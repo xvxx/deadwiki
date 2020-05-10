@@ -3,7 +3,7 @@ use pulldown_cmark as markdown;
 use threadpool::ThreadPool;
 use tiny_http::{Method::Get, Request, Response, Server};
 
-use std::{fs, io, path::Path};
+use std::{fs, io, os::unix::fs::PermissionsExt, path::Path, process::Command, str};
 
 /// How many threads to run. Keep it low, this is for personal use!
 const MAX_WORKERS: usize = 10;
@@ -80,16 +80,22 @@ fn handle(req: Request) -> Result<(), io::Error> {
 /// Wiki pages are stored in the `wiki/` directory as `.md` files.
 fn render_wiki(path: &str) -> Option<String> {
     let raw = path.ends_with(".md");
-    let path = if raw { path.trim_end_matches(".md") } else { path };
+    let path = if raw {
+        path.trim_end_matches(".md")
+    } else {
+        path
+    };
     if let Some(path) = wiki_path(path) {
-        let html = fs::read_to_string(path).unwrap_or_else(|_| "".into());
-        Some(
-            if raw {
-                format!("<pre>{}</pre>", html)
-            } else {
-                render_with_layout("Title", &markdown_to_html(&html))
-            }
-        )
+        let html = if is_executable(&path) {
+            shell(&path, &[]).unwrap_or_else(|e| e.to_string())
+        } else {
+            fs::read_to_string(path).unwrap_or_else(|_| "".into())
+        };
+        Some(if raw {
+            format!("<pre>{}</pre>", html)
+        } else {
+            render_with_layout("Title", &markdown_to_html(&html))
+        })
     } else {
         None
     }
@@ -98,7 +104,8 @@ fn render_wiki(path: &str) -> Option<String> {
 /// Renders a chunk of HTML surrounded by `web/layout.html`.
 fn render_with_layout(title: &str, body: &str) -> String {
     if let Some(layout) = web_path("layout.html") {
-        fs::read_to_string(layout).unwrap_or_else(|_| "".into())
+        fs::read_to_string(layout)
+            .unwrap_or_else(|_| "".into())
             .replace("{title}", title)
             .replace("{body}", body)
     } else {
@@ -131,6 +138,29 @@ fn wiki_path(path: &str) -> Option<String> {
         Some(path)
     } else {
         None
+    }
+}
+
+/// Is the file at the given path `chmod +x`?
+fn is_executable(path: &str) -> bool {
+    if let Ok(meta) = fs::metadata(path) {
+        meta.permissions().mode() & 0o111 != 0
+    } else {
+        false
+    }
+}
+
+/// Run a script and return its output.
+fn shell(path: &str, args: &[&str]) -> Result<String, io::Error> {
+    let output = Command::new(path).args(args).output()?;
+    let out = if output.status.success() {
+        output.stdout
+    } else {
+        output.stderr
+    };
+    match str::from_utf8(&out) {
+        Ok(s) => Ok(s.to_string()),
+        Err(e) => Err(io::Error::new(io::ErrorKind::Other, e.to_string())),
     }
 }
 
