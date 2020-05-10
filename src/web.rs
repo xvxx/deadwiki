@@ -113,18 +113,97 @@ fn render_with_layout(title: &str, body: &str) -> String {
     }
 }
 
+/// Lowercase names of all the wiki pages.
+fn wiki_page_names() -> Vec<String> {
+    let mut dirs = vec![];
+
+    if let Ok(entries) = fs::read_dir("./wiki") {
+        for dir in entries {
+            if let Ok(dir) = dir {
+                dirs.push(
+                    dir.path()
+                        .to_str()
+                        .unwrap_or_else(|| "?")
+                        .trim_start_matches("./wiki/")
+                        .trim_end_matches(".md")
+                        .to_string(),
+                )
+            }
+        }
+    }
+
+    dirs
+}
+
+/// [Help] => <a href="/help">Help</a>
+fn autolink_pages(html: &str) -> String {
+    let mut open = false;
+    let mut word = String::new();
+    let mut out = String::with_capacity(html.len() * 3);
+
+    for c in html.chars() {
+        if c == '[' && !open {
+            open = true;
+        } else if c == ']' && open {
+            open = false;
+            let link = word.to_lowercase();
+            if wiki_page_names().contains(&link) {
+                out.push_str(&format!(r#"<a href="{}">{}</a>"#, link, word));
+                println!(r#"<a href="{}">{}</a>"#, link, word);
+            } else {
+                out.push('[');
+                out.push_str(&word);
+                out.push(']');
+            }
+            word.clear();
+        } else if open {
+            println!("WIDE OPEN");
+            word.push(c);
+        } else {
+            println!("UM WHY");
+            out.push(c);
+        }
+    }
+
+    out
+}
+
 /// Convert raw Markdown into HTML.
 fn markdown_to_html(md: &str) -> String {
     let mut options = markdown::Options::empty();
     options.insert(markdown::Options::ENABLE_TASKLISTS);
     options.insert(markdown::Options::ENABLE_FOOTNOTES);
+
+    let mut wiki_link = false;
+    let mut wiki_link_text = String::new();
+
     let parser = markdown::Parser::new_ext(&md, options).map(|event| match event {
         markdown::Event::Text(text) => {
-            let linked = autolink::auto_link(&text, &[]);
-            if linked.len() == text.len() {
-                markdown::Event::Text(text)
+            if text.as_ref() == "[" && !wiki_link {
+                wiki_link = true;
+                markdown::Event::Text("".into())
+            } else if text.as_ref() == "]" && wiki_link {
+                wiki_link = false;
+                let page_name = wiki_link_text.to_lowercase();
+                let link_text = wiki_link_text.clone();
+                wiki_link_text.clear();
+                if wiki_page_names().contains(&page_name) {
+                    markdown::Event::Html(
+                        format!(r#"<a href="/{}">{}</a>"#, page_name, link_text).into(),
+                    )
+                } else {
+                    markdown::Event::Text(format!("[{}]", link_text).into())
+                }
+            } else if wiki_link {
+                wiki_link_text.push_str(&text);
+                markdown::Event::Text("".into())
             } else {
-                markdown::Event::Html(linked.into())
+                let linked = autolink::auto_link(&text, &[]);
+                if linked.len() == text.len() {
+                    markdown::Event::Text(text)
+                } else {
+                    markdown::Event::Html(linked.into())
+                }
             }
         }
         _ => event,
