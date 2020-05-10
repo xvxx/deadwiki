@@ -10,7 +10,7 @@ Here's a link: [Help]
 
 Where'd it go?
 
-Try this: <https://google.com>
+Try this: https://google.com
 
 AKA [Google](https://google.com)
 

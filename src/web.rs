@@ -118,8 +118,19 @@ fn markdown_to_html(md: &str) -> String {
     let mut options = markdown::Options::empty();
     options.insert(markdown::Options::ENABLE_TASKLISTS);
     options.insert(markdown::Options::ENABLE_FOOTNOTES);
-    let parser = markdown::Parser::new_ext(&md, options);
-    let mut html_output = String::new();
+    let parser = markdown::Parser::new_ext(&md, options).map(|event| match event {
+        markdown::Event::Text(text) => {
+            let linked = autolink::auto_link(&text, &[]);
+            if linked.len() == text.len() {
+                markdown::Event::Text(text)
+            } else {
+                markdown::Event::Html(linked.into())
+            }
+        }
+        _ => event,
+    });
+
+    let mut html_output = String::with_capacity(md.len() * 3 / 2);
     markdown::html::push_html(&mut html_output, parser);
     html_output
 }
