@@ -184,7 +184,7 @@ fn markdown_to_html(md: &str) -> String {
                 markdown::Event::Text("".into())
             } else if text.as_ref() == "]" && wiki_link {
                 wiki_link = false;
-                let page_name = wiki_link_text.to_lowercase();
+                let page_name = wiki_link_text.to_lowercase().replace(" ", "_");
                 let link_text = wiki_link_text.clone();
                 wiki_link_text.clear();
                 if wiki_page_names().contains(&page_name) {
