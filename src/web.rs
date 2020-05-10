@@ -72,7 +72,7 @@ fn handle(req: Request) -> Result<(), io::Error> {
         value: AsciiString::from_ascii(content_type).unwrap(),
     });
 
-    println!("{} {} {}", status, req.method(), req.url());
+    println!("-> {} {} {}", status, req.method(), req.url());
     req.respond(response)
 }
 
