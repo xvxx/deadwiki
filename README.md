@@ -19,7 +19,7 @@ all pages. Three ways to access it:
 - [ ] Link to other page
 - [ ] JS editor
 - [ ] Edit page
-- [ ] New page
+- [ ] Create page
 
 ## WebView
 
