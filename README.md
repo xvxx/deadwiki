@@ -13,9 +13,10 @@ all pages. Three ways to access it:
 
 ## HTML
 
-- [ ] Start app
-- [ ] Directory of Markdown files
-- [ ] Render Page
+- [x] Start app
+- [x] Directory of Markdown files
+- [x] Render Page
+- [ ] Render raw page
 - [ ] Link to other page
 - [ ] JS editor
 - [ ] Edit page

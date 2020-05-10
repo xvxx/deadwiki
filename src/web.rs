@@ -49,7 +49,7 @@ fn handle(req: Request) -> Result<(), io::Error> {
         }
 
         (Get, path) => {
-            if let Some(html) = render(path) {
+            if let Some(html) = render_wiki(path) {
                 status = 200;
                 body = html;
             } else if let Some(web_path) = web_path(path) {
@@ -76,14 +76,33 @@ fn handle(req: Request) -> Result<(), io::Error> {
     req.respond(response)
 }
 
-/// Render a wiki page to an HTML string.
+/// Render a wiki page to a fully loaded HTML string.
 /// Wiki pages are stored in the `wiki/` directory as `.md` files.
-fn render(path: &str) -> Option<String> {
+fn render_wiki(path: &str) -> Option<String> {
+    let raw = path.ends_with(".md");
+    let path = path.trim_end_matches(".md");
     if let Some(path) = wiki_path(path) {
-        let raw = fs::read_to_string(path).unwrap_or_else(|_| "".into());
-        Some(markdown_to_html(&raw))
+        let html = fs::read_to_string(path).unwrap_or_else(|_| "".into());
+        Some(
+            if raw {
+                format!("<pre>{}</pre>", html)
+            } else {
+                render_with_layout("Title", &markdown_to_html(&html))
+            }
+        )
     } else {
         None
+    }
+}
+
+/// Renders a chunk of HTML surrounded by `web/layout.html`.
+fn render_with_layout(title: &str, body: &str) -> String {
+    if let Some(layout) = web_path("layout.html") {
+        fs::read_to_string(layout).unwrap_or_else(|_| "".into())
+            .replace("{title}", title)
+            .replace("{body}", body)
+    } else {
+        body.to_string()
     }
 }
 
