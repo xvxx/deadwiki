@@ -10,14 +10,15 @@ fn main() -> Result<(), io::Error> {
     let host = "0.0.0.0";
     let port = 8000;
     let addr = format!("{}:{}", host, port);
-    println!("> starting at http://{}", addr);
+
+    println!("-> starting at http://{}", addr);
     let server = Server::http(addr).unwrap();
     let pool = ThreadPool::new(MAX_WORKERS);
 
     for request in server.incoming_requests() {
         pool.execute(move || {
             if let Err(e) = handle(request) {
-                eprintln!(">> {}", e);
+                eprintln!("!> {}", e);
             }
         });
     }
@@ -30,7 +31,6 @@ fn handle(req: Request) -> Result<(), io::Error> {
     let mut status = 404;
     let mut content_type = "text/html; charset=utf8";
 
-    println!("{} {}", req.method(), req.url());
     match (req.method(), req.url()) {
         (Get, "/") => {
             status = 200;
@@ -70,6 +70,7 @@ fn handle(req: Request) -> Result<(), io::Error> {
         value: AsciiString::from_ascii(content_type).unwrap(),
     });
 
+    println!("{} {} {}", status, req.method(), req.url());
     req.respond(response)
 }
 
