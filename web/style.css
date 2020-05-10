@@ -1,7 +1,11 @@
 * {
-    zoom: 120%;
+    /* zoom: 120%; */
 }
 
 a.new {
     color: red;
+}
+
+.CodeMirror {
+    font-family: monospace !important;
 }

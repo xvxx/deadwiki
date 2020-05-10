@@ -9,7 +9,7 @@ use std::{fs, io, os::unix::fs::PermissionsExt, path::Path, process::Command, st
 const MAX_WORKERS: usize = 10;
 
 /// Run the web server.
-pub fn run(host: &str, port: usize) -> Result<(), io::Error> {
+pub fn server(host: &str, port: usize) -> Result<(), io::Error> {
     let addr = format!("{}:{}", host, port);
 
     println!("-> running at http://{}", addr);
@@ -135,41 +135,12 @@ fn wiki_page_names() -> Vec<String> {
     dirs
 }
 
-/// [Help] => <a href="/help">Help</a>
-fn autolink_pages(html: &str) -> String {
-    let mut open = false;
-    let mut word = String::new();
-    let mut out = String::with_capacity(html.len() * 3);
-
-    for c in html.chars() {
-        if c == '[' && !open {
-            open = true;
-        } else if c == ']' && open {
-            open = false;
-            let link = word.to_lowercase();
-            if wiki_page_names().contains(&link) {
-                out.push_str(&format!(r#"<a href="{}">{}</a>"#, link, word));
-                println!(r#"<a href="{}">{}</a>"#, link, word);
-            } else {
-                out.push('[');
-                out.push_str(&word);
-                out.push(']');
-            }
-            word.clear();
-        } else if open {
-            println!("WIDE OPEN");
-            word.push(c);
-        } else {
-            println!("UM WHY");
-            out.push(c);
-        }
-    }
-
-    out
+fn markdown_to_html(md: &str) -> String {
+    format!("<textarea id='markdown-content'>{}</textarea>", md)
 }
 
 /// Convert raw Markdown into HTML.
-fn markdown_to_html(md: &str) -> String {
+fn _markdown_to_html(md: &str) -> String {
     let mut options = markdown::Options::empty();
     options.insert(markdown::Options::ENABLE_TASKLISTS);
     options.insert(markdown::Options::ENABLE_FOOTNOTES);
