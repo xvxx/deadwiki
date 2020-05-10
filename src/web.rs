@@ -80,7 +80,7 @@ fn handle(req: Request) -> Result<(), io::Error> {
 /// Wiki pages are stored in the `wiki/` directory as `.md` files.
 fn render_wiki(path: &str) -> Option<String> {
     let raw = path.ends_with(".md");
-    let path = path.trim_end_matches(".md");
+    let path = if raw { path.trim_end_matches(".md") } else { path };
     if let Some(path) = wiki_path(path) {
         let html = fs::read_to_string(path).unwrap_or_else(|_| "".into());
         Some(
