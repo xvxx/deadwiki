@@ -10,3 +10,4 @@ edition = "2018"
 tiny_http = "0.7"
 ascii = "1.0.0"
 threadpool = "1.7.1"
+pulldown-cmark = { version = "0.7", default-features = false }

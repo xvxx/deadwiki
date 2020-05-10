@@ -1,4 +1,5 @@
 use ascii::AsciiString;
+use pulldown_cmark as markdown;
 use threadpool::ThreadPool;
 use tiny_http::{Method::Get, Request, Response, Server};
 
@@ -79,10 +80,21 @@ fn handle(req: Request) -> Result<(), io::Error> {
 fn render(path: &str) -> Option<String> {
     if let Some(path) = wiki_path(path) {
         let raw = fs::read_to_string(path).unwrap_or_else(|_| "".into());
-        Some(raw)
+        Some(markdown_to_html(&raw))
     } else {
         None
     }
+}
+
+/// Convert raw Markdown into HTML.
+fn markdown_to_html(md: &str) -> String {
+    let mut options = markdown::Options::empty();
+    options.insert(markdown::Options::ENABLE_TASKLISTS);
+    options.insert(markdown::Options::ENABLE_FOOTNOTES);
+    let parser = markdown::Parser::new_ext(&md, options);
+    let mut html_output = String::new();
+    markdown::html::push_html(&mut html_output, parser);
+    html_output
 }
 
 /// Path of wiki page on disk, if it exists.
