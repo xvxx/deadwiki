@@ -83,7 +83,6 @@ dependencies = [
  "ascii",
  "atomicwrites",
  "autolink",
- "chrono",
  "etag",
  "percent-encoding",
  "pulldown-cmark",
