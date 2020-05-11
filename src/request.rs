@@ -394,10 +394,10 @@ impl Request {
                 .iter()
                 .any(|h| h.field.equiv("If-None-Match") && h.value == etag.tag())
             {
-                println!("-> STATIC -> {} {} {}", 304, self.method(), self.url());
+                println!("-> {} {} {}", 304, self.method(), self.url());
                 return self.respond(Response::from_data("").with_status_code(304));
             } else {
-                println!("-> STATIC -> {} {} {}", 200, self.method(), self.url());
+                println!("-> {} {} {}", 200, self.method(), self.url());
                 return self.respond(
                     Response::from_data(file)
                         .with_header(header("ETag", etag.tag()))

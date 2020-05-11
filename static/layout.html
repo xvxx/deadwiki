@@ -4,6 +4,7 @@
     <link rel="stylesheet" type="text/css" href="/style.css" />
     <link rel="stylesheet" href="/simplemde.min.css" />
     <link rel="stylesheet" href="/github.min.css" />
+    <link rel="stylesheet" href="/font-awesome.min.css" />
 
     <script src="/highlight.min.js"></script>
     <script src="/simplemde.min.js"></script>
@@ -44,6 +45,7 @@
       if (focused && focused.value == "") focused.focus();
       var simplemde = new SimpleMDE({
         autofocus: !focused || focused.value != "",
+        autoDownloadFontAwesome: false,
         blockStyles: {
           italic: "_",
         },
