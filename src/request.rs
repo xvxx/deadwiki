@@ -104,7 +104,9 @@ impl Request {
             .into_iter()
             .filter_map(|e| e.ok())
         {
-            if !entry.file_type().is_dir() {
+            if !entry.file_type().is_dir()
+                && entry.file_name().to_str().unwrap_or("").ends_with(".md")
+            {
                 let dir = entry.path().display().to_string().replace(&self.root, "");
                 let dir = dir.trim_end_matches(".md");
                 if !dir.is_empty() {
@@ -499,16 +501,31 @@ fn decode_form_value(post: &str) -> String {
         .replace('+', " ")
 }
 
+/// Capitalize the first letter of a string.
+fn capitalize(s: &str) -> String {
+    format!(
+        "{}{}",
+        s.chars().next().unwrap_or('?').to_uppercase(),
+        &s.chars().skip(1).collect::<String>()
+    )
+}
+
 /// some_page -> Some Page
 fn wiki_path_to_title(path: &str) -> String {
     path.trim_start_matches('/')
-        .split("_")
+        .split('_')
         .map(|part| {
-            format!(
-                "{}{}",
-                part.chars().next().unwrap_or('?').to_uppercase(),
-                &part.chars().skip(1).collect::<String>()
-            )
+            if part.contains('/') {
+                let mut parts = part.split('/').rev();
+                let last = parts.next().unwrap_or("?");
+                format!(
+                    "{}/{}",
+                    parts.rev().collect::<Vec<_>>().join("/"),
+                    capitalize(last)
+                )
+            } else {
+                capitalize(&part)
+            }
         })
         .collect::<Vec<_>>()
         .join(" ")
