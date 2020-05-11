@@ -29,8 +29,30 @@ pub fn server(host: &str, port: usize) -> Result<(), io::Error> {
 
 /// Handle a single request.
 fn handle(req: Request) -> Result<(), io::Error> {
-    let mut body = "404 Not Found".to_string();
+    let (status, body, content_type) = match route(&req) {
+        Ok(res) => res,
+        Err(e) => (
+            500,
+            format!("<h1>500 Internal Error</h1><pre>{}</pre>", e),
+            "text/html",
+        ),
+    };
+
+    let response = Response::from_data(body)
+        .with_status_code(status)
+        .with_header(tiny_http::Header {
+            field: "Content-Type".parse().unwrap(),
+            value: AsciiString::from_ascii(content_type).unwrap(),
+        });
+
+    println!("-> {} {} {}", status, req.method(), req.url());
+    req.respond(response)
+}
+
+/// Route a request.
+fn route(req: &Request) -> Result<(i32, String, &'static str), io::Error> {
     let mut status = 404;
+    let mut body = "404 Not Found".to_string();
     let mut content_type = "text/html; charset=utf8";
 
     match (req.method(), req.url()) {
@@ -46,6 +68,14 @@ fn handle(req: Request) -> Result<(), io::Error> {
                         .collect::<String>()
                 ),
                 None,
+            );
+        }
+        (Get, "/new") => {
+            status = 200;
+            body = render_with_layout(
+                "new page",
+                &fs::read_to_string(web_path("new").unwrap_or_else(|| "?".into()))?,
+                Some("<a href='javascript:history.back()'>back</a>)"),
             );
         }
         (Get, "/sleep") => {
@@ -75,15 +105,7 @@ fn handle(req: Request) -> Result<(), io::Error> {
         (x, y) => println!("x: {:?}, y: {:?}", x, y),
     }
 
-    let response = Response::from_data(body).with_status_code(status);
-
-    let response = response.with_header(tiny_http::Header {
-        field: "Content-Type".parse().unwrap(),
-        value: AsciiString::from_ascii(content_type).unwrap(),
-    });
-
-    println!("-> {} {} {}", status, req.method(), req.url());
-    req.respond(response)
+    Ok((status, body, content_type))
 }
 
 /// some_page -> Some Page
