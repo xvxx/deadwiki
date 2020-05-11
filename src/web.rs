@@ -54,21 +54,23 @@ fn handle(mut req: Request) -> Result<(), io::Error> {
     let response = if status == 302 {
         Response::from_data(format!("Redirected to {}", body))
             .with_status_code(status)
-            .with_header(tiny_http::Header {
-                field: "Location".parse().unwrap(),
-                value: AsciiString::from_ascii(body).unwrap(),
-            })
+            .with_header(header("Location", &body))
     } else {
         Response::from_data(body)
             .with_status_code(status)
-            .with_header(tiny_http::Header {
-                field: "Content-Type".parse().unwrap(),
-                value: AsciiString::from_ascii(content_type).unwrap(),
-            })
+            .with_header(header("Content-Type", content_type))
     };
 
     println!("-> {} {} {}", status, req.method(), req.url());
     req.respond(response)
+}
+
+/// Generate a Header for tiny_http.
+fn header(field: &str, value: &str) -> tiny_http::Header {
+    tiny_http::Header {
+        field: field.parse().unwrap(),
+        value: AsciiString::from_ascii(value).unwrap_or_else(|_| AsciiString::new()),
+    }
 }
 
 /// Route a request.
