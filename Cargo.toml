@@ -5,6 +5,8 @@ authors = ["chris west <c@xvxx.io>"]
 edition = "2018"
 license = "MIT"
 description = "dead simple personal wiki"
+repository = "https://github.com/xvxx/deadwiki"
+readme = "README.md"
 
 [[bin]]
 name = "dead"
