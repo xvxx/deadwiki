@@ -13,3 +13,8 @@ a.new {
 input[type=text] {
     zoom: 200%;
 }
+
+#main {
+    width: 600px;
+    margin: 0 auto;
+}
