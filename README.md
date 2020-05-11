@@ -1,4 +1,4 @@
-<img src="./web/rip.gif" alt="R.I.P." height="200" align="left">
+<img src="./static/rip.gif" alt="R.I.P." height="200" align="left">
 
 # deadwiki
 
