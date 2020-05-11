@@ -25,13 +25,19 @@
       }
 
       // ESC key to go back when editing
-      document.onkeydown = function (evt) {
-        if (
-          window.event &&
-          window.event.keyCode == 27 &&
-          document.getElementById("markdown")
-        )
-          history.back();
+      // CTRL+ENTER to submit when editing
+      document.onkeydown = (e) => {
+        e = e || window.event || {};
+
+        // edit page only
+        if (!document.getElementById("markdown")) return;
+
+        // escape
+        if (e.keyCode == 27) history.back();
+
+        // ctrl+enter
+        if ((e.ctrlKey || e.metaKey) && e.keyCode == 13)
+          document.getElementById("form").submit();
       };
 
       var focused = document.getElementById("focused");
