@@ -35,6 +35,24 @@ the web UI. Edits show up instantly, as do new pages - there is no
 database and no fancy pantsy caching. Just you, your filesystem, and a
 dream.
 
+In addition to [CommonMark], Markdown files can link to each other by
+putting the `[Page Name]` in brackets. Like most wikis, it'll either
+be a link to the actual page or a way to create it.
+
+## ~ keyboard shortcuts ~
+
+Wiki editing uses [SimpleMDE], so check out their [keyboard
+shortcuts][keys].
+
+In addition, if you're in the web UI you can use these:
+
+| **Shortcut**   | **Notes**                        |
+| -------------- | -------------------------------- |
+| `Double Click` | Enters edit mode for a wiki page |
+| `ESC`          | Exits edit mode                  |
+| `Ctrl+Enter`   | Submits your edits               |
+| `Cmd+Enter`    | Same                             |
+
 ## ~ installation ~
 
 Hey, how do I get that handy dandy `dead` CLI utility? With [cargo]:
@@ -44,3 +62,6 @@ Hey, how do I get that handy dandy `dead` CLI utility? With [cargo]:
 Now you should be able to run `dead -h` to see the possibilities.
 
 [cargo]: https://rustup.rs
+[simplemde]: https://simplemde.com/
+[keys]: https://github.com/sparksuite/simplemde-markdown-editor#keyboard-shortcuts
+[commonmark]: https://commonmark.org/
