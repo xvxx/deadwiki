@@ -31,11 +31,14 @@ pub fn server(host: &str, port: usize) -> Result<(), io::Error> {
 fn handle(req: Request) -> Result<(), io::Error> {
     let (status, body, content_type) = match route(&req) {
         Ok(res) => res,
-        Err(e) => (
-            500,
-            format!("<h1>500 Internal Error</h1><pre>{}</pre>", e),
-            "text/html",
-        ),
+        Err(e) => {
+            eprintln!("{}", e);
+            (
+                500,
+                format!("<h1>500 Internal Error</h1><pre>{}</pre>", e),
+                "text/html",
+            )
+        }
     };
 
     let response = Response::from_data(body)
@@ -74,8 +77,8 @@ fn route(req: &Request) -> Result<(i32, String, &'static str), io::Error> {
             status = 200;
             body = render_with_layout(
                 "new page",
-                &fs::read_to_string(web_path("new").unwrap_or_else(|| "?".into()))?,
-                Some("<a href='javascript:history.back()'>back</a>)"),
+                &fs::read_to_string(web_path("new.html").unwrap_or_else(|| "?".into()))?,
+                Some("<p><a href='javascript:history.back()'>back</a></p>"),
             );
         }
         (Get, "/sleep") => {
@@ -183,11 +186,6 @@ fn wiki_page_names() -> Vec<String> {
     }
 
     dirs
-}
-
-/// A textarea to hold our raw Markdown content.
-fn markdown_textarea(md: &str) -> String {
-    format!("<textarea id='markdown-content'>{}</textarea>", md)
 }
 
 /// Convert raw Markdown into HTML.

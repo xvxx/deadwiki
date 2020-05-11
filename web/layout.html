@@ -11,13 +11,12 @@
     <meta charset="utf-8" />
     <title>{title}</title>
   </head>
-  <body>
-    {nav}
-    {body}
+  <body onload="loadTheWiki()">
+    {nav} {body}
   </body>
   <script>
     var simplemde = new SimpleMDE({
-      autofocus: true,
+      // autofocus: true,
       blockStyles: {
         italic: "_",
       },
@@ -28,7 +27,11 @@
       },
       status: false,
       tabSize: 4,
-      element: document.getElementById("markdown-content"),
+      element: document.getElementById("markdown"),
     });
+
+    function loadTheWiki() {
+      document.getElementById("focused").focus();
+    }
   </script>
 </html>
