@@ -1,25 +1,7 @@
-# welcome to deadwiki
+# Welcome to deadwiki
 
 Hello, and welcome.
 
-- List
-- Two
-- Three
+This is just an example wiki. To really get the most out of deadwiki, create your own git repository filled with `.md` files and point `dead` at it!
 
-Here's a link: [Help]
-
-Another link: [TEMP]
-
-One with spaces: [Test Page]
-
-Where'd it go?
-
-Try this: https://google.com
-
-AKA [Google](https://google.com)
-
-[Footnotes]
-
-Cool.
-
-[footnotes]: https://github.com
+Enjoy! 
