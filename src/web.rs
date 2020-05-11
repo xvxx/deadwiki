@@ -115,6 +115,32 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
             status = 404;
             body = fs::read_to_string("web/404.html")?;
         }
+        (Post, "/new") => {
+            let mut content = String::new();
+            req.as_reader().read_to_string(&mut content)?;
+            let mut path = String::new();
+            let mut mdown = String::new();
+            for pair in content.split('&') {
+                let mut parts = pair.splitn(2, '=');
+                let (field, value) = (
+                    parts.next().unwrap_or_default(),
+                    parts.next().unwrap_or_default(),
+                );
+                match field.as_ref() {
+                    "name" => path = decode_form_value(value),
+                    "markdown" => mdown = decode_form_value(value),
+                    _ => {}
+                }
+            }
+            if !wiki_page_names().contains(&path.to_lowercase()) {
+                if let Some(disk_path) = new_wiki_path(&path) {
+                    let mut file = fs::File::create(disk_path)?;
+                    write!(file, "{}", mdown)?;
+                    status = 302;
+                    body = path.to_string();
+                }
+            }
+        }
         (Post, path) => {
             if query.is_empty() {
                 status = 404;
@@ -125,7 +151,7 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
                     req.as_reader().read_to_string(&mut content)?;
                     let mdown = content.split("markdown=").last().unwrap_or("");
                     let mut file = fs::File::create(disk_path)?;
-                    write!(file, "{}", decode_form_post(mdown))?;
+                    write!(file, "{}", decode_form_value(mdown))?;
                     status = 302;
                     body = path.to_string();
                 } else {
@@ -299,16 +325,21 @@ fn markdown_to_html(md: &str) -> String {
     html_output
 }
 
+/// Returns a path on disk to a new wiki page.
+/// Nothing if the page already exists.
+fn new_wiki_path(path: &str) -> Option<String> {
+    if wiki_path(path).is_none() {
+        Some(wiki_disk_path(path))
+    } else {
+        None
+    }
+}
+
 /// Path of wiki page on disk, if it exists.
 /// Always in the `wiki/` directory.
 /// Eg. wiki_path("Welcome") -> "wiki/welcome.md"
 fn wiki_path(path: &str) -> Option<String> {
-    let path = format!(
-        "./wiki/{}.md",
-        path.to_lowercase()
-            .trim_start_matches('/')
-            .replace("..", ".")
-    );
+    let path = wiki_disk_path(path);
     if Path::new(&path).exists() {
         Some(path)
     } else {
@@ -316,6 +347,16 @@ fn wiki_path(path: &str) -> Option<String> {
     }
 }
 
+/// Returns a wiki path on disk, regardless of whether it exists or
+/// not already.
+fn wiki_disk_path(path: &str) -> String {
+    format!(
+        "./wiki/{}.md",
+        path.to_lowercase()
+            .trim_start_matches('/')
+            .replace("..", ".")
+    )
+}
 /// Is the file at the given path `chmod +x`?
 fn is_executable(path: &str) -> bool {
     if let Ok(meta) = fs::metadata(path) {
@@ -387,7 +428,7 @@ fn get_content_type(path: &str) -> Option<&'static str> {
 }
 
 /// Does what it says.
-fn decode_form_post(post: &str) -> String {
+fn decode_form_value(post: &str) -> String {
     percent_decode(post.as_bytes())
         .decode_utf8_lossy()
         .replace('+', " ")
