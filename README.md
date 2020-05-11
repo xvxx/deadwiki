@@ -17,8 +17,18 @@ There are three built-in ways to access your deadwiki:
 
 ## ~ status ~
 
-Very barebones, no native app yet. Under construction! But I'm using
-it.
+Very barebones, no native app yet. Under construction!
+
+I use it every day, and I like combining it with other small tools. I
+keep a Markdown TODO list in `~/.todo` that I manage on the command
+line with a `todo` program, and I have a little scratch pad in
+`~/.scratch` that I add links to in a shell using an `s` program,
+like:
+
+    $ s https://git.coolstuff.com/some/repo
+
+With deadwiki, I symlinked both of those files into my `~/.deadwiki`
+dir and can browse them using a fancy, 1990s-era HTML interface.
 
 ## ~ getting started ~
 
