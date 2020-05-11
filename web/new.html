@@ -5,7 +5,13 @@
 
 <form method="POST" action="/new">
   <p>
-    <input name="name" type="text" placeholder="filename" id="focused" />
+    <input
+      name="name"
+      type="text"
+      placeholder="filename"
+      value="{name}"
+      id="focused"
+    />
   </p>
   <textarea name="markdown" id="markdown"></textarea>
   <input type="submit" />

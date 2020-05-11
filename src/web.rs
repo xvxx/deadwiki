@@ -100,9 +100,15 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
         }
         (Get, "/new") => {
             status = 200;
+            let mut name = "".to_string();
+            if !query.is_empty() {
+                name.push_str(&decode_form_value(&query.replace("name=", "")));
+            }
+
             body = render_with_layout(
                 "new page",
-                &fs::read_to_string(web_path("new.html").unwrap_or_else(|| "?".into()))?,
+                &fs::read_to_string(web_path("new.html").unwrap_or_else(|| "?".into()))?
+                    .replace("{name}", &name),
                 None,
             );
         }
@@ -292,15 +298,16 @@ fn markdown_to_html(md: &str) -> String {
                 let page_name = wiki_link_text.to_lowercase().replace(" ", "_");
                 let link_text = wiki_link_text.clone();
                 wiki_link_text.clear();
-                let link_class = if wiki_page_names().contains(&page_name) {
-                    ""
+                let page_exists = wiki_page_names().contains(&page_name);
+                let (link_class, link_href) = if page_exists {
+                    ("", format!("/{}", page_name))
                 } else {
-                    "new"
+                    ("new", format!("/new?name={}", page_name))
                 };
                 markdown::Event::Html(
                     format!(
-                        r#"<a href="/{}" class="{}">{}</a>"#,
-                        page_name, link_class, link_text
+                        r#"<a href="{}" class="{}">{}</a>"#,
+                        link_href, link_class, link_text
                     )
                     .into(),
                 )

@@ -15,23 +15,23 @@
     {nav} {body}
   </body>
   <script>
-    var simplemde = new SimpleMDE({
-      // autofocus: true,
-      blockStyles: {
-        italic: "_",
-      },
-      indentWithTabs: false,
-      renderingConfig: {
-        singleLineBreaks: false,
-        codeSyntaxHighlighting: true,
-      },
-      status: false,
-      tabSize: 4,
-      element: document.getElementById("markdown"),
-    });
-
     function loadTheWiki() {
-      document.getElementById("focused").focus();
+      var focused = document.getElementById("focused");
+      if (focused && focused.value == "") focused.focus();
+      var simplemde = new SimpleMDE({
+        autofocus: !focused || focused.value != "",
+        blockStyles: {
+          italic: "_",
+        },
+        indentWithTabs: false,
+        renderingConfig: {
+          singleLineBreaks: false,
+          codeSyntaxHighlighting: true,
+        },
+        status: false,
+        tabSize: 4,
+        element: document.getElementById("markdown"),
+      });
     }
   </script>
 </html>
