@@ -89,10 +89,10 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
             body = render_with_layout(
                 "deadwiki",
                 &format!(
-                    "<ul>{}</ul>",
+                    "<h1>deadwiki</h1>\n<ul>\n{}</ul>",
                     wiki_page_names()
                         .iter()
-                        .map(|name| format!(r#"<li><a href="{}">{}</a></li>"#, name, name))
+                        .map(|name| format!("  <li><a href='{}'>{}</a></li>\n", name, name))
                         .collect::<String>()
                 ),
                 None,
@@ -127,7 +127,7 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
                     parts.next().unwrap_or_default(),
                 );
                 match field.as_ref() {
-                    "name" => path = decode_form_value(value),
+                    "name" => path = to_path(&decode_form_value(value)),
                     "markdown" => mdown = decode_form_value(value),
                     _ => {}
                 }
@@ -257,14 +257,13 @@ fn wiki_page_names() -> Vec<String> {
     if let Ok(entries) = fs::read_dir("./wiki") {
         for dir in entries {
             if let Ok(dir) = dir {
-                dirs.push(
+                dirs.push(to_path(
                     dir.path()
                         .to_str()
                         .unwrap_or_else(|| "?")
                         .trim_start_matches("./wiki/")
-                        .trim_end_matches(".md")
-                        .to_string(),
-                )
+                        .trim_end_matches(".md"),
+                ))
             }
         }
     }
@@ -347,15 +346,19 @@ fn wiki_path(path: &str) -> Option<String> {
     }
 }
 
+/// Convert a wiki name to a path-friendly name.
+/// Ex: "Test Results" -> "test_results"
+fn to_path(path: &str) -> String {
+    path.to_lowercase()
+        .trim_start_matches('/')
+        .replace("..", ".")
+        .replace(" ", "_")
+}
+
 /// Returns a wiki path on disk, regardless of whether it exists or
 /// not already.
 fn wiki_disk_path(path: &str) -> String {
-    format!(
-        "./wiki/{}.md",
-        path.to_lowercase()
-            .trim_start_matches('/')
-            .replace("..", ".")
-    )
+    format!("./wiki/{}.md", to_path(path))
 }
 /// Is the file at the given path `chmod +x`?
 fn is_executable(path: &str) -> bool {
@@ -384,7 +387,7 @@ fn shell(path: &str, args: &[&str]) -> Result<String, io::Error> {
 /// Always in the `web/` directory.
 /// Eg web_path("style.css") -> "web/style.css"
 fn web_path(path: &str) -> Option<String> {
-    let path = format!("./web/{}", path.trim_start_matches('/').replace("..", "."));
+    let path = format!("./web/{}", to_path(path));
     if Path::new(&path).exists() {
         Some(path)
     } else {

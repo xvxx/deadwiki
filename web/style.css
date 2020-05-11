@@ -1,11 +1,11 @@
-* {
-    /* zoom: 120%; */
-}
-
 a.new {
     color: red;
 }
 
 .CodeMirror {
     font-family: monospace !important;
+}
+
+input[type=text] {
+    zoom: 200%;
 }
