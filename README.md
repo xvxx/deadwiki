@@ -1,3 +1,5 @@
+<img src="./web/rip.gif" alt="R.I.P." height=200 align="right">
+
 # deadwiki
 
 _a dead simple personal wiki_
