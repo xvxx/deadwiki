@@ -7,18 +7,24 @@ use tiny_http::{
     Request, Response, Server,
 };
 
-use std::{fs, io, os::unix::fs::PermissionsExt, path::Path, process::Command, str};
+use std::{
+    fs,
+    io::{self, Write},
+    os::unix::fs::PermissionsExt,
+    path::Path,
+    process::Command,
+    str,
+};
 
 /// How many threads to run. Keep it low, this is for personal use!
 const MAX_WORKERS: usize = 10;
 
 /// Run the web server.
 pub fn server(host: &str, port: usize) -> Result<(), io::Error> {
-    let addr = format!("{}:{}", host, port);
-
-    println!("-> running at http://{}", addr);
-    let server = Server::http(addr).unwrap();
     let pool = ThreadPool::new(MAX_WORKERS);
+    let addr = format!("{}:{}", host, port);
+    let server = Server::http(&addr).expect("Server Error: ");
+    println!("-> running at http://{}", addr);
 
     for request in server.incoming_requests() {
         pool.execute(move || {
@@ -45,12 +51,21 @@ fn handle(mut req: Request) -> Result<(), io::Error> {
         }
     };
 
-    let response = Response::from_data(body)
-        .with_status_code(status)
-        .with_header(tiny_http::Header {
-            field: "Content-Type".parse().unwrap(),
-            value: AsciiString::from_ascii(content_type).unwrap(),
-        });
+    let response = if status == 302 {
+        Response::from_data(format!("Redirected to {}", body))
+            .with_status_code(status)
+            .with_header(tiny_http::Header {
+                field: "Location".parse().unwrap(),
+                value: AsciiString::from_ascii(body).unwrap(),
+            })
+    } else {
+        Response::from_data(body)
+            .with_status_code(status)
+            .with_header(tiny_http::Header {
+                field: "Content-Type".parse().unwrap(),
+                value: AsciiString::from_ascii(content_type).unwrap(),
+            })
+    };
 
     println!("-> {} {} {}", status, req.method(), req.url());
     req.respond(response)
@@ -62,7 +77,8 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
     let mut body = "404 Not Found".to_string();
     let mut content_type = "text/html; charset=utf8";
 
-    let mut parts = req.url().splitn(2, "?");
+    let full_url = req.url().to_string();
+    let mut parts = full_url.splitn(2, "?");
     let (url, query) = (parts.next().unwrap_or("/"), parts.next().unwrap_or(""));
 
     match (req.method(), url) {
@@ -106,8 +122,10 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
                     let mut content = String::new();
                     req.as_reader().read_to_string(&mut content)?;
                     let mdown = content.split("markdown=").last().unwrap_or("");
-                    status = 200;
-                    body = format!("<pre>{}</pre>", decode_form_post(mdown));
+                    let mut file = fs::File::create(disk_path)?;
+                    write!(file, "{}", decode_form_post(mdown))?;
+                    status = 302;
+                    body = path.to_string();
                 } else {
                     status = 404;
                     body = fs::read_to_string("web/404.html")?;
