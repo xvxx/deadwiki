@@ -1,7 +1,11 @@
 use ascii::AsciiString;
+use percent_encoding::percent_decode;
 use pulldown_cmark as markdown;
 use threadpool::ThreadPool;
-use tiny_http::{Method::Get, Request, Response, Server};
+use tiny_http::{
+    Method::{Get, Post},
+    Request, Response, Server,
+};
 
 use std::{fs, io, os::unix::fs::PermissionsExt, path::Path, process::Command, str};
 
@@ -28,8 +32,8 @@ pub fn server(host: &str, port: usize) -> Result<(), io::Error> {
 }
 
 /// Handle a single request.
-fn handle(req: Request) -> Result<(), io::Error> {
-    let (status, body, content_type) = match route(&req) {
+fn handle(mut req: Request) -> Result<(), io::Error> {
+    let (status, body, content_type) = match route(&mut req) {
         Ok(res) => res,
         Err(e) => {
             eprintln!("{}", e);
@@ -53,12 +57,15 @@ fn handle(req: Request) -> Result<(), io::Error> {
 }
 
 /// Route a request.
-fn route(req: &Request) -> Result<(i32, String, &'static str), io::Error> {
+fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
     let mut status = 404;
     let mut body = "404 Not Found".to_string();
     let mut content_type = "text/html; charset=utf8";
 
-    match (req.method(), req.url()) {
+    let mut parts = req.url().splitn(2, "?");
+    let (url, query) = (parts.next().unwrap_or("/"), parts.next().unwrap_or(""));
+
+    match (req.method(), url) {
         (Get, "/") => {
             status = 200;
             body = render_with_layout(
@@ -78,7 +85,7 @@ fn route(req: &Request) -> Result<(i32, String, &'static str), io::Error> {
             body = render_with_layout(
                 "new page",
                 &fs::read_to_string(web_path("new.html").unwrap_or_else(|| "?".into()))?,
-                Some("<p><a href='javascript:history.back()'>back</a></p>"),
+                None,
             );
         }
         (Get, "/sleep") => {
@@ -90,11 +97,38 @@ fn route(req: &Request) -> Result<(i32, String, &'static str), io::Error> {
             status = 404;
             body = fs::read_to_string("web/404.html")?;
         }
+        (Post, path) => {
+            if query.is_empty() {
+                status = 404;
+                body = fs::read_to_string("web/404.html")?;
+            } else {
+                if let Some(disk_path) = wiki_path(path) {
+                    let mut content = String::new();
+                    req.as_reader().read_to_string(&mut content)?;
+                    let mdown = content.split("markdown=").last().unwrap_or("");
+                    status = 200;
+                    body = format!("<pre>{}</pre>", decode_form_post(mdown));
+                } else {
+                    status = 404;
+                    body = fs::read_to_string("web/404.html")?;
+                }
+            }
+        }
 
         (Get, path) => {
-            if let Some(html) = render_wiki(path) {
+            if let Some(disk_path) = wiki_path(path) {
                 status = 200;
-                body = html;
+                if query.is_empty() {
+                    body = render_wiki(path).unwrap_or_else(|| "".into());
+                } else if query == "edit" {
+                    body = render_with_layout(
+                        "Edit",
+                        &web_to_string("edit.html")
+                            .unwrap_or_else(|| "".into())
+                            .replace("{markdown}", &fs::read_to_string(disk_path)?),
+                        None,
+                    )
+                }
             } else if let Some(web_path) = web_path(path) {
                 status = 200;
                 body = fs::read_to_string(web_path)?;
@@ -145,12 +179,16 @@ fn render_wiki(path: &str) -> Option<String> {
         Some(if raw {
             format!("<pre>{}</pre>", html)
         } else {
-            let nav = fs::read_to_string("./web/nav.html").unwrap_or("".into());
-            render_with_layout(&title, &markdown_to_html(&html), Some(&nav))
+            render_with_layout(&title, &markdown_to_html(&html), Some(&nav()))
         })
     } else {
         None
     }
+}
+
+/// Return the <nav> for a page
+fn nav() -> String {
+    fs::read_to_string("./web/nav.html").unwrap_or("".into())
 }
 
 /// Renders a chunk of HTML surrounded by `web/layout.html`.
@@ -293,6 +331,14 @@ fn web_path(path: &str) -> Option<String> {
     }
 }
 
+fn web_to_string(path: &str) -> Option<String> {
+    if let Some(disk_path) = web_path(path) {
+        Some(fs::read_to_string(disk_path).unwrap_or_else(|e| e.to_string()))
+    } else {
+        None
+    }
+}
+
 /// Content type for a file on disk. We only look in `web/`.
 fn get_content_type(path: &str) -> Option<&'static str> {
     let disk_path = web_path(path);
@@ -318,4 +364,11 @@ fn get_content_type(path: &str) -> Option<&'static str> {
         "txt" => "text/plain; charset=utf8",
         _ => "text/plain; charset=utf8",
     })
+}
+
+/// Does what it says.
+fn decode_form_post(post: &str) -> String {
+    percent_decode(post.as_bytes())
+        .decode_utf8_lossy()
+        .replace('+', " ")
 }

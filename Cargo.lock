@@ -65,6 +65,7 @@ version = "0.1.0"
 dependencies = [
  "ascii",
  "autolink",
+ "percent-encoding",
  "pulldown-cmark",
  "threadpool",
  "tiny_http",
