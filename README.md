@@ -13,17 +13,6 @@ There are three built-in ways to access your deadwiki:
 - Via native WebView app that wraps the UI.
 - Just use your filesystem. Regular Markdown files. `cat`, `ls`, etc.
 
-## HTML
-
-- [x] Start app
-- [x] Directory of Markdown files
-- [x] Render Page
-- [x] Render raw page
-- [x] Link to other page
-- [x] JS editor
-- [x] Edit page
-- [ ] Create page
-
 ## WebView
 
 - [ ] Wrap HTML server
