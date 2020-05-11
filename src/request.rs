@@ -2,7 +2,6 @@
 use {
     ascii::AsciiString,
     atomicwrites::{AllowOverwrite, AtomicFile},
-    chrono::{offset::Utc, DateTime},
     etag::EntityTag,
     percent_encoding::percent_decode,
     pulldown_cmark as markdown,
@@ -422,17 +421,6 @@ fn header(field: &str, value: &str) -> tiny_http::Header {
 /// Does the asset exist on disk?
 fn asset_exists(path: &str) -> bool {
     Asset::get(&pathify(path)).is_some()
-}
-
-/// Path of asset on disk, if it exists.
-/// Always in the `static/` directory.
-/// Ex: web_path("style.css") -> "static/style.css"
-fn asset_path(path: &str) -> Option<String> {
-    if asset_exists(&path) {
-        Some(pathify(path))
-    } else {
-        None
-    }
 }
 
 /// like fs::read_to_string() but with an asset.
