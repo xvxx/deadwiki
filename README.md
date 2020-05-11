@@ -17,7 +17,8 @@ There are three built-in ways to access your deadwiki:
 
 ## ~ status ~
 
-Very barebones, no native app yet. Under construction!
+Very barebones, no native app yet. Under construction! But I'm using
+it.
 
 ## ~ getting started ~
 
