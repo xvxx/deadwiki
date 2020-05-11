@@ -1,4 +1,6 @@
 use ascii::AsciiString;
+use chrono::{offset::Utc, DateTime};
+use etag::EntityTag;
 use percent_encoding::percent_decode;
 use pulldown_cmark as markdown;
 use threadpool::ThreadPool;
@@ -37,8 +39,54 @@ pub fn server(host: &str, port: usize) -> Result<(), io::Error> {
     Ok(())
 }
 
+/// Serve a static file, doing the header dance with ETag and whatnot.
+fn serve_static_file(req: Request, path: &str) -> Result<(), io::Error> {
+    let file = fs::File::open(&path)?;
+    if let Ok(meta) = file.metadata() {
+        if let Ok(mtime) = meta.modified() {
+            let etag = EntityTag::from_file_meta(&meta);
+            if req
+                .headers()
+                .iter()
+                .any(|h| h.field.equiv("If-None-Match") && h.value == etag.tag())
+            {
+                println!("-> STATIC -> {} {} {}", 304, req.method(), req.url());
+                return req.respond(Response::from_data("").with_status_code(304));
+            } else {
+                let datetime: DateTime<Utc> = mtime.into();
+                let mtime = datetime.format("%a, %d %b %Y %H:%M:%S GMT");
+                println!("-> STATIC -> {} {} {}", 200, req.method(), req.url());
+                return req.respond(
+                    Response::from_file(file)
+                        .with_header(header("ETag", etag.tag()))
+                        .with_header(header(
+                            "Content-Type",
+                            get_content_type(&path).unwrap_or("text/plain"),
+                        ))
+                        .with_header(header("Last-Modified", &mtime.to_string())),
+                );
+            }
+        }
+    }
+
+    req.respond(Response::from_string("404 Not Found").with_status_code(404))
+}
+
 /// Handle a single request.
 fn handle(mut req: Request) -> Result<(), io::Error> {
+    // static files
+    if req.method() == &Get && req.url().contains('.') {
+        if let Some(path) = web_path(&req.url()) {
+            if fs::File::open(&path)?
+                .metadata()
+                .and_then(|r| Ok(r.is_file()))
+                .unwrap_or(false)
+            {
+                return serve_static_file(req, &path);
+            }
+        }
+    }
+
     let (status, body, content_type) = match route(&mut req) {
         Ok(res) => res,
         Err(e) => {
@@ -415,7 +463,11 @@ fn web_to_string(path: &str) -> Option<String> {
 
 /// Content type for a file on disk. We only look in `web/`.
 fn get_content_type(path: &str) -> Option<&'static str> {
-    let disk_path = web_path(path);
+    let disk_path = if path.starts_with("./web") {
+        Some(path.to_string())
+    } else {
+        web_path(path)
+    };
     if disk_path.is_none() {
         return None;
     }

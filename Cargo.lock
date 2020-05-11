@@ -65,11 +65,22 @@ version = "0.1.0"
 dependencies = [
  "ascii",
  "autolink",
+ "chrono",
+ "etag",
  "percent-encoding",
  "pulldown-cmark",
  "threadpool",
  "tiny_http",
  "walkdir",
+]
+
+[[package]]
+name = "etag"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e6e1ce4c10daf2cf82d296745c998f315ffd2c81794eb87262c87055bc8d537"
+dependencies = [
+ "wy",
 ]
 
 [[package]]
@@ -330,3 +341,9 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "wy"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "923e7fbbe6e8f8097170033a46b33685afd59acedc64d33480507b267fe9f54e"
