@@ -61,7 +61,36 @@ Hey, how do I get that handy dandy `dead` CLI utility? With [cargo]:
 
 Now you should be able to run `dead -h` to see the possibilities.
 
+## ~ hacking ~
+
+The code is in pretty rough shape right now, so enter at your own
+risk, but you can hack on it pretty easily using [cargo]:
+
+    $ git clone https://github.com/xvxx/deadwiki
+    $ cd deadwiki
+    $ cargo run wiki/
+
+There's a basic wiki included that shows off some features.
+
+## ~ future features ~
+
+- search
+- jump to page (via fuzzy finder)
+- `--git`: automatically `git push` and `git pull` your deadwiki
+- `--gopher`: serve wiki pages over gopher too, probably using [phd]
+- `*.css` in wiki dir gets included
+
+## ~ philosophy ~
+
+- no database
+- text editor/plain text friendly
+- prefer server-side rendering
+- take your data with you (scm friendly)
+- js only for user input, no ui/frameworks (keyboard shortcuts, markdown editor, finder)
+- build time matters (72 crates currently, ~22s release ~10s debug)
+
 [cargo]: https://rustup.rs
 [simplemde]: https://simplemde.com/
 [keys]: https://github.com/sparksuite/simplemde-markdown-editor#keyboard-shortcuts
 [commonmark]: https://commonmark.org/
+[phd]: https://github.com/xvxx/phd
