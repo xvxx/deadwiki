@@ -3,7 +3,7 @@ use deadwiki::web;
 fn main() {
     let args = std::env::args().skip(1).collect::<Vec<String>>();
     let mut args = args.iter();
-    let mut path = "./wiki";
+    let mut path = "";
     let mut host = "0.0.0.0";
     let mut port = 8000;
 
@@ -27,6 +27,10 @@ fn main() {
             }
             _ => path = arg,
         }
+    }
+
+    if path.is_empty() {
+        return print_help();
     }
 
     if let Err(e) = web::server(path, host, port) {
