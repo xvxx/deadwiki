@@ -11,9 +11,13 @@ using its 1990s-era web interface.
 
 There are three built-in ways to access your deadwiki:
 
-- Via local webserver and static HTML UI.
-- Via native WebView app that wraps the UI.
+- Run the local webserver and use the static HTML UI.
+- Run a native WebView app that wraps the UI.
 - Just use your filesystem. Regular Markdown files. `cat`, `ls`, etc.
+
+## ~ status ~
+
+Very barebones, no native app yet. Under construction!
 
 ## ~ getting started ~
 
