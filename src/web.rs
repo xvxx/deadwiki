@@ -27,7 +27,7 @@ pub fn server(host: &str, port: usize) -> Result<(), io::Error> {
     let pool = ThreadPool::new(MAX_WORKERS);
     let addr = format!("{}:{}", host, port);
     let server = Server::http(&addr).expect("Server Error: ");
-    println!("-> running at http://{}", addr);
+    println!("-> deadwiki serving wiki/ at http://{}", addr);
 
     for request in server.incoming_requests() {
         pool.execute(move || {

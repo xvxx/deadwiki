@@ -14,3 +14,29 @@ There are three built-in ways to access your deadwiki:
 - Via local webserver and static HTML UI.
 - Via native WebView app that wraps the UI.
 - Just use your filesystem. Regular Markdown files. `cat`, `ls`, etc.
+
+## ~ getting started ~
+
+To begin, create an empty directory or find one already populated with
+`.md` files. This is your deadwiki. Simply point the CLI utility at it
+to get going:
+
+    dead my-wiki-dir/
+    -> deadwiki serving my-wiki-dir/ at http://0.0.0.0:8000
+
+Now visit that URL in your browser! (Or don't. It's up to you.)
+
+You can edit wiki pages locally with something like `vim`, or by using
+the web UI. Edits show up instantly, as do new pages - there is no
+database and no fancy pantsy caching. Just you, your filesystem, and a
+dream.
+
+## ~ installation ~
+
+Hey, how do I get that handy dandy `dead` CLI utility? With [cargo]:
+
+    cargo install deadwiki
+
+Now you should be able to run `dead -h` to see the possibilities.
+
+[cargo]: https://rustup.rs
