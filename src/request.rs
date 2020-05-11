@@ -6,6 +6,7 @@ use {
     etag::EntityTag,
     percent_encoding::percent_decode,
     pulldown_cmark as markdown,
+    rust_embed::RustEmbed,
     std::{
         fs,
         io::{self, prelude::*},
@@ -27,6 +28,10 @@ pub struct Request {
     // raw TinyHTTP request
     tiny_req: TinyRequest,
 }
+
+#[derive(RustEmbed)]
+#[folder = "static/"]
+pub struct Asset;
 
 impl Request {
     /// Make a new Request.
@@ -447,14 +452,16 @@ fn asset_path(path: &str) -> Option<String> {
 
 /// like fs::read_to_string() but with an asset.
 fn asset_to_string(path: &str) -> Result<String, io::Error> {
-    if let Some(path) = asset_path(path) {
-        fs::read_to_string(path)
-    } else {
-        Err(io::Error::new(
-            io::ErrorKind::NotFound,
-            format!("{} not found", path),
-        ))
+    if let Some(asset) = Asset::get(&path) {
+        if let Ok(utf8) = str::from_utf8(asset.as_ref()) {
+            return Ok(utf8.to_string());
+        }
     }
+
+    Err(io::Error::new(
+        io::ErrorKind::NotFound,
+        format!("{} not found", path),
+    ))
 }
 
 /// Convert a wiki or asset name to a path-friendly string.
