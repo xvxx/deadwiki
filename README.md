@@ -1,17 +1,17 @@
 # deadwiki
 
-_Dead simple personal wiki._
+_a dead simple personal wiki_
 
-**deadwiki** is a Markdown-powered wiki that uses your filesystem to
-store all its wiki pages. This means you can keep your wiki in a git
-repository and edit them with your text editor, or through a web
-interface.
+**deadwiki** is a Markdown-powered wiki that uses your filesystem as
+its db. This means you can keep your wiki in a git repository and edit
+content with your text editor, or read and modify pages _with style_
+using its 1990s-era web interface.
 
-There are three built-in ways to access it:
+There are three built-in ways to access your deadwiki:
 
-- Local webserver with a basic, static HTML UI.
-- Native WebView app that wraps it.
-- Just use your filesystem. Regular Markdown files.
+- Via local webserver and static HTML UI.
+- Via native WebView app that wraps the UI.
+- Just use your filesystem. Regular Markdown files. `cat`, `ls`, etc.
 
 ## HTML
 
@@ -20,8 +20,8 @@ There are three built-in ways to access it:
 - [x] Render Page
 - [x] Render raw page
 - [x] Link to other page
-- [ ] JS editor
-- [ ] Edit page
+- [x] JS editor
+- [x] Edit page
 - [ ] Create page
 
 ## WebView
