@@ -3,6 +3,8 @@ name = "deadwiki"
 version = "0.1.0"
 authors = ["chris west <c@xvxx.io>"]
 edition = "2018"
+license = "MIT"
+description = "dead simple personal wiki"
 
 [[bin]]
 name = "dead"
