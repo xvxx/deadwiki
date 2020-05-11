@@ -140,6 +140,11 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
             }
             if !wiki_page_names().contains(&path.to_lowercase()) {
                 if let Some(disk_path) = new_wiki_path(&path) {
+                    if disk_path.contains('/') {
+                        if let Some(dir) = Path::new(&disk_path).parent() {
+                            fs::create_dir_all(&dir.display().to_string())?;
+                        }
+                    }
                     let mut file = fs::File::create(disk_path)?;
                     write!(file, "{}", mdown)?;
                     status = 302;
