@@ -9,8 +9,8 @@ interface.
 
 There are three built-in ways to access it:
 
-- Local webserver with a super basic HTML UI
-- Native WebView app
+- Local webserver with a basic, static HTML UI.
+- Native WebView app that wraps it.
 - Just use your filesystem. Regular Markdown files.
 
 ## HTML

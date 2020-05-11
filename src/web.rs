@@ -120,7 +120,8 @@ fn render_wiki(path: &str) -> Option<String> {
         Some(if raw {
             format!("<pre>{}</pre>", html)
         } else {
-            render_with_layout(&title, &markdown_to_html(&html), None)
+            let nav = fs::read_to_string("./web/nav.html").unwrap_or("".into());
+            render_with_layout(&title, &markdown_to_html(&html), Some(&nav))
         })
     } else {
         None
