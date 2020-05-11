@@ -127,8 +127,8 @@ impl Request {
     pub fn handle(mut self) -> Result<(), io::Error> {
         // static files
         if self.method() == &Get && self.url().contains('.') {
-            if asset_exists(&self.url()) {
-                let path = self.url().to_string();
+            let path = dequery(self.url());
+            if asset_exists(&path) {
                 return self.serve_static_file(&path);
             }
         }
@@ -525,4 +525,14 @@ fn shell(path: &str, args: &[&str]) -> Result<String, io::Error> {
 /// Return the <nav> for a page
 fn nav() -> Result<String, io::Error> {
     asset_to_string("nav.html")
+}
+
+/// Remove the ?query string from a URL.
+fn dequery(url: &str) -> String {
+    if url.contains('?') {
+        url.split('?').next().unwrap_or_else(|| "")
+    } else {
+        url
+    }
+    .to_string()
 }
