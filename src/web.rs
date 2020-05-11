@@ -23,7 +23,7 @@ use std::{
 const MAX_WORKERS: usize = 10;
 
 /// Run the web server.
-pub fn server(host: &str, port: usize) -> Result<(), io::Error> {
+pub fn server(root: &str, host: &str, port: usize) -> Result<(), io::Error> {
     let pool = ThreadPool::new(MAX_WORKERS);
     let addr = format!("{}:{}", host, port);
     let server = Server::http(&addr).expect("Server Error: ");
