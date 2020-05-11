@@ -2,8 +2,6 @@
 
 # deadwiki
 
-_dead simple personal wiki_
-
 **deadwiki** is a Markdown-powered wiki that uses your filesystem as
 its db. This means you can keep your wiki in a git repository and edit
 content with your text editor, or read and modify pages _with style_
