@@ -36,7 +36,16 @@ fn handle(req: Request) -> Result<(), io::Error> {
     match (req.method(), req.url()) {
         (Get, "/") => {
             status = 200;
-            body = fs::read_to_string("web/index.html")?;
+            body = render_with_layout(
+                "deadwiki",
+                &format!(
+                    "<ul>{}</ul>",
+                    wiki_page_names()
+                        .iter()
+                        .map(|name| format!(r#"<li><a href="{}">{}</a></li>"#, name, name))
+                        .collect::<String>()
+                ),
+            );
         }
         (Get, "/sleep") => {
             status = 200;
@@ -135,17 +144,20 @@ fn wiki_page_names() -> Vec<String> {
     dirs
 }
 
-fn markdown_to_html(md: &str) -> String {
+/// A textarea to hold our raw Markdown content.
+fn markdown_textarea(md: &str) -> String {
     format!("<textarea id='markdown-content'>{}</textarea>", md)
 }
 
 /// Convert raw Markdown into HTML.
-fn _markdown_to_html(md: &str) -> String {
+fn markdown_to_html(md: &str) -> String {
     let mut options = markdown::Options::empty();
     options.insert(markdown::Options::ENABLE_TASKLISTS);
     options.insert(markdown::Options::ENABLE_FOOTNOTES);
 
+    // are we parsing a wiki link like [Help] or [Solar Power]?
     let mut wiki_link = false;
+    // if we are, store the text between [ and ]
     let mut wiki_link_text = String::new();
 
     let parser = markdown::Parser::new_ext(&md, options).map(|event| match event {
