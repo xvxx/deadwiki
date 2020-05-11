@@ -264,17 +264,15 @@ fn render_with_layout(title: &str, body: &str, nav: Option<&str>) -> String {
 /// Lowercase names of all the wiki pages.
 fn wiki_page_names() -> Vec<String> {
     let mut dirs = vec![];
-
-    if let Ok(entries) = fs::read_dir("./wiki") {
-        for dir in entries {
-            if let Ok(dir) = dir {
-                dirs.push(to_path(
-                    dir.path()
-                        .to_str()
-                        .unwrap_or_else(|| "?")
-                        .trim_start_matches("./wiki/")
-                        .trim_end_matches(".md"),
-                ))
+    for entry in walkdir::WalkDir::new("./wiki")
+        .into_iter()
+        .filter_map(|e| e.ok())
+    {
+        if !entry.file_type().is_dir() {
+            let dir = entry.path().display().to_string().replace("./wiki/", "");
+            let dir = dir.trim_end_matches(".md");
+            if !dir.is_empty() {
+                dirs.push(format!("{}", dir));
             }
         }
     }

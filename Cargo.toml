@@ -13,3 +13,4 @@ threadpool = "1.7.1"
 pulldown-cmark = { version = "0.7", default-features = false }
 autolink = "0.3.0"
 percent-encoding = "2.1.0"
+walkdir = "2"
