@@ -1,4 +1,5 @@
 use ascii::AsciiString;
+use atomicwrites::{AllowOverwrite, AtomicFile};
 use chrono::{offset::Utc, DateTime};
 use etag::EntityTag;
 use percent_encoding::percent_decode;
@@ -209,8 +210,8 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
                     let mut content = String::new();
                     req.as_reader().read_to_string(&mut content)?;
                     let mdown = content.split("markdown=").last().unwrap_or("");
-                    let mut file = fs::File::create(disk_path)?;
-                    write!(file, "{}", decode_form_value(mdown))?;
+                    let af = AtomicFile::new(disk_path, AllowOverwrite);
+                    af.write(|f| f.write_all(decode_form_value(mdown).as_bytes()))?;
                     status = 302;
                     body = path.to_string();
                 } else {
@@ -325,6 +326,7 @@ fn wiki_page_names() -> Vec<String> {
         }
     }
 
+    dirs.sort();
     dirs
 }
 
