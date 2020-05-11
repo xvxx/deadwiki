@@ -11,7 +11,7 @@ using its 1990s-era web interface.
 
 There are three built-in ways to access your deadwiki:
 
-- Run the local webserver and use the static HTML UI.
+- Run the local webserver and use the (minimal) HTML UI.
 - Run a native WebView app that wraps the UI.
 - Just use your filesystem. Regular Markdown files. `cat`, `ls`, etc.
 
@@ -25,10 +25,11 @@ To begin, create an empty directory or find one already populated with
 `.md` files. This is your deadwiki. Simply point the CLI utility at it
 to get going:
 
-    dead my-wiki-dir/
+    $ dead my-wiki-dir/
     -> deadwiki serving my-wiki-dir/ at http://0.0.0.0:8000
 
-Now visit that URL in your browser! (Or don't. It's up to you.)
+Now visit http://0.0.0.0:8000/ in your browser! (Or don't. It's up to
+you.)
 
 You can edit wiki pages locally with something like `vim`, or by using
 the web UI. Edits show up instantly, as do new pages - there is no
