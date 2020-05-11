@@ -128,14 +128,9 @@ impl Request {
     pub fn handle(mut self) -> Result<(), io::Error> {
         // static files
         if self.method() == &Get && self.url().contains('.') {
-            if let Some(path) = asset_path(&self.url()) {
-                if fs::File::open(&path)?
-                    .metadata()
-                    .and_then(|r| Ok(r.is_file()))
-                    .unwrap_or(false)
-                {
-                    return self.serve_static_file(&path);
-                }
+            if asset_exists(&self.url()) {
+                let path = self.url().to_string();
+                return self.serve_static_file(&path);
             }
         }
 
@@ -378,7 +373,7 @@ impl Request {
                 } else if asset_exists(path) {
                     status = 200;
                     body = asset_to_string(path)?;
-                    content_type = get_content_type(path).unwrap_or("text/plain");
+                    content_type = get_content_type(path);
                 } else {
                     status = 404;
                     body = asset_to_string("404.html")?;
@@ -393,31 +388,22 @@ impl Request {
 
     /// Serve a static file, doing the header dance with ETag and whatnot.
     fn serve_static_file(self, path: &str) -> Result<(), io::Error> {
-        let file = fs::File::open(&path)?;
-        if let Ok(meta) = file.metadata() {
-            if let Ok(mtime) = meta.modified() {
-                let etag = EntityTag::from_file_meta(&meta);
-                if self
-                    .headers()
-                    .iter()
-                    .any(|h| h.field.equiv("If-None-Match") && h.value == etag.tag())
-                {
-                    println!("-> STATIC -> {} {} {}", 304, self.method(), self.url());
-                    return self.respond(Response::from_data("").with_status_code(304));
-                } else {
-                    let datetime: DateTime<Utc> = mtime.into();
-                    let mtime = datetime.format("%a, %d %b %Y %H:%M:%S GMT");
-                    println!("-> STATIC -> {} {} {}", 200, self.method(), self.url());
-                    return self.respond(
-                        Response::from_file(file)
-                            .with_header(header("ETag", etag.tag()))
-                            .with_header(header(
-                                "Content-Type",
-                                get_content_type(&path).unwrap_or("text/plain"),
-                            ))
-                            .with_header(header("Last-Modified", &mtime.to_string())),
-                    );
-                }
+        if let Some(file) = Asset::get(&pathify(path)) {
+            let etag = EntityTag::from_hash(&file);
+            if self
+                .headers()
+                .iter()
+                .any(|h| h.field.equiv("If-None-Match") && h.value == etag.tag())
+            {
+                println!("-> STATIC -> {} {} {}", 304, self.method(), self.url());
+                return self.respond(Response::from_data("").with_status_code(304));
+            } else {
+                println!("-> STATIC -> {} {} {}", 200, self.method(), self.url());
+                return self.respond(
+                    Response::from_data(file)
+                        .with_header(header("ETag", etag.tag()))
+                        .with_header(header("Content-Type", get_content_type(&path))),
+                );
             }
         }
 
@@ -435,16 +421,15 @@ fn header(field: &str, value: &str) -> tiny_http::Header {
 
 /// Does the asset exist on disk?
 fn asset_exists(path: &str) -> bool {
-    Path::new(&format!("./static/{}", pathify(path))).exists()
+    Asset::get(&pathify(path)).is_some()
 }
 
 /// Path of asset on disk, if it exists.
 /// Always in the `static/` directory.
 /// Ex: web_path("style.css") -> "static/style.css"
 fn asset_path(path: &str) -> Option<String> {
-    let path = format!("./static/{}", pathify(path));
-    if Path::new(&path).exists() {
-        Some(path)
+    if asset_exists(&path) {
+        Some(pathify(path))
     } else {
         None
     }
@@ -474,20 +459,8 @@ fn pathify(path: &str) -> String {
 }
 
 /// Content type for a file on disk. We only look in `assets/`.
-fn get_content_type(path: &str) -> Option<&'static str> {
-    let disk_path = if path.starts_with("./static") {
-        path.to_string()
-    } else {
-        asset_path(path)?
-    };
-    let path = Path::new(&disk_path);
-
-    let extension = match path.extension() {
-        None => return Some("text/plain"),
-        Some(e) => e,
-    };
-
-    Some(match extension.to_str().unwrap() {
+fn get_content_type(path: &str) -> &'static str {
+    match path.split('.').last().unwrap_or("?") {
         "gif" => "image/gif",
         "jpg" => "image/jpeg",
         "jpeg" => "image/jpeg",
@@ -498,7 +471,7 @@ fn get_content_type(path: &str) -> Option<&'static str> {
         "html" => "text/html; charset=utf8",
         "txt" => "text/plain; charset=utf8",
         _ => "text/plain; charset=utf8",
-    })
+    }
 }
 
 /// Does what it says.

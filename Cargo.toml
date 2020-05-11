@@ -24,6 +24,5 @@ autolink = "0.3.0"
 percent-encoding = "2.1.0"
 walkdir = "2"
 etag = { version = "2.0.1", features = ["std"] }
-chrono = "0.4.11"
 atomicwrites = "0.2.5"
 rust-embed = "5.2.0"
