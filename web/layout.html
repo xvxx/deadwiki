@@ -16,6 +16,12 @@
   </body>
   <script>
     function loadTheWiki() {
+      var editLink = document.getElementById("edit-link");
+      if (editLink) {
+        window.addEventListener("dblclick", function () {
+          window.location = editLink.href;
+        });
+      }
       var focused = document.getElementById("focused");
       if (focused && focused.value == "") focused.focus();
       var simplemde = new SimpleMDE({
