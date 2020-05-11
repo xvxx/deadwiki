@@ -39,7 +39,7 @@ fn handle(req: Request) -> Result<(), io::Error> {
             body = render_with_layout(
                 "deadwiki",
                 &format!(
-                    "<ul>{}</ul>",
+                    "<h1>deadwiki</h1><ul>{}</ul>",
                     wiki_page_names()
                         .iter()
                         .map(|name| format!(r#"<li><a href="{}">{}</a></li>"#, name, name))
