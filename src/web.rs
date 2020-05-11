@@ -89,7 +89,7 @@ fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error> {
             body = render_with_layout(
                 "deadwiki",
                 &format!(
-                    "<h1>deadwiki</h1>\n<ul>\n{}</ul>",
+                    "<h1>deadwiki</h1>\n<ul>\n{}</ul>\n<hr><a href='/new'>new</a>",
                     wiki_page_names()
                         .iter()
                         .map(|name| format!("  <li><a href='{}'>{}</a></li>\n", name, name))
