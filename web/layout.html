@@ -16,12 +16,24 @@
   </body>
   <script>
     function loadTheWiki() {
+      // dbl click wiki content to edit
       var editLink = document.getElementById("edit-link");
       if (editLink) {
         window.addEventListener("dblclick", function () {
           window.location = editLink.href;
         });
       }
+
+      // ESC key to go back when editing
+      document.onkeydown = function (evt) {
+        if (
+          window.event &&
+          window.event.keyCode == 27 &&
+          document.getElementById("markdown")
+        )
+          history.back();
+      };
+
       var focused = document.getElementById("focused");
       if (focused && focused.value == "") focused.focus();
       var simplemde = new SimpleMDE({
