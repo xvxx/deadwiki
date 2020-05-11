@@ -39,12 +39,13 @@ fn handle(req: Request) -> Result<(), io::Error> {
             body = render_with_layout(
                 "deadwiki",
                 &format!(
-                    "<h1>deadwiki</h1><ul>{}</ul>",
+                    "<ul>{}</ul>",
                     wiki_page_names()
                         .iter()
                         .map(|name| format!(r#"<li><a href="{}">{}</a></li>"#, name, name))
                         .collect::<String>()
                 ),
+                None,
             );
         }
         (Get, "/sleep") => {
@@ -85,6 +86,21 @@ fn handle(req: Request) -> Result<(), io::Error> {
     req.respond(response)
 }
 
+/// some_page -> Some Page
+fn path_to_title(path: &str) -> String {
+    path.trim_start_matches('/')
+        .split("_")
+        .map(|part| {
+            format!(
+                "{}{}",
+                part.chars().next().unwrap_or('?').to_uppercase(),
+                &part.chars().skip(1).collect::<String>()
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 /// Render a wiki page to a fully loaded HTML string.
 /// Wiki pages are stored in the `wiki/` directory as `.md` files.
 fn render_wiki(path: &str) -> Option<String> {
@@ -94,6 +110,7 @@ fn render_wiki(path: &str) -> Option<String> {
     } else {
         path
     };
+    let title = path_to_title(path);
     if let Some(path) = wiki_path(path) {
         let html = if is_executable(&path) {
             shell(&path, &[]).unwrap_or_else(|e| e.to_string())
@@ -103,7 +120,7 @@ fn render_wiki(path: &str) -> Option<String> {
         Some(if raw {
             format!("<pre>{}</pre>", html)
         } else {
-            render_with_layout("Title", &markdown_to_html(&html))
+            render_with_layout(&title, &markdown_to_html(&html), None)
         })
     } else {
         None
@@ -111,12 +128,13 @@ fn render_wiki(path: &str) -> Option<String> {
 }
 
 /// Renders a chunk of HTML surrounded by `web/layout.html`.
-fn render_with_layout(title: &str, body: &str) -> String {
+fn render_with_layout(title: &str, body: &str, nav: Option<&str>) -> String {
     if let Some(layout) = web_path("layout.html") {
         fs::read_to_string(layout)
             .unwrap_or_else(|_| "".into())
             .replace("{title}", title)
             .replace("{body}", body)
+            .replace("{nav}", nav.unwrap_or(""))
     } else {
         body.to_string()
     }
