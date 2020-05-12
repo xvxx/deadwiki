@@ -4,7 +4,7 @@
 
 **deadwiki** is a Markdown-powered wiki that uses your filesystem as
 its db. This means you can keep your wiki in a git repository and edit
-content with your text editor, or read and modify pages _with style_
+content with your text editor, or read and modify pages `with style`
 using its 1990s-era web interface.
 
 ---
@@ -53,10 +53,8 @@ be a link to the actual page or a way to create it.
 
 ## ~ keyboard shortcuts ~
 
-Wiki editing uses [SimpleMDE], so check out their [keyboard
-shortcuts][keys].
-
-In addition, if you're in the web UI you can use these:
+Web-based wiki editing uses [SimpleMDE], plus a dash of other
+shortcuts in editor mode:
 
 | **Shortcut**   | **Notes**                        |
 | -------------- | -------------------------------- |
@@ -64,6 +62,20 @@ In addition, if you're in the web UI you can use these:
 | `ESC`          | Exits edit mode                  |
 | `Ctrl+Enter`   | Submits your edits               |
 | `Cmd+Enter`    | Same                             |
+| `Cmd-'`        | Toggle Blockquote                |
+| `Cmd-B`        | Toggle Bold                      |
+| `Cmd-E`        | Clean Block                      |
+| `Cmd-H`        | Toggle Heading (Smaller)         |
+| `Cmd-I`        | Toggle Italic                    |
+| `Cmd-K`        | Draw Link                        |
+| `Cmd-L`        | Toggle Unordered List            |
+| `Cmd-P`        | Toggle Preview                   |
+| `Cmd-Alt-C`    | Toggle Code Block                |
+| `Cmd-Alt-I`    | Draw Image                       |
+| `Cmd-Alt-L`    | Toggle Ordered LIST              |
+| `Shift-Cmd-H`  | Toggle Heading (Bigger)          |
+| `F9`           | Toggle Side-By-Side              |
+| `F11`          | Toggle Fullscreen                |
 
 ## ~ installation ~
 
@@ -103,10 +115,9 @@ There's a basic wiki included that shows off some features.
 
 ## ~ screenies ~
 
-|![screenie1](static/img/screenie1.jpeg)|![screenie1](static/img/screenie2.jpeg)|
-|:-:|:-:|
-| Rendering Markdown. _Wow._ | Editing Markdown. _Amazing._ |
-
+| ![screenie1](static/img/screenie1.jpeg) | ![screenie1](static/img/screenie2.jpeg) |
+| :-------------------------------------: | :-------------------------------------: |
+|       Rendering Markdown. `Wow.`        |      Editing Markdown. `Amazing.`       |
 
 [cargo]: https://rustup.rs
 [simplemde]: https://simplemde.com/
