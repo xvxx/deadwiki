@@ -1,9 +1,9 @@
 //! Rendering "logic".
 
 use {
-    crate::{asset, render, web, Request},
+    crate::{asset, render, shell, wiki_root, Request},
     pulldown_cmark as markdown,
-    std::{fs, io, os::unix::fs::PermissionsExt, path::Path, process::Command, str},
+    std::{fs, io, os::unix::fs::PermissionsExt, path::Path, str},
 };
 
 /// Render the index page which lists all wiki pages.
@@ -172,20 +172,6 @@ fn is_executable(path: &str) -> bool {
     }
 }
 
-/// Run a script and return its output.
-fn shell(path: &str, args: &[&str]) -> Result<String, io::Error> {
-    let output = Command::new(path).args(args).output()?;
-    let out = if output.status.success() {
-        output.stdout
-    } else {
-        output.stderr
-    };
-    match str::from_utf8(&out) {
-        Ok(s) => Ok(s.to_string()),
-        Err(e) => Err(io::Error::new(io::ErrorKind::Other, e.to_string())),
-    }
-}
-
 /// Convert a wiki page name or file path to cleaned up path.
 /// Ex: "Test Results" -> "test_results"
 pub fn pathify(path: &str) -> String {
@@ -227,9 +213,4 @@ pub fn new_page_path(path: &str) -> Option<String> {
 /// Returns a wiki path on disk, regardless of whether it exists.
 fn page_disk_path(path: &str) -> String {
     format!("{}/{}.md", wiki_root(), pathify(path))
-}
-
-/// Path to our deadwiki.
-pub fn wiki_root() -> String {
-    web::WIKI_ROOT.lock().unwrap().clone()
 }

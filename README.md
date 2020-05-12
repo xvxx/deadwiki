@@ -43,13 +43,25 @@ Now visit http://0.0.0.0:8000/ in your browser! (Or don't. It's up to
 you.)
 
 You can edit wiki pages locally with something like `vim`, or by using
-the web UI. Edits show up instantly, as do new pages - there is no
-database and no fancy pantsy caching. Just you, your filesystem, and a
-dream.
+the web UI. Edits show up on the next page load, as do new pages -
+there is no database and no fancy pantsy caching. Just you, your
+filesystem, and a dream.
 
 In addition to [CommonMark], Markdown files can link to each other by
 putting the `[Page Name]` in brackets. Like most wikis, it'll either
 be a link to the actual page or a way to create it.
+
+Finally, if you want to sync your wiki automatically, there is some
+_very basic_ git support. Basically, if you start the `dead`
+program with the `-s` or `--sync` flag and point it at an existing git
+repository, it'll do this every 30 seconds or so:
+
+    git add .
+    git commit -am update
+    git pull origin master
+    git push origin master
+
+Like I said, super basic! But it works.
 
 ## ~ keyboard shortcuts ~
 
@@ -100,7 +112,6 @@ There's a basic wiki included that shows off some features.
 
 - search
 - jump to page (via fuzzy finder)
-- `--git`: automatically `git push` and `git pull` your deadwiki
 - `--gopher`: serve wiki pages over gopher too, probably using [phd]
 - `*.css` in wiki dir gets included
 

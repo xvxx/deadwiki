@@ -197,7 +197,6 @@ impl Request {
             (Get, "/new") => {
                 status = 200;
                 let name = self.param("name");
-                println!("NAME: {}", name);
 
                 body = render::layout(
                     "new page",

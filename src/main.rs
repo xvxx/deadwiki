@@ -1,4 +1,4 @@
-use deadwiki::web;
+use deadwiki::{sync, web};
 
 fn main() {
     let args = std::env::args().skip(1).collect::<Vec<String>>();
@@ -6,11 +6,13 @@ fn main() {
     let mut path = "";
     let mut host = "0.0.0.0";
     let mut port = 8000;
+    let mut sync = false;
 
     while let Some(arg) = args.next() {
         match arg.as_ref() {
             "-v" | "-version" | "--version" => return print_version(),
             "-h" | "-help" | "--help" => return print_help(),
+            "-s" | "-sync" | "--sync" => sync = true,
             "-H" | "-host" | "--host" => {
                 if let Some(arg) = args.next() {
                     host = arg;
@@ -33,6 +35,22 @@ fn main() {
         return print_help();
     }
 
+    {
+        // set current dir to wiki
+        std::env::set_current_dir(path).expect("couldn't change working dir");
+
+        // if this fails, we want to blow up
+        let mut lock = deadwiki::WIKI_ROOT.lock().unwrap();
+        *lock = path.to_string();
+    }
+
+    if sync {
+        if let Err(e) = sync::start() {
+            eprintln!("Sync Error: {}", e);
+            return;
+        }
+    }
+
     if let Err(e) = web::server(path, host, port) {
         eprintln!("WebServer Error: {}", e);
     }
@@ -49,6 +67,7 @@ fn print_help() {
 Options:
     -H, --host     Host to bind to. Default: 0.0.0.0
     -p, --port     Port to bind to. Default: 8000
+    -s, --sync     Automatically sync wiki. Must be a git repo.
     -v, --version  Print version.
     -h, --help     Show this message.
 "
