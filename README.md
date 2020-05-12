@@ -110,7 +110,8 @@ There's a basic wiki included that shows off some features.
 - text editor/plain text friendly
 - prefer server-side rendering
 - take your data with you (scm friendly)
-- js only for user input, no ui/frameworks (keyboard shortcuts, markdown editor, finder)
+- js only for user input (keyboard shortcuts, markdown editor, finder)
+- no js frameworks/helpers
 - build time matters (72 crates currently, ~22s release ~10s debug)
 
 ## ~ screenies ~
