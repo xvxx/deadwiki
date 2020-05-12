@@ -74,24 +74,29 @@ impl Request {
 
     /// Turn a query string or POST body into a nice and tidy HashMap.
     fn parse_params(&mut self) {
-        if !self.params.is_empty() || !self.url().contains('?') {
+        if !self.params.is_empty() {
             return;
         }
 
-        let url = self.url();
+        // temp value
         let mut map = HashMap::new();
+
+        // parse url
+        let url = self.url();
         if let Some(start) = url.find('?') {
-            for kv in url[start..].split('&') {
-                let mut parts = kv.splitn(2, '=');
-                if let Some(key) = parts.next() {
-                    if let Some(val) = parts.next() {
-                        map.insert(key.to_string(), decode_form_value(val));
-                    } else {
-                        map.insert(key.to_string(), "".to_string());
-                    }
+            parse_query_into_map(&url[start..], &mut map);
+        }
+
+        // parse POST body
+        if self.method() == &Post {
+            let mut content = String::new();
+            if let Ok(size) = self.as_reader().read_to_string(&mut content) {
+                if size > 0 {
+                    parse_query_into_map(&content, &mut map);
                 }
             }
         }
+
         if !map.is_empty() {
             self.params = map;
         }
@@ -209,8 +214,6 @@ impl Request {
                 body = asset::to_string("404.html")?;
             }
             (Post, "/new") => {
-                let mut content = String::new();
-                self.as_reader().read_to_string(&mut content)?;
                 let path = render::pathify(&self.param("name"));
                 if !self.page_names().contains(&path) {
                     if let Some(disk_path) = render::new_page_path(&path) {
@@ -333,6 +336,21 @@ fn decode_form_value(post: &str) -> String {
         .replace('\r', "")
 }
 
+/// Parses a query string like "name=jimbo&other_data=sure" into a
+/// HashMap.
+fn parse_query_into_map(params: &str, map: &mut HashMap<String, String>) {
+    for kv in params.split('&') {
+        let mut parts = kv.splitn(2, '=');
+        if let Some(key) = parts.next() {
+            if let Some(val) = parts.next() {
+                map.insert(key.to_string(), decode_form_value(val));
+            } else {
+                map.insert(key.to_string(), "".to_string());
+            }
+        }
+    }
+}
+
 /// Strip the ?querystring from a URL.
 fn strip_query(url: &str) -> &str {
     if let Some(idx) = url.find('?') {
@@ -341,4 +359,6 @@ fn strip_query(url: &str) -> &str {
         url
     }
     .trim_start_matches("static/")
+    .trim_start_matches("/static/")
+    .trim_start_matches("./static/")
 }
