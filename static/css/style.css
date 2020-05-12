@@ -14,6 +14,9 @@ input[type=text] {
     zoom: 200%;
 }
 
+img {
+  max-width: 500px;
+}
 #main {
     width: 600px;
     margin: 0 auto;
