@@ -2,6 +2,15 @@
 
 Hello, and welcome.
 
-This is just an example wiki. To really get the most out of deadwiki, create your own git repository filled with `.md` files and point `dead` at it!
+There are many things you can do with deadwiki. Start by editing this page and seeing some of them.
 
-Enjoy! 
+deadwiki supports all of [CommonMark] and includes exactly one addition: normally when a word is alone in brackets like `[Snippet]`, it's assumed to be a footnote. If there's no matching footnote, deadwiki turns it into a wiki link - either to an existing page, or a form to make a new one. Standard wiki stuff.
+
+- Existing page: [Snippets]
+- New page: [Some page that doesn't exist]
+
+Check out the [README] for more. Enjoy!
+
+[pulldown-cmark]: https://github.com/raphlinus/pulldown-cmark
+[CommonMark]: https://commonmark.org/
+[readme]: https://github.com/xvxx/deadwiki#readme
