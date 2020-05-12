@@ -119,6 +119,12 @@ There's a basic wiki included that shows off some features.
 | :-------------------------------------: | :-------------------------------------: |
 |       Rendering Markdown. `Wow.`        |      Editing Markdown. `Amazing.`       |
 
+## ~ bug reports ~
+
+Please direct all known and unknown (suspected) bugs to this URL:
+
+- https://github.com/xvxx/deadwiki/issues/new
+
 [cargo]: https://rustup.rs
 [simplemde]: https://simplemde.com/
 [keys]: https://github.com/sparksuite/simplemde-markdown-editor#keyboard-shortcuts
