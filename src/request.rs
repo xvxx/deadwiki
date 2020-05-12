@@ -424,11 +424,24 @@ fn header(field: &str, value: &str) -> tiny_http::Header {
 
 /// Does the asset exist on disk?
 fn asset_exists(path: &str) -> bool {
-    Asset::get(&pathify(path)).is_some()
+    let path = pathify(path);
+    let path = if path.ends_with(".html") && !path.starts_with("html/") {
+        format!("html/{}", path)
+    } else {
+        path.to_string()
+    };
+
+    Asset::get(&path).is_some()
 }
 
 /// like fs::read_to_string() but with an asset.
 fn asset_to_string(path: &str) -> Result<String, io::Error> {
+    let path = if path.ends_with(".html") && !path.starts_with("html/") {
+        format!("html/{}", path)
+    } else {
+        path.to_string()
+    };
+
     if let Some(asset) = Asset::get(&path) {
         if let Ok(utf8) = str::from_utf8(asset.as_ref()) {
             return Ok(utf8.to_string());
