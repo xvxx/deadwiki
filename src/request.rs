@@ -84,7 +84,7 @@ impl Request {
         // parse url
         let url = self.url();
         if let Some(start) = url.find('?') {
-            parse_query_into_map(&url[start..], &mut map);
+            parse_query_into_map(&url[start + 1..], &mut map);
         }
 
         // parse POST body
@@ -197,6 +197,7 @@ impl Request {
             (Get, "/new") => {
                 status = 200;
                 let name = self.param("name");
+                println!("NAME: {}", name);
 
                 body = render::layout(
                     "new page",
