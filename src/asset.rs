@@ -18,6 +18,7 @@ pub fn exists(path: &str) -> bool {
 
 /// Like fs::read_to_string(), but with an asset.
 pub fn to_string(path: &str) -> Result<String, io::Error> {
+    let path = pathify(path);
     if let Some(asset) = Asset::get(&path) {
         if let Ok(utf8) = str::from_utf8(asset.as_ref()) {
             return Ok(utf8.to_string());

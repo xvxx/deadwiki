@@ -194,7 +194,7 @@ pub fn pathify(path: &str) -> String {
         .replace("..", ".")
         .replace(" ", "_")
         .chars()
-        .filter(|&c| c.is_alphanumeric() || c == '_' || c == '-' || c == '/')
+        .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
         .collect::<String>()
 }
 
@@ -224,6 +224,7 @@ fn page_disk_path(path: &str) -> String {
     format!("{}/{}.md", wiki_root(), pathify(path))
 }
 
+/// Path to our deadwiki.
 pub fn wiki_root() -> String {
     web::WIKI_ROOT.lock().unwrap().clone()
 }

@@ -7,6 +7,7 @@ use {
     etag::EntityTag,
     percent_encoding::percent_decode,
     std::{
+        collections::HashMap,
         fs,
         io::{self, prelude::*},
         path::Path,
@@ -24,6 +25,8 @@ pub struct Request {
     root: String,
     // raw TinyHTTP request
     tiny_req: TinyRequest,
+    // POST/GET params
+    params: HashMap<String, String>,
 }
 
 impl Request {
@@ -32,6 +35,7 @@ impl Request {
         Request {
             root: format!("{}/", root.trim_end_matches("/")),
             tiny_req: req,
+            params: HashMap::new(),
         }
     }
 
@@ -50,8 +54,51 @@ impl Request {
         self.tiny_req.headers()
     }
 
+    /// Return a value in a POST <form> or ?querystring=
+    /// Always gives a string. Will be empty if param wasn't sent.
+    /// Use `has_param()` to check if it exists.
+    pub fn param(&mut self, name: &str) -> &str {
+        self.parse_params();
+        if let Some(s) = self.params.get(name) {
+            s
+        } else {
+            ""
+        }
+    }
+
+    /// Has the given param been set?
+    pub fn has_param(&mut self, name: &str) -> bool {
+        self.parse_params();
+        self.params.contains_key(name)
+    }
+
+    /// Turn a query string or POST body into a nice and tidy HashMap.
+    fn parse_params(&mut self) {
+        if !self.params.is_empty() || !self.url().contains('?') {
+            return;
+        }
+
+        let url = self.url();
+        let mut map = HashMap::new();
+        if let Some(start) = url.find('?') {
+            for kv in url[start..].split('&') {
+                let mut parts = kv.splitn(2, '=');
+                if let Some(key) = parts.next() {
+                    if let Some(val) = parts.next() {
+                        map.insert(key.to_string(), decode_form_value(val));
+                    } else {
+                        map.insert(key.to_string(), "".to_string());
+                    }
+                }
+            }
+        }
+        if !map.is_empty() {
+            self.params = map;
+        }
+    }
+
     /// Provide io::Read
-    fn as_reader(&mut self) -> &mut dyn io::Read {
+    pub fn as_reader(&mut self) -> &mut dyn io::Read {
         self.tiny_req.as_reader()
     }
 
@@ -144,10 +191,7 @@ impl Request {
             }
             (Get, "/new") => {
                 status = 200;
-                let mut name = "".to_string();
-                if !query.is_empty() {
-                    name.push_str(&decode_form_value(&query.replace("name=", "")));
-                }
+                let name = self.param("name");
 
                 body = render::layout(
                     "new page",
@@ -167,21 +211,8 @@ impl Request {
             (Post, "/new") => {
                 let mut content = String::new();
                 self.as_reader().read_to_string(&mut content)?;
-                let mut path = String::new();
-                let mut mdown = String::new();
-                for pair in content.split('&') {
-                    let mut parts = pair.splitn(2, '=');
-                    let (field, value) = (
-                        parts.next().unwrap_or_default(),
-                        parts.next().unwrap_or_default(),
-                    );
-                    match field.as_ref() {
-                        "name" => path = render::pathify(&decode_form_value(value)),
-                        "markdown" => mdown = decode_form_value(value),
-                        _ => {}
-                    }
-                }
-                if !self.page_names().contains(&path.to_lowercase()) {
+                let path = render::pathify(&self.param("name"));
+                if !self.page_names().contains(&path) {
                     if let Some(disk_path) = render::new_page_path(&path) {
                         if disk_path.contains('/') {
                             if let Some(dir) = Path::new(&disk_path).parent() {
@@ -189,6 +220,7 @@ impl Request {
                             }
                         }
                         let mut file = fs::File::create(disk_path)?;
+                        let mdown = self.param("markdown");
                         write!(file, "{}", mdown)?;
                         status = 302;
                         body = path.to_string();
@@ -298,6 +330,7 @@ fn decode_form_value(post: &str) -> String {
     percent_decode(post.as_bytes())
         .decode_utf8_lossy()
         .replace('+', " ")
+        .replace('\r', "")
 }
 
 /// Remove the ?query string from a URL.
