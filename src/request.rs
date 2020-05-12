@@ -270,15 +270,19 @@ impl Request {
                 body = self.render_with_layout(
                     "deadwiki",
                     &format!(
-                        "<p><a href='/new'>new</a></p><h1>deadwiki</h1>\n<ul>\n{}</ul>\n<hr>",
-                        self.page_names()
-                            .iter()
-                            .map(|name| format!(
-                                "  <li><a href='{}'>{}</a></li>\n",
-                                name,
-                                wiki_path_to_title(name)
-                            ))
-                            .collect::<String>()
+                        "{}",
+                        asset_to_string("index.html")?.replace(
+                            "{pages}",
+                            &self
+                                .page_names()
+                                .iter()
+                                .map(|name| format!(
+                                    "  <li><a href='{}'>{}</a></li>\n",
+                                    name,
+                                    wiki_path_to_title(name)
+                                ))
+                                .collect::<String>()
+                        )
                     ),
                     None,
                 );
