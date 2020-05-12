@@ -101,6 +101,13 @@ There's a basic wiki included that shows off some features.
 - js only for user input, no ui/frameworks (keyboard shortcuts, markdown editor, finder)
 - build time matters (72 crates currently, ~22s release ~10s debug)
 
+## ~ screenies ~
+
+|![screenie1](static/screenie1.jpeg)|![screenie1](static/screenie2.jpeg)|
+|:-:|:-:|
+| Rendering Markdown. _Wow._ | Editing Markdown. _Amazing._ |
+
+
 [cargo]: https://rustup.rs
 [simplemde]: https://simplemde.com/
 [keys]: https://github.com/sparksuite/simplemde-markdown-editor#keyboard-shortcuts
