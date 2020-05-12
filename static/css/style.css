@@ -1,92 +1,58 @@
-a:visited {
-    color: blue;
-}
-
-a.new {
-    color: red;
-}
-
-img {
-    max-width: 400px;
-}
-
 /* whole site */
 
 #main {
-    width: 900px;
-    margin: 0 auto;
-    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+  width: 960px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial,
+    sans-serif, Apple Color Emoji, Segoe UI Emoji;
 }
 
-/* headers */
+/* content  */
 
-h1 {
-    font-size: 2rem;
-    margin-top: inherit;
+.markdown-body h2 {
+  border-bottom: none;
 }
 
-h1:first-of-type {
-    margin-top: 10px;
-    margin-bottom: 16px;
-    font-weight: 600;
-    line-height: 1.25;
-    padding-bottom: .3em;
-    border-bottom: 1px solid #eaecef;
-}
-
-h2 {
-    font-size: 1.5rem;
-    margin-top: 1rem;
-}
-
-h1+p, h2+p, h3+p, h4+p, h5+p {
-    margin-top: 0.3rem;
-}
-
-hr {
-    height: .1em;
-    background-color: #e1e4e8;
-    border: 0;
-    margin-top: 1.3rem;
-}
-
-/* tables */
-
-table td {
-    padding: 0.3rem;
+img {
+  max-width: 400px;
 }
 
 /* code  */
 
 .CodeMirror {
-    font-family: monospace !important;
+  font-family: monospace !important;
 }
 
-.CodeMirror .CodeMirror-code .cm-header-1, .CodeMirror .CodeMirror-code .cm-header-2, .CodeMirror .CodeMirror-code .cm-header-3, .CodeMirror .CodeMirror-code .cm-header-4, .CodeMirror .CodeMirror-code .cm-header-5 {
-    font-size: inherit;
+.CodeMirror .CodeMirror-code .cm-header-1,
+.CodeMirror .CodeMirror-code .cm-header-2,
+.CodeMirror .CodeMirror-code .cm-header-3,
+.CodeMirror .CodeMirror-code .cm-header-4,
+.CodeMirror .CodeMirror-code .cm-header-5 {
+  font-size: inherit;
 }
 
-input[type=text] {
-    zoom: 200%;
+input[type="text"] {
+  zoom: 200%;
 }
 
 pre {
-    padding: 16px;
-    overflow: auto;
-    line-height: 1.45;
-    background-color: #f6f8fa;
-    border-radius: 3px;
+  padding: 16px;
+  overflow: auto;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 3px;
 }
 
-code a, code a:visited {
-    color: black;
+code a,
+code a:visited {
+  color: black;
 }
 
-:not(pre)>code {
-    line-height: 1.5;
-    padding: .2em .4em;
-    margin: 0;
-    font-size: 85%;
-    background-color: rgba(27, 31, 35, .05);
-    border-radius: 3px;
+:not(pre) > code {
+  line-height: 1.5;
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
 }
