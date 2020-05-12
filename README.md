@@ -64,7 +64,8 @@ repository, it'll do this every 30 seconds or so:
     git pull origin master
     git push origin master
 
-Like I said, super basic! But it works.
+Like I said, super basic! But it works, and it's nice that it syncs
+changes you make even outside of the web UI.
 
 ## ~ keyboard shortcuts ~
 
