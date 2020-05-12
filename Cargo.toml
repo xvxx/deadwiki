@@ -26,3 +26,4 @@ walkdir = "2"
 etag = { version = "2.0.1", features = ["std"] }
 atomicwrites = "0.2.5"
 rust-embed = "5.2.0"
+lazy_static = "1.4"

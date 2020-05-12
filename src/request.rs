@@ -1,17 +1,15 @@
 //! Web Request.
+
 use {
+    crate::{asset, render},
     ascii::AsciiString,
     atomicwrites::{AllowOverwrite, AtomicFile},
     etag::EntityTag,
     percent_encoding::percent_decode,
-    pulldown_cmark as markdown,
-    rust_embed::RustEmbed,
     std::{
         fs,
         io::{self, prelude::*},
-        os::unix::fs::PermissionsExt,
         path::Path,
-        process::Command,
         str,
     },
     tiny_http::{
@@ -27,10 +25,6 @@ pub struct Request {
     // raw TinyHTTP request
     tiny_req: TinyRequest,
 }
-
-#[derive(RustEmbed)]
-#[folder = "static/"]
-pub struct Asset;
 
 impl Request {
     /// Make a new Request.
@@ -74,32 +68,6 @@ impl Request {
         self.tiny_req.respond(res)
     }
 
-    /// Path of wiki page on disk, if it exists.
-    /// Ex: page_path("Welcome") -> "wiki/welcome.md"
-    fn page_path(&self, path: &str) -> Option<String> {
-        let path = self.page_disk_path(path);
-        if Path::new(&path).exists() {
-            Some(path)
-        } else {
-            None
-        }
-    }
-
-    /// Returns a path on disk to a new wiki page.
-    /// Nothing if the page already exists.
-    fn new_page_path(&self, path: &str) -> Option<String> {
-        if self.page_path(path).is_none() {
-            Some(self.page_disk_path(path))
-        } else {
-            None
-        }
-    }
-
-    /// Returns a wiki path on disk, regardless of whether it exists.
-    fn page_disk_path(&self, path: &str) -> String {
-        format!("{}/{}.md", self.root, pathify(path))
-    }
-
     /// All the wiki pages, in alphabetical order.
     pub fn page_names(&self) -> Vec<String> {
         let mut dirs = vec![];
@@ -128,7 +96,7 @@ impl Request {
         // static files
         if self.method() == &Get && self.url().contains('.') {
             let path = dequery(self.url());
-            if asset_exists(&path) {
+            if asset::exists(&path) {
                 return self.serve_static_file(&path);
             }
         }
@@ -159,101 +127,6 @@ impl Request {
         self.respond(response)
     }
 
-    /// Render a wiki page to a fully loaded HTML string.
-    fn render_page(&self, path: &str) -> Result<String, io::Error> {
-        let raw = path.ends_with(".md");
-        let path = if raw {
-            path.trim_end_matches(".md")
-        } else {
-            path
-        };
-        let title = wiki_path_to_title(path);
-        if let Some(path) = self.page_path(path) {
-            let html = if is_executable(&path) {
-                shell(&path, &[]).unwrap_or_else(|e| e.to_string())
-            } else {
-                fs::read_to_string(path).unwrap_or_else(|_| "".into())
-            };
-            Ok(if raw {
-                format!("<pre>{}</pre>", html)
-            } else {
-                self.render_with_layout(&title, &self.markdown_to_html(&html), Some(&nav()?))
-            })
-        } else {
-            Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                format!("{} not found", path),
-            ))
-        }
-    }
-
-    /// Renders a chunk of HTML surrounded by `assets/layout.html`.
-    fn render_with_layout(&self, title: &str, body: &str, nav: Option<&str>) -> String {
-        if asset_exists("layout.html") {
-            asset_to_string("layout.html")
-                .unwrap_or_else(|_| "".into())
-                .replace("{title}", title)
-                .replace("{body}", body)
-                .replace("{nav}", nav.unwrap_or(""))
-        } else {
-            body.to_string()
-        }
-    }
-
-    /// Convert raw Markdown into HTML.
-    fn markdown_to_html(&self, md: &str) -> String {
-        let mut options = markdown::Options::empty();
-        options.insert(markdown::Options::ENABLE_TASKLISTS);
-        options.insert(markdown::Options::ENABLE_FOOTNOTES);
-
-        // are we parsing a wiki link like [Help] or [Solar Power]?
-        let mut wiki_link = false;
-        // if we are, store the text between [ and ]
-        let mut wiki_link_text = String::new();
-
-        let parser = markdown::Parser::new_ext(&md, options).map(|event| match event {
-            markdown::Event::Text(text) => {
-                if text.as_ref() == "[" && !wiki_link {
-                    wiki_link = true;
-                    markdown::Event::Text("".into())
-                } else if text.as_ref() == "]" && wiki_link {
-                    wiki_link = false;
-                    let page_name = wiki_link_text.to_lowercase().replace(" ", "_");
-                    let link_text = wiki_link_text.clone();
-                    wiki_link_text.clear();
-                    let page_exists = self.page_names().contains(&page_name);
-                    let (link_class, link_href) = if page_exists {
-                        ("", format!("/{}", page_name))
-                    } else {
-                        ("new", format!("/new?name={}", page_name))
-                    };
-                    markdown::Event::Html(
-                        format!(
-                            r#"<a href="{}" class="{}">{}</a>"#,
-                            link_href, link_class, link_text
-                        )
-                        .into(),
-                    )
-                } else if wiki_link {
-                    wiki_link_text.push_str(&text);
-                    markdown::Event::Text("".into())
-                } else {
-                    let linked = autolink::auto_link(&text, &[]);
-                    if linked.len() == text.len() {
-                        markdown::Event::Text(text)
-                    } else {
-                        markdown::Event::Html(linked.into())
-                    }
-                }
-            }
-            _ => event,
-        });
-
-        let mut html_output = String::with_capacity(md.len() * 3 / 2);
-        markdown::html::push_html(&mut html_output, parser);
-        html_output
-    }
-
     /// Route a request. Returns tuple of (Status Code, Body, Content-Type)
     fn route(&mut self) -> Result<(i32, String, &'static str), io::Error> {
         let mut status = 404;
@@ -267,25 +140,7 @@ impl Request {
         match (self.method(), url) {
             (Get, "/") => {
                 status = 200;
-                body = self.render_with_layout(
-                    "deadwiki",
-                    &format!(
-                        "{}",
-                        asset_to_string("index.html")?.replace(
-                            "{pages}",
-                            &self
-                                .page_names()
-                                .iter()
-                                .map(|name| format!(
-                                    "  <li><a href='{}'>{}</a></li>\n",
-                                    name,
-                                    wiki_path_to_title(name)
-                                ))
-                                .collect::<String>()
-                        )
-                    ),
-                    None,
-                );
+                body = render::index(&self)?;
             }
             (Get, "/new") => {
                 status = 200;
@@ -294,9 +149,9 @@ impl Request {
                     name.push_str(&decode_form_value(&query.replace("name=", "")));
                 }
 
-                body = self.render_with_layout(
+                body = render::layout(
                     "new page",
-                    &asset_to_string("new.html")?.replace("{name}", &name),
+                    &asset::to_string("new.html")?.replace("{name}", &name),
                     None,
                 );
             }
@@ -307,7 +162,7 @@ impl Request {
             }
             (Get, "/404") => {
                 status = 404;
-                body = asset_to_string("404.html")?;
+                body = asset::to_string("404.html")?;
             }
             (Post, "/new") => {
                 let mut content = String::new();
@@ -321,13 +176,13 @@ impl Request {
                         parts.next().unwrap_or_default(),
                     );
                     match field.as_ref() {
-                        "name" => path = pathify(&decode_form_value(value)),
+                        "name" => path = render::pathify(&decode_form_value(value)),
                         "markdown" => mdown = decode_form_value(value),
                         _ => {}
                     }
                 }
                 if !self.page_names().contains(&path.to_lowercase()) {
-                    if let Some(disk_path) = self.new_page_path(&path) {
+                    if let Some(disk_path) = render::new_page_path(&path) {
                         if disk_path.contains('/') {
                             if let Some(dir) = Path::new(&disk_path).parent() {
                                 fs::create_dir_all(&dir.display().to_string())?;
@@ -343,9 +198,9 @@ impl Request {
             (Post, path) => {
                 if query.is_empty() {
                     status = 404;
-                    body = asset_to_string("404.html")?;
+                    body = asset::to_string("404.html")?;
                 } else {
-                    if let Some(disk_path) = self.page_path(path) {
+                    if let Some(disk_path) = render::page_path(path) {
                         let mut content = String::new();
                         self.as_reader().read_to_string(&mut content)?;
                         let mdown = content.split("markdown=").last().unwrap_or("");
@@ -355,31 +210,31 @@ impl Request {
                         body = path.to_string();
                     } else {
                         status = 404;
-                        body = asset_to_string("404.html")?;
+                        body = asset::to_string("404.html")?;
                     }
                 }
             }
 
             (Get, path) => {
-                if let Some(disk_path) = self.page_path(path) {
+                if let Some(disk_path) = render::page_path(path) {
                     status = 200;
                     if query.is_empty() {
-                        body = self.render_page(path).unwrap_or_else(|_| "".into());
+                        body = render::page(self, path).unwrap_or_else(|_| "".into());
                     } else if query == "edit" {
-                        body = self.render_with_layout(
+                        body = render::layout(
                             "Edit",
-                            &asset_to_string("edit.html")?
+                            &asset::to_string("edit.html")?
                                 .replace("{markdown}", &fs::read_to_string(disk_path)?),
                             None,
                         )
                     }
-                } else if asset_exists(path) {
+                } else if asset::exists(path) {
                     status = 200;
-                    body = asset_to_string(path)?;
+                    body = asset::to_string(path)?;
                     content_type = get_content_type(path);
                 } else {
                     status = 404;
-                    body = asset_to_string("404.html")?;
+                    body = asset::to_string("404.html")?;
                 }
             }
 
@@ -391,7 +246,7 @@ impl Request {
 
     /// Serve a static file, doing the header dance with ETag and whatnot.
     fn serve_static_file(self, path: &str) -> Result<(), io::Error> {
-        if let Some(file) = Asset::get(&pathify(path)) {
+        if let Some(file) = asset::Asset::get(&render::pathify(path)) {
             let etag = EntityTag::from_hash(&file);
             if self
                 .headers()
@@ -422,47 +277,6 @@ fn header(field: &str, value: &str) -> tiny_http::Header {
     }
 }
 
-/// Does the asset exist on disk?
-fn asset_exists(path: &str) -> bool {
-    let path = pathify(path);
-    let path = if path.ends_with(".html") && !path.starts_with("html/") {
-        format!("html/{}", path)
-    } else {
-        path.to_string()
-    };
-
-    Asset::get(&path).is_some()
-}
-
-/// like fs::read_to_string() but with an asset.
-fn asset_to_string(path: &str) -> Result<String, io::Error> {
-    let path = if path.ends_with(".html") && !path.starts_with("html/") {
-        format!("html/{}", path)
-    } else {
-        path.to_string()
-    };
-
-    if let Some(asset) = Asset::get(&path) {
-        if let Ok(utf8) = str::from_utf8(asset.as_ref()) {
-            return Ok(utf8.to_string());
-        }
-    }
-
-    Err(io::Error::new(
-        io::ErrorKind::NotFound,
-        format!("{} not found", path),
-    ))
-}
-
-/// Convert a wiki or asset name to a path-friendly string.
-/// Ex: "Test Results" -> "test_results"
-fn pathify(path: &str) -> String {
-    path.to_lowercase()
-        .trim_start_matches('/')
-        .replace("..", ".")
-        .replace(" ", "_")
-}
-
 /// Content type for a file on disk. We only look in `assets/`.
 fn get_content_type(path: &str) -> &'static str {
     match path.split('.').last().unwrap_or("?") {
@@ -484,64 +298,6 @@ fn decode_form_value(post: &str) -> String {
     percent_decode(post.as_bytes())
         .decode_utf8_lossy()
         .replace('+', " ")
-}
-
-/// Capitalize the first letter of a string.
-fn capitalize(s: &str) -> String {
-    format!(
-        "{}{}",
-        s.chars().next().unwrap_or('?').to_uppercase(),
-        &s.chars().skip(1).collect::<String>()
-    )
-}
-
-/// some_page -> Some Page
-fn wiki_path_to_title(path: &str) -> String {
-    path.trim_start_matches('/')
-        .split('_')
-        .map(|part| {
-            if part.contains('/') {
-                let mut parts = part.split('/').rev();
-                let last = parts.next().unwrap_or("?");
-                format!(
-                    "{}/{}",
-                    parts.rev().collect::<Vec<_>>().join("/"),
-                    capitalize(last)
-                )
-            } else {
-                capitalize(&part)
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-/// Is the file at the given path `chmod +x`?
-fn is_executable(path: &str) -> bool {
-    if let Ok(meta) = fs::metadata(path) {
-        meta.permissions().mode() & 0o111 != 0
-    } else {
-        false
-    }
-}
-
-/// Run a script and return its output.
-fn shell(path: &str, args: &[&str]) -> Result<String, io::Error> {
-    let output = Command::new(path).args(args).output()?;
-    let out = if output.status.success() {
-        output.stdout
-    } else {
-        output.stderr
-    };
-    match str::from_utf8(&out) {
-        Ok(s) => Ok(s.to_string()),
-        Err(e) => Err(io::Error::new(io::ErrorKind::Other, e.to_string())),
-    }
-}
-
-/// Return the <nav> for a page
-fn nav() -> Result<String, io::Error> {
-    asset_to_string("nav.html")
 }
 
 /// Remove the ?query string from a URL.

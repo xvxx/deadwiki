@@ -84,6 +84,7 @@ dependencies = [
  "atomicwrites",
  "autolink",
  "etag",
+ "lazy_static",
  "percent-encoding",
  "pulldown-cmark",
  "rust-embed",

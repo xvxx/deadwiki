@@ -1,7 +1,16 @@
-use {crate::Request, std::io, threadpool::ThreadPool, tiny_http::Server};
+use {
+    crate::Request,
+    std::{io, sync::Mutex},
+    threadpool::ThreadPool,
+    tiny_http::Server,
+};
 
 /// How many threads to run. Keep it low, this is for personal use!
 const MAX_WORKERS: usize = 10;
+
+lazy_static! {
+    pub static ref WIKI_ROOT: Mutex<String> = Mutex::new("hello".to_string());
+}
 
 /// Run the web server.
 pub fn server(root: &str, host: &str, port: usize) -> Result<(), io::Error> {
@@ -10,6 +19,12 @@ pub fn server(root: &str, host: &str, port: usize) -> Result<(), io::Error> {
             io::ErrorKind::NotFound,
             format!("can't find {}", root),
         ));
+    }
+
+    {
+        // if this fails, we want to blow up
+        let mut lock = WIKI_ROOT.lock().unwrap();
+        *lock = root.to_string();
     }
 
     let pool = ThreadPool::new(MAX_WORKERS);
