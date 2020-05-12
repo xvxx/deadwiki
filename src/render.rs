@@ -108,11 +108,15 @@ fn markdown_to_html(req: &Request, md: &str) -> String {
                 wiki_link_text.push_str(&text);
                 markdown::Event::Text("".into())
             } else {
-                let linked = autolink::auto_link(&text, &[]);
-                if linked.len() == text.len() {
-                    markdown::Event::Text(text)
+                if text.contains("http:") || text.contains("https:") {
+                    let linked = autolink::auto_link(&text, &[]);
+                    if linked.len() == text.len() {
+                        markdown::Event::Text(text)
+                    } else {
+                        markdown::Event::Html(linked.into())
+                    }
                 } else {
-                    markdown::Event::Html(linked.into())
+                    markdown::Event::Text(text)
                 }
             }
         }
