@@ -76,8 +76,8 @@ shortcuts in editor mode:
 | -------------- | -------------------------------- |
 | `Double Click` | Enters edit mode for a wiki page |
 | `ESC`          | Exits edit mode                  |
-| `Ctrl+Enter`   | Submits your edits               |
-| `Cmd+Enter`    | Same                             |
+| `Ctrl Enter`   | Submits your edits               |
+| `Cmd Enter`    | Same                             |
 | `Cmd-'`        | Toggle Blockquote                |
 | `Cmd-B`        | Toggle Bold                      |
 | `Cmd-E`        | Clean Block                      |
