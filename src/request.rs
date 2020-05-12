@@ -142,7 +142,7 @@ impl Request {
     pub fn handle(mut self) -> Result<(), io::Error> {
         // static files
         if self.method() == &Get && self.url().contains('.') {
-            let path = dequery(self.url());
+            let path = strip_query(self.url()).to_string();
             if asset::exists(&path) {
                 return self.serve_static_file(&path);
             }
@@ -333,12 +333,12 @@ fn decode_form_value(post: &str) -> String {
         .replace('\r', "")
 }
 
-/// Remove the ?query string from a URL.
-fn dequery(url: &str) -> String {
-    if url.contains('?') {
-        url.split('?').next().unwrap_or_else(|| "")
+/// Strip the ?querystring from a URL.
+fn strip_query(url: &str) -> &str {
+    if let Some(idx) = url.find('?') {
+        &url[..idx]
     } else {
         url
     }
-    .to_string()
+    .trim_start_matches("static/")
 }
