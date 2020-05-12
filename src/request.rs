@@ -21,8 +21,6 @@ use {
 };
 
 pub struct Request {
-    // path to wiki on disk
-    root: String,
     // raw TinyHTTP request
     tiny_req: TinyRequest,
     // POST/GET params
@@ -31,9 +29,8 @@ pub struct Request {
 
 impl Request {
     /// Make a new Request.
-    pub fn new(root: String, req: TinyRequest) -> Request {
+    pub fn new(req: TinyRequest) -> Request {
         Request {
-            root: format!("{}/", root.trim_end_matches("/")),
             tiny_req: req,
             params: HashMap::new(),
         }
@@ -124,15 +121,15 @@ impl Request {
     pub fn page_names(&self) -> Vec<String> {
         let mut dirs = vec![];
 
-        for entry in walkdir::WalkDir::new(&self.root)
+        for entry in walkdir::WalkDir::new("./")
             .into_iter()
             .filter_map(|e| e.ok())
         {
             if !entry.file_type().is_dir()
                 && entry.file_name().to_str().unwrap_or("").ends_with(".md")
             {
-                let dir = entry.path().display().to_string().replace(&self.root, "");
-                let dir = dir.trim_end_matches(".md");
+                let dir = entry.path().display().to_string();
+                let dir = dir.trim_start_matches("./").trim_end_matches(".md");
                 if !dir.is_empty() {
                     dirs.push(format!("{}", dir));
                 }

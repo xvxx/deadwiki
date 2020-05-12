@@ -35,13 +35,9 @@ fn main() {
         return print_help();
     }
 
-    {
-        // set current dir to wiki
-        std::env::set_current_dir(path).expect("couldn't change working dir");
-
-        // if this fails, we want to blow up
-        let mut lock = deadwiki::WIKI_ROOT.lock().unwrap();
-        *lock = path.to_string();
+    if let Err(e) = deadwiki::set_wiki_root(path) {
+        eprintln!("Wiki Error: {}", e);
+        return;
     }
 
     if sync {
@@ -51,7 +47,7 @@ fn main() {
         }
     }
 
-    if let Err(e) = web::server(path, host, port) {
+    if let Err(e) = web::server(host, port) {
         eprintln!("WebServer Error: {}", e);
     }
 }

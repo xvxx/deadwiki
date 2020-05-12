@@ -212,5 +212,5 @@ pub fn new_page_path(path: &str) -> Option<String> {
 
 /// Returns a wiki path on disk, regardless of whether it exists.
 fn page_disk_path(path: &str) -> String {
-    format!("{}/{}.md", wiki_root(), pathify(path))
+    format!("{}.md", pathify(path))
 }
