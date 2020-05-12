@@ -19,6 +19,9 @@ There are three built-in ways to access your deadwiki:
 
 Very barebones, no native app yet. Under construction!
 
+_The git `master` may be broken, so make sure you install from
+crates.io (see below)._
+
 I use it every day, and I like combining it with other small tools. I
 keep a Markdown TODO list in `~/.todo` that I manage on the command
 line with a `todo` program, and I have a little scratch pad in
