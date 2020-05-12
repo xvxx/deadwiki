@@ -62,6 +62,10 @@ table td {
     font-family: monospace !important;
 }
 
+.CodeMirror .CodeMirror-code .cm-header-1, .CodeMirror .CodeMirror-code .cm-header-2, .CodeMirror .CodeMirror-code .cm-header-3, .CodeMirror .CodeMirror-code .cm-header-4, .CodeMirror .CodeMirror-code .cm-header-5 {
+    font-size: inherit;
+}
+
 input[type=text] {
     zoom: 200%;
 }
