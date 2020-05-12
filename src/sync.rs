@@ -42,9 +42,8 @@ fn is_git_repo() -> bool {
 fn sync_periodically() -> Result<(), io::Error> {
     let period = time::Duration::from_millis(SYNC_WAIT * 1000);
     loop {
-        if save_changes()? {
-            sync_changes()?;
-        }
+        save_changes()?;
+        sync_changes()?;
         thread::sleep(period);
     }
 }
