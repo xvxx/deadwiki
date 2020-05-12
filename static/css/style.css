@@ -9,6 +9,10 @@
 
 /* content  */
 
+a.new {
+  color: red;
+}
+
 .markdown-body h1:first-of-type {
   margin-top: 1em;
 }
