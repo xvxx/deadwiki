@@ -74,6 +74,7 @@ fn markdown_to_html(req: &Request, md: &str) -> String {
     let mut options = markdown::Options::empty();
     options.insert(markdown::Options::ENABLE_TASKLISTS);
     options.insert(markdown::Options::ENABLE_FOOTNOTES);
+    options.insert(markdown::Options::ENABLE_TABLES);
 
     // are we parsing a wiki link like [Help] or [Solar Power]?
     let mut wiki_link = false;
