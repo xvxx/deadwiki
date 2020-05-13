@@ -114,9 +114,11 @@ There's a basic wiki included that shows off some features.
 
 ## ~ future features ~
 
-- search
-- jump to page (via fuzzy finder)
-- `--gopher`: serve wiki pages over gopher too, probably using [phd]
+- jump to wiki page (via fuzzy finder)
+- `--read-only` mode, so i can have a copy i can view anywhere
+- mobile-friendly CSS
+- search (probably just `grep`)
+- `--gopher`: serve wiki pages over gopher too (probably using [phd])
 - `*.css` in wiki dir gets included
 
 ## ~ philosophy ~
