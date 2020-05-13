@@ -7,7 +7,7 @@
 #   $ scratch NOTE - Add NOTE to scratch file
 function scratch
   if count $argv > /dev/null
-    echo $argv >> ~/.scratch
+    echo "- $argv" >> ~/.scratch
   else
     vim " normal Go"  star ~/.scratch
   end
