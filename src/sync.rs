@@ -17,7 +17,7 @@ pub fn start() -> Result<(), io::Error> {
     if !is_git_repo() {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
-            "wiki is not a git repo",
+            format!("{} is not a git repo", wiki_root()),
         ));
     }
 
@@ -28,8 +28,7 @@ pub fn start() -> Result<(), io::Error> {
 
 /// Is this wiki a git repo?
 fn is_git_repo() -> bool {
-    let path = format!("{}/.git", wiki_root());
-    let path = Path::new(&path);
+    let path = Path::new(".git");
     if let Ok(file) = fs::File::open(path) {
         if let Ok(meta) = file.metadata() {
             return meta.is_dir();
