@@ -120,6 +120,8 @@ There's a basic wiki included that shows off some features.
 - search (probably just `grep`)
 - `--gopher`: serve wiki pages over gopher too (probably using [phd])
 - `*.css` in wiki dir gets included
+- homebrew package, AUR package
+- `brew services` for running on osx, `systemd` for arch
 
 ## ~ philosophy ~
 
