@@ -119,7 +119,7 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
       - name: Package Binary
-        run: target/release && cd target/release && zip -r deadwiki-${{ steps.get_version.outputs.VERSION }}-macos.zip dead
+        run: cd target/release && zip -r deadwiki-${{ steps.get_version.outputs.VERSION }}-macos.zip dead
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
