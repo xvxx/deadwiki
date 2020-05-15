@@ -1,16 +1,12 @@
 //! Web Request.
 
 use {
-    crate::{asset, render},
+    crate::{asset, render, routes::route, util},
     ascii::AsciiString,
-    atomicwrites::{AllowOverwrite, AtomicFile},
     etag::EntityTag,
-    percent_encoding::percent_decode,
     std::{
         collections::HashMap,
-        fs,
-        io::{self, prelude::*},
-        path::Path,
+        io::{self},
         str,
     },
     tiny_http::{
@@ -150,7 +146,7 @@ impl Request {
             }
         }
 
-        let (status, body, content_type) = match self.route() {
+        let (status, body, content_type) = match route(&mut self) {
             Ok(res) => res,
             Err(e) => {
                 eprintln!("{}", e);
@@ -176,106 +172,6 @@ impl Request {
         self.respond(response)
     }
 
-    /// Route a request. Returns tuple of (Status Code, Body, Content-Type)
-    fn route(&mut self) -> Result<(i32, String, &'static str), io::Error> {
-        let mut status = 404;
-        let mut body = "404 Not Found".to_string();
-        let mut content_type = "text/html; charset=utf8";
-
-        let full_url = self.url().to_string();
-        let mut parts = full_url.splitn(2, "?");
-        let (url, query) = (parts.next().unwrap_or("/"), parts.next().unwrap_or(""));
-
-        match (self.method(), url) {
-            (Get, "/") => {
-                status = 200;
-                body = render::index(&self)?;
-            }
-            (Get, "/new") => {
-                status = 200;
-                let name = self.param("name");
-
-                body = render::layout(
-                    "new page",
-                    &asset::to_string("new.html")?.replace("{name}", &name),
-                    None,
-                );
-            }
-            (Get, "/sleep") => {
-                status = 200;
-                body = "Zzzzz...".into();
-                std::thread::sleep(std::time::Duration::from_secs(5));
-            }
-            (Get, "/404") => {
-                status = 404;
-                body = asset::to_string("404.html")?;
-            }
-            (Post, "/new") => {
-                let path = render::pathify(&self.param("name"));
-                if !self.page_names().contains(&path) {
-                    if let Some(disk_path) = render::new_page_path(&path) {
-                        if disk_path.contains('/') {
-                            if let Some(dir) = Path::new(&disk_path).parent() {
-                                fs::create_dir_all(&dir.display().to_string())?;
-                            }
-                        }
-                        let mut file = fs::File::create(disk_path)?;
-                        let mdown = self.param("markdown");
-                        write!(file, "{}", mdown)?;
-                        status = 302;
-                        body = path.to_string();
-                    }
-                }
-            }
-            (Post, path) => {
-                if query.is_empty() {
-                    status = 404;
-                    body = asset::to_string("404.html")?;
-                } else {
-                    if let Some(disk_path) = render::page_path(path) {
-                        let mut content = String::new();
-                        self.as_reader().read_to_string(&mut content)?;
-                        let mdown = content.split("markdown=").last().unwrap_or("");
-                        let af = AtomicFile::new(disk_path, AllowOverwrite);
-                        af.write(|f| f.write_all(decode_form_value(mdown).as_bytes()))?;
-                        status = 302;
-                        body = path.to_string();
-                    } else {
-                        status = 404;
-                        body = asset::to_string("404.html")?;
-                    }
-                }
-            }
-
-            (Get, path) => {
-                if let Some(disk_path) = render::page_path(path) {
-                    status = 200;
-                    if query.is_empty() {
-                        body = render::page(self, path).unwrap_or_else(|_| "".into());
-                    } else if query == "edit" {
-                        body = render::layout(
-                            "Edit",
-                            &asset::to_string("edit.html")?
-                                .replace("{markdown}", &fs::read_to_string(disk_path)?),
-                            None,
-                        )
-                    }
-                } else if asset::exists(path) {
-                    status = 200;
-                    body = asset::to_string(path)?;
-                    content_type = get_content_type(path);
-                } else {
-                    status = 404;
-                    body = asset::to_string("404.html")?;
-                }
-            }
-
-            (x, y) => println!("x: {:?}, y: {:?}", x, y),
-        }
-
-        Ok((status, body, content_type))
-    }
-
     /// Serve a static file, doing the header dance with ETag and whatnot.
     fn serve_static_file(self, path: &str) -> Result<(), io::Error> {
         if let Some(file) = asset::Asset::get(&render::pathify(path)) {
@@ -292,7 +188,7 @@ impl Request {
                 return self.respond(
                     Response::from_data(file)
                         .with_header(header("ETag", etag.tag()))
-                        .with_header(header("Content-Type", get_content_type(&path))),
+                        .with_header(header("Content-Type", util::get_content_type(&path))),
                 );
             }
         }
@@ -309,30 +205,6 @@ fn header(field: &str, value: &str) -> tiny_http::Header {
     }
 }
 
-/// Content type for a file on disk. We only look in `assets/`.
-fn get_content_type(path: &str) -> &'static str {
-    match path.split('.').last().unwrap_or("?") {
-        "gif" => "image/gif",
-        "jpg" => "image/jpeg",
-        "jpeg" => "image/jpeg",
-        "png" => "image/png",
-        "pdf" => "application/pdf",
-        "css" => "text/css; charset=utf8",
-        "htm" => "text/html; charset=utf8",
-        "html" => "text/html; charset=utf8",
-        "txt" => "text/plain; charset=utf8",
-        _ => "text/plain; charset=utf8",
-    }
-}
-
-/// Does what it says.
-fn decode_form_value(post: &str) -> String {
-    percent_decode(post.as_bytes())
-        .decode_utf8_lossy()
-        .replace('+', " ")
-        .replace('\r', "")
-}
-
 /// Parses a query string like "name=jimbo&other_data=sure" into a
 /// HashMap.
 fn parse_query_into_map(params: &str, map: &mut HashMap<String, String>) {
@@ -340,7 +212,7 @@ fn parse_query_into_map(params: &str, map: &mut HashMap<String, String>) {
         let mut parts = kv.splitn(2, '=');
         if let Some(key) = parts.next() {
             if let Some(val) = parts.next() {
-                map.insert(key.to_string(), decode_form_value(val));
+                map.insert(key.to_string(), util::decode_form_value(val));
             } else {
                 map.insert(key.to_string(), "".to_string());
             }

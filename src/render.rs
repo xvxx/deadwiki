@@ -1,7 +1,7 @@
 //! Rendering "logic".
 
 use {
-    crate::{asset, render, shell, Request},
+    crate::{asset, render, util::shell, Request},
     pulldown_cmark as markdown,
     std::{fs, io, os::unix::fs::PermissionsExt, path::Path, str},
 };
