@@ -74,7 +74,7 @@ shortcuts in editor mode:
 
 | **Shortcut**   | **Notes**                        |
 | -------------- | -------------------------------- |
-| `Double Click` | Enters edit mode for a wiki page |
+| `Double Click` | Enter edit or create mode |
 | `ESC`          | Exits edit mode                  |
 | `Ctrl Enter`   | Submits your edits               |
 | `Cmd Enter`    | Same                             |

@@ -1,5 +1,13 @@
 <p><a href="/new">new</a></p>
 <h1>deadwiki</h1>
-<ul>
-  {pages}
-</ul>
+<article id="index-page">
+  <ul>
+    {pages}
+  </ul>
+</article>
+
+<script type="text/javascript">
+  window.addEventListener("dblclick", () => {
+    window.location = "/new";
+  });
+</script>
