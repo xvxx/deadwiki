@@ -40,6 +40,16 @@ fn main() {
         }
     }
 
+    #[cfg(feature = "gui")]
+    {
+        if gui {
+            if let Err(e) = deadwiki::gui::run(host, port, path) {
+                eprintln!("GUI Error: {}", e);
+            }
+            return;
+        }
+    }
+
     if path.is_empty() {
         return print_help();
     }
@@ -52,16 +62,6 @@ fn main() {
     if sync {
         if let Err(e) = sync::start() {
             eprintln!("Sync Error: {}", e);
-            return;
-        }
-    }
-
-    #[cfg(feature = "gui")]
-    {
-        if gui {
-            if let Err(e) = deadwiki::gui::run(host, port) {
-                eprintln!("GUI Error: {}", e);
-            }
             return;
         }
     }
