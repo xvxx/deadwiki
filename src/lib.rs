@@ -2,6 +2,8 @@
 extern crate lazy_static;
 
 pub mod asset;
+#[cfg(feature = "gui")]
+pub mod gui;
 pub mod render;
 pub mod request;
 pub mod routes;

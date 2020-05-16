@@ -17,7 +17,7 @@ There are three built-in ways to access your deadwiki:
 
 ## ~ status ~
 
-Very barebones, no native app yet. Under construction!
+Under construction!
 
 _The git `master` may be broken, so make sure you install from
 crates.io (see below)._

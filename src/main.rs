@@ -7,6 +7,8 @@ fn main() {
     let mut host = "0.0.0.0";
     let mut port = 8000;
     let mut sync = false;
+    #[cfg(feature = "gui")]
+    let mut gui = false;
 
     while let Some(arg) = args.next() {
         match arg.as_ref() {
@@ -27,6 +29,8 @@ fn main() {
                     return eprintln!("--port needs a value");
                 }
             }
+            #[cfg(feature = "gui")]
+            "-g" | "-gui" | "--gui" => gui = true,
             _ => {
                 if arg.starts_with('-') {
                     return eprintln!("unknown option: {}", arg);
@@ -52,6 +56,16 @@ fn main() {
         }
     }
 
+    #[cfg(feature = "gui")]
+    {
+        if gui {
+            if let Err(e) = deadwiki::gui::run(host, port) {
+                eprintln!("GUI Error: {}", e);
+            }
+            return;
+        }
+    }
+
     if let Err(e) = web::server(host, port) {
         eprintln!("WebServer Error: {}", e);
     }
@@ -62,6 +76,11 @@ fn print_version() {
 }
 
 fn print_help() {
+    let mut gui = "";
+    if cfg!(feature = "gui") {
+        gui = "    -g, --gui      Launch as WebView application.\n";
+    }
+
     print!(
         "Usage: dead [options] <PATH TO WIKI>
 
@@ -69,8 +88,10 @@ Options:
     -H, --host     Host to bind to. Default: 0.0.0.0
     -p, --port     Port to bind to. Default: 8000
     -s, --sync     Automatically sync wiki. Must be a git repo.
+{gui}
     -v, --version  Print version.
     -h, --help     Show this message.
-"
+",
+        gui = gui
     );
 }
