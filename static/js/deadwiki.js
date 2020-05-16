@@ -10,6 +10,23 @@ window.onload = () => {
       window.location = editLink.href;
     });
   }
+
+  // markdown editor
+  var simplemde = new SimpleMDE({
+    autofocus: !focused || focused.value != "",
+    autoDownloadFontAwesome: false,
+    blockStyles: {
+      italic: "_",
+    },
+    indentWithTabs: false,
+    renderingConfig: {
+      singleLineBreaks: false,
+      codeSyntaxHighlighting: true,
+    },
+    status: false,
+    tabSize: 4,
+    element: document.getElementById("markdown"),
+  });
 };
 
 document.onkeydown = (e) => {
@@ -40,20 +57,3 @@ document.onkeydown = (e) => {
   if ((e.ctrlKey || e.metaKey) && e.keyCode == 13)
     document.getElementById("form").submit();
 };
-
-// markdown editor
-var simplemde = new SimpleMDE({
-  autofocus: !focused || focused.value != "",
-  autoDownloadFontAwesome: false,
-  blockStyles: {
-    italic: "_",
-  },
-  indentWithTabs: false,
-  renderingConfig: {
-    singleLineBreaks: false,
-    codeSyntaxHighlighting: true,
-  },
-  status: false,
-  tabSize: 4,
-  element: document.getElementById("markdown"),
-});
