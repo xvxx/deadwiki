@@ -9,73 +9,14 @@
 
     <script src="/js/highlight.min.js" defer></script>
     <script src="/js/simplemde.min.js" defer></script>
+    <script src="/js/deadwiki.js" defer></script>
 
     <meta charset="utf-8" />
     <title>{title}</title>
   </head>
-  <body onload="loadTheWiki()">
+  <body>
     <div id="main" class="markdown-body {webview-app}">
       {nav} {body}
     </div>
   </body>
-  <script>
-    function loadTheWiki() {
-      // dbl click wiki content to edit
-      var editLink = document.getElementById("edit-link");
-      if (editLink) {
-        window.addEventListener("dblclick", function () {
-          window.location = editLink.href;
-        });
-      }
-
-      // ESC key to go back when editing
-      // CTRL+ENTER to submit when editing
-      document.onkeydown = (e) => {
-        e = e || window.event || {};
-
-        // check for app mode
-        if (document.getElementById("main").classList.contains("webview-app")) {
-          if (e.metaKey && (e.key == "[" || e.keyCode == 37)) {
-            // history back: cmd+[ or cmd+left-arrow
-            e.preventDefault();
-            history.back();
-            return;
-          } else if (e.metaKey && (e.key == "]" || e.keyCode == 47)) {
-            // history forward: cmd+] or cmd+right-arrow
-            e.preventDefault();
-            history.forward();
-            return;
-          }
-        }
-
-        // edit page only after this
-        if (!document.getElementById("markdown")) return;
-
-        // escape
-        if (e.keyCode == 27) history.back();
-
-        // ctrl+enter
-        if ((e.ctrlKey || e.metaKey) && e.keyCode == 13)
-          document.getElementById("form").submit();
-      };
-
-      var focused = document.getElementById("focused");
-      if (focused && focused.value == "") focused.focus();
-      var simplemde = new SimpleMDE({
-        autofocus: !focused || focused.value != "",
-        autoDownloadFontAwesome: false,
-        blockStyles: {
-          italic: "_",
-        },
-        indentWithTabs: false,
-        renderingConfig: {
-          singleLineBreaks: false,
-          codeSyntaxHighlighting: true,
-        },
-        status: false,
-        tabSize: 4,
-        element: document.getElementById("markdown"),
-      });
-    }
-  </script>
 </html>
