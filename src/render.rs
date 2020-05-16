@@ -58,11 +58,17 @@ pub fn page(req: &Request, path: &str) -> Result<String, io::Error> {
 
 /// Renders a chunk of HTML surrounded by `static/layout.html`.
 pub fn layout(title: &str, body: &str, nav: Option<&str>) -> String {
+    let mut webview_app = "";
+    if cfg!(feature = "gui") {
+        webview_app = "webview-app";
+    }
+
     if asset::exists("layout.html") {
         asset::to_string("layout.html")
             .unwrap_or_else(|_| "".into())
             .replace("{title}", title)
             .replace("{body}", body)
+            .replace("{webview-app}", webview_app)
             .replace("{nav}", nav.unwrap_or(""))
     } else {
         body.to_string()
