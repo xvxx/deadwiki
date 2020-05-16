@@ -1,4 +1,4 @@
-use deadwiki::{sync, web};
+use deadwiki::{server, sync};
 
 fn main() {
     let args = std::env::args().skip(1).collect::<Vec<String>>();
@@ -66,7 +66,7 @@ fn main() {
         }
     }
 
-    if let Err(e) = web::server(host, port) {
+    if let Err(e) = server::run(host, port) {
         eprintln!("WebServer Error: {}", e);
     }
 }

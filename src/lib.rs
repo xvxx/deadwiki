@@ -7,9 +7,9 @@ pub mod gui;
 pub mod render;
 pub mod request;
 pub mod routes;
+pub mod server;
 pub mod sync;
 pub mod util;
-pub mod web;
 
 pub use request::Request;
 

@@ -1,3 +1,5 @@
+//! Web-related file in `static/`
+
 use {
     crate::render::pathify,
     rust_embed::RustEmbed,

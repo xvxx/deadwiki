@@ -1,4 +1,5 @@
-//! The code that gets run when a page is visited.
+//! (Method, URL) => Code
+
 use {
     crate::{asset, render, util, Request},
     atomicwrites::{AllowOverwrite, AtomicFile},

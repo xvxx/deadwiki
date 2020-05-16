@@ -1,8 +1,11 @@
+//! "Native" app using your system's WebKit to browse a local deadwiki
+//! instance.
+
 #[cfg(feature = "gui")]
 use web_view;
 
 use {
-    crate::web,
+    crate::{server, set_wiki_root},
     std::{io, thread},
 };
 
@@ -26,7 +29,7 @@ pub fn run(host: &str, port: usize, wiki_root: &str) -> Result<()> {
 
     if wiki_root.is_empty() {
         if let Ok(Some(wiki_root)) = wv.dialog().choose_directory("Wiki Root", "") {
-            crate::set_wiki_root(&wiki_root.to_str().unwrap_or("."))?;
+            set_wiki_root(&wiki_root.to_str().unwrap_or("."))?;
             wv.eval(&format!("location.href = \"{}\";", url)).unwrap();
         } else {
             return Err(io::Error::new(
@@ -36,7 +39,7 @@ pub fn run(host: &str, port: usize, wiki_root: &str) -> Result<()> {
         }
     }
 
-    thread::spawn(move || web::server(&host, port));
+    thread::spawn(move || server::run(&host, port));
 
     wv.run().unwrap();
     Ok(())
