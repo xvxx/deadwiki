@@ -27,7 +27,12 @@ fn main() {
                     return eprintln!("--port needs a value");
                 }
             }
-            _ => path = arg,
+            _ => {
+                if arg.starts_with('-') {
+                    return eprintln!("unknown option: {}", arg);
+                }
+                path = arg;
+            }
         }
     }
 
