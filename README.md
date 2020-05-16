@@ -33,6 +33,16 @@ like:
 With deadwiki, I symlinked both of those files into my `~/.deadwiki`
 dir and can browse them using a fancy, 1990s-era HTML interface.
 
+## ~ installation ~
+
+Okay, so how do you get started? With [cargo]:
+
+    cargo install deadwiki
+
+That'll give you a handy dead `dead` CLI tool, if everything is setup
+and `~/.cargo/bin` is in your `$PATH`. You should now be able to run
+`dead -h` to see the possibilities.
+
 ## ~ getting started ~
 
 To begin, create an empty directory or find one already populated with
@@ -93,13 +103,16 @@ shortcuts in editor mode:
 | `F9`           | Toggle Side-By-Side              |
 | `F11`          | Toggle Fullscreen                |
 
-## ~ installation ~
+## ~ gui mode ~
 
-Hey, how do I get that handy dandy `dead` CLI utility? With [cargo]:
+There is a "native" app that uses your system's WebKit to view the
+local webserver, which it starts and manages.
 
-    cargo install deadwiki
+You can start it by using `make gui` to build a `dead` binary, then
+passing the `-g` flag to it:
 
-Now you should be able to run `dead -h` to see the possibilities.
+    $ make gui
+    $ ./dead -g -p 8001 wiki/
 
 ## ~ hacking ~
 
