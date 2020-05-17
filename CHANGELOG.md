@@ -1,4 +1,4 @@
-## 0.1.13-dev
+## 0.1.13
 
 - First release with a working GUI mode. Launch it by compiling with
   the `gui` feature and running deadwiki with `-g`:
