@@ -17,6 +17,9 @@ gui = ["web-view"]
 default = []
 
 [package.metadata.release]
+pre-release-replacements = [
+  {file="CHANGELOG.md", search="\\d+\\.\\d+\\.\\d+-dev", replace="{{version}}"},
+]
 dev-version-ext = "dev"
 
 [dependencies]
