@@ -1,17 +1,13 @@
 #[macro_use]
 extern crate lazy_static;
 
-pub mod asset;
+pub mod app;
 #[cfg(feature = "gui")]
 pub mod gui;
+pub mod helper;
 pub mod render;
-pub mod request;
-pub mod routes;
-pub mod server;
 pub mod sync;
 pub mod util;
-
-pub use request::Request;
 
 lazy_static! {
     pub static ref WIKI_ROOT: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());

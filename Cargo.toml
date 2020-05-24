@@ -23,14 +23,11 @@ pre-release-replacements = [
 dev-version-ext = "dev"
 
 [dependencies]
-tiny_http = "0.7"
-ascii = "1.0.0"
-threadpool = "1.7.1"
+vial = { path = "../vial", features = ['horror'] }
+
 pulldown-cmark = { version = "0.7", default-features = false }
 autolink = "0.3.0"
-percent-encoding = "2.1.0"
 walkdir = "2"
-etag = { version = "2.0.1", features = ["std"] }
 atomicwrites = "0.2.5"
 rust-embed = "5.2.0"
 lazy_static = "1.4"
