@@ -1,4 +1,4 @@
-## 0.1.14-dev
+## 0.1.14
 
 This release includes new keyboard shortcuts for browsing around the
 wiki:
