@@ -35,7 +35,7 @@ pub fn page(path: &str) -> Result<String, io::Error> {
     }
 }
 
-/// Renders a chunk of HTML surrounded by `static/layout.html`.
+/// Renders a chunk of HTML surrounded by `static/html/layout.html`.
 pub fn layout(title: &str, body: &str, nav: Option<&str>) -> Result<String, io::Error> {
     let mut webview_app = "";
     if cfg!(feature = "gui") {

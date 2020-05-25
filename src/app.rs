@@ -24,9 +24,9 @@ vial! {
     GET "/new" => new;
     POST "/new" => create;
 
-    GET "/:page" => show;
-    GET "/:page/edit" => edit;
-    POST "/:page" => update;
+    GET "/:name" => show;
+    GET "/:name/edit" => edit;
+    POST "/:name" => update;
 }
 
 #[allow(dead_code)]
@@ -135,5 +135,5 @@ fn show(req: Request) -> Result<impl Responder, io::Error> {
             .unwrap_or_else(|_| "".into())
             .to_response());
     }
-    Ok(Response::from(404))
+    Ok(Response::from(404).with_body("404 Not Found"))
 }

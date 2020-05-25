@@ -66,6 +66,7 @@ fn main() {
         }
     }
 
+    vial::static_dir!("./static");
     if let Err(e) = vial::run!(format!("{}:{}", host, port), app) {
         eprintln!("WebServer Error: {}", e);
     }
