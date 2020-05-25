@@ -1,5 +1,10 @@
+use {
+    std::{fs, io, os::unix::fs::PermissionsExt, path::Path},
+    vial::asset,
+};
+
 /// Capitalize the first letter of a string.
-fn capitalize(s: &str) -> String {
+pub fn capitalize(s: &str) -> String {
     format!(
         "{}{}",
         s.chars().next().unwrap_or('?').to_uppercase(),
@@ -8,7 +13,7 @@ fn capitalize(s: &str) -> String {
 }
 
 /// some_page -> Some Page
-fn wiki_path_to_title(path: &str) -> String {
+pub fn wiki_path_to_title(path: &str) -> String {
     path.trim_start_matches('/')
         .split('_')
         .map(|part| {
@@ -29,12 +34,12 @@ fn wiki_path_to_title(path: &str) -> String {
 }
 
 /// Return the <nav> for a page
-fn nav() -> Result<String, io::Error> {
+pub fn nav() -> Result<String, io::Error> {
     asset::to_string("nav.html")
 }
 
 /// Is the file at the given path `chmod +x`?
-fn is_executable(path: &str) -> bool {
+pub fn is_executable(path: &str) -> bool {
     if let Ok(meta) = fs::metadata(path) {
         meta.permissions().mode() & 0o111 != 0
     } else {
@@ -81,6 +86,28 @@ pub fn new_page_path(path: &str) -> Option<String> {
 }
 
 /// Returns a wiki path on disk, regardless of whether it exists.
-fn page_disk_path(path: &str) -> String {
+pub fn page_disk_path(path: &str) -> String {
     format!("{}.md", pathify(path))
+}
+
+/// All the wiki pages, in alphabetical order.
+pub fn page_names() -> Vec<String> {
+    let mut dirs = vec![];
+
+    for entry in walkdir::WalkDir::new("./")
+        .into_iter()
+        .filter_map(|e| e.ok())
+    {
+        if !entry.file_type().is_dir() && entry.file_name().to_str().unwrap_or("").ends_with(".md")
+        {
+            let dir = entry.path().display().to_string();
+            let dir = dir.trim_start_matches("./").trim_end_matches(".md");
+            if !dir.is_empty() {
+                dirs.push(format!("{}", dir));
+            }
+        }
+    }
+
+    dirs.sort();
+    dirs
 }

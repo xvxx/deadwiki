@@ -1,9 +1,13 @@
 //! (Method, URL) => Code
 
 use {
-    crate::{render, util},
+    crate::{helper::*, render, util},
     atomicwrites::{AllowOverwrite, AtomicFile},
-    std::{fs, io::Write, path::Path},
+    std::{
+        fs,
+        io::{self, Write},
+        path::Path,
+    },
 };
 
 #[macro_use]
@@ -49,30 +53,22 @@ fn new2(req: Request) -> impl Responder {
     }
 }
 
-fn template(path: &str) -> String {
-    if let Ok(tpl) = asset::to_string(path) {
-        tpl.clone()
-    } else {
-        String::new()
-    }
-}
-
-fn new(req: Request) -> impl Responder {
-    render::layout(
+fn new(req: Request) -> Result<impl Responder, io::Error> {
+    Ok(render::layout(
         "new page",
-        &template("html/new.html").replace("{name}", &req.query("name").unwrap_or("")),
+        &asset::to_string("html/new.html")?.replace("{name}", &req.query("name").unwrap_or("")),
         None,
-    )
+    ))
 }
 
-fn index(req: Request) -> impl Responder {
+fn index(req: Request) -> Result<impl Responder, io::Error> {
     render::layout(
         "deadwiki",
         &format!(
             "{}",
-            template("index.html").replace(
+            asset::to_string("index.html")?.replace(
                 "{pages}",
-                &req.page_names()
+                &page_names()
                     .iter()
                     .map(|name| format!(
                         "  <li><a href='{}'>{}</a></li>\n",
@@ -86,22 +82,22 @@ fn index(req: Request) -> impl Responder {
     )
 }
 
-fn create(req: Request) -> impl Responder {
-    let path = render::pathify(&req.query("name").unwrap_or(""));
-    if !req.page_names().contains(&path) {
-        if let Some(disk_path) = render::new_page_path(&path) {
+fn create(req: Request) -> Result<impl Responder, io::Error> {
+    let path = pathify(&req.query("name").unwrap_or(""));
+    if !page_names().contains(&path) {
+        if let Some(disk_path) = new_page_path(&path) {
             if disk_path.contains('/') {
                 if let Some(dir) = Path::new(&disk_path).parent() {
                     fs::create_dir_all(&dir.display().to_string())?;
                 }
             }
             let mut file = fs::File::create(disk_path)?;
-            let mdown = req.param("markdown");
+            let mdown = req.arg("markdown").unwrap_or("");
             write!(file, "{}", mdown)?;
-            Response::from(302).with_body(path)
+            return Ok(Response::from(302).with_body(&path));
         }
     }
-    Response::from(404)
+    Ok(Response::from(404))
 }
 
 fn update(req: Request) -> impl Responder {
