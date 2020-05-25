@@ -99,7 +99,7 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
             return Ok(Response::from(302).with_body(&path));
         }
     }
-    Ok(Response::from(404))
+    Ok(response_404())
 }
 
 fn update(req: Request) -> Result<impl Responder, io::Error> {
@@ -111,7 +111,7 @@ fn update(req: Request) -> Result<impl Responder, io::Error> {
             return Ok(Response::from(302).with_body(&pathify(name)));
         }
     }
-    Ok(Response::from(404))
+    Ok(response_404())
 }
 
 fn edit(req: Request) -> Result<impl Responder, io::Error> {
@@ -126,14 +126,18 @@ fn edit(req: Request) -> Result<impl Responder, io::Error> {
             .to_response());
         }
     }
-    Ok(Response::from(404))
+    Ok(response_404())
 }
 
 fn show(req: Request) -> Result<impl Responder, io::Error> {
     if let Some(name) = req.arg("name") {
-        return Ok(render::page(name)
-            .unwrap_or_else(|_| "".into())
-            .to_response());
+        if let Some(_disk_path) = page_path(name) {
+            return Ok(render::page(name)?.to_response());
+        }
     }
-    Ok(Response::from(404).with_body("404 Not Found"))
+    Ok(response_404())
+}
+
+fn response_404() -> Response {
+    Response::from(404).with_asset("html/404.html")
 }
