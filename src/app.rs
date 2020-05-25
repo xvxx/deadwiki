@@ -68,7 +68,7 @@ fn index(_req: Request) -> Result<impl Responder, io::Error> {
         "deadwiki",
         &format!(
             "{}",
-            asset::to_string("index.html")?.replace(
+            asset::to_string("html/index.html")?.replace(
                 "{pages}",
                 &page_names()
                     .iter()
@@ -119,7 +119,7 @@ fn edit(req: Request) -> Result<impl Responder, io::Error> {
         if let Some(disk_path) = page_path(name) {
             return Ok(render::layout(
                 "Edit",
-                &asset::to_string("edit.html")?
+                &asset::to_string("html/edit.html")?
                     .replace("{markdown}", &fs::read_to_string(disk_path)?),
                 None,
             )?

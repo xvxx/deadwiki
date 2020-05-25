@@ -42,8 +42,8 @@ pub fn layout(title: &str, body: &str, nav: Option<&str>) -> Result<String, io::
         webview_app = "webview-app";
     }
 
-    Ok(if asset::exists("layout.html") {
-        asset::to_string("layout.html")?
+    Ok(if asset::exists("html/layout.html") {
+        asset::to_string("html/layout.html")?
             .replace("{title}", title)
             .replace("{body}", body)
             .replace("{webview-app}", webview_app)
