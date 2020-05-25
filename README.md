@@ -79,29 +79,43 @@ changes you make even outside of the web UI.
 
 ## ~ keyboard shortcuts ~
 
-Web-based wiki editing uses [SimpleMDE], plus a dash of other
-shortcuts in editor mode:
+There are two modes: browsing and editing. Editing is powered by
+[SimpleMDE] and includes all its default shortcuts (shown below), plus
+a few deadwiki-specific shortcuts.
 
-| **Shortcut**   | **Notes**                        |
-| -------------- | -------------------------------- |
-| `Double Click` | Enter edit or create mode |
-| `ESC`          | Exits edit mode                  |
-| `Ctrl Enter`   | Submits your edits               |
-| `Cmd Enter`    | Same                             |
-| `Cmd-'`        | Toggle Blockquote                |
-| `Cmd-B`        | Toggle Bold                      |
-| `Cmd-E`        | Clean Block                      |
-| `Cmd-H`        | Toggle Heading (Smaller)         |
-| `Cmd-I`        | Toggle Italic                    |
-| `Cmd-K`        | Draw Link                        |
-| `Cmd-L`        | Toggle Unordered List            |
-| `Cmd-P`        | Toggle Preview                   |
-| `Cmd-Alt-C`    | Toggle Code Block                |
-| `Cmd-Alt-I`    | Draw Image                       |
-| `Cmd-Alt-L`    | Toggle Ordered LIST              |
-| `Shift-Cmd-H`  | Toggle Heading (Bigger)          |
-| `F9`           | Toggle Side-By-Side              |
-| `F11`          | Toggle Fullscreen                |
+Browsing mode includes a few keyboard shortcuts to make navigation
+quicker and more nimble.
+
+### MODE: Browse
+
+| **Shortcut**   | **Notes**                    |
+| -------------- | ---------------------------- |
+| `Double Click` | Enter edit or create mode    |
+| `Ctrl-h`       | Go to the home page          |
+| `Ctrl-n`       | Go to the "new" page         |
+| `Ctrl-e`       | Open editor for current page |
+
+### MODE: Edit
+
+| **Shortcut**  | **Notes**                |
+| ------------- | ------------------------ |
+| `ESC`         | Exits edit mode          |
+| `Ctrl Enter`  | Submits your edits       |
+| `Cmd Enter`   | Same                     |
+| `Cmd-'`       | Toggle Blockquote        |
+| `Cmd-B`       | Toggle Bold              |
+| `Cmd-E`       | Clean Block              |
+| `Cmd-H`       | Toggle Heading (Smaller) |
+| `Cmd-I`       | Toggle Italic            |
+| `Cmd-K`       | Draw Link                |
+| `Cmd-L`       | Toggle Unordered List    |
+| `Cmd-P`       | Toggle Preview           |
+| `Cmd-Alt-C`   | Toggle Code Block        |
+| `Cmd-Alt-I`   | Draw Image               |
+| `Cmd-Alt-L`   | Toggle Ordered LIST      |
+| `Shift-Cmd-H` | Toggle Heading (Bigger)  |
+| `F9`          | Toggle Side-By-Side      |
+| `F11`         | Toggle Fullscreen        |
 
 ## ~ gui mode ~
 

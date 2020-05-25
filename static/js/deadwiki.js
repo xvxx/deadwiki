@@ -47,8 +47,23 @@ document.onkeydown = (e) => {
     }
   }
 
-  // edit page only after this
-  if (!document.getElementById("markdown")) return;
+  // global shortcuts for pages that don't have the editor
+  if (!document.getElementById("markdown")) {
+    // ctrl-h goes home
+    if (e.ctrlKey && e.key == "h") return (window.location = "/");
+
+    // ctrl-n new
+    if (e.ctrlKey && e.key == "n") return (window.location = "/new");
+
+    // ctrl-e edit
+    var editLink = document.getElementById("edit-link");
+    if (editLink)
+      if (e.ctrlKey && e.key == "e") return (window.location = "/new");
+
+    ////
+    // everything after this are shortcuts only for the editor
+    return;
+  }
 
   // ESC key to go back when editing
   if (e.keyCode == 27) history.back();
