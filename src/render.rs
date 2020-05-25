@@ -4,11 +4,11 @@ use {
     crate::{helper::*, render, util::shell},
     pulldown_cmark as markdown,
     std::{fs, io, str},
-    vial::{asset, Request},
+    vial::asset,
 };
 
 /// Render a wiki page to a fully loaded HTML string, with layout.
-pub fn page(req: &Request, path: &str) -> Result<String, io::Error> {
+pub fn page(path: &str) -> Result<String, io::Error> {
     let raw = path.ends_with(".md");
     let path = if raw {
         path.trim_end_matches(".md")
@@ -22,11 +22,11 @@ pub fn page(req: &Request, path: &str) -> Result<String, io::Error> {
         } else {
             fs::read_to_string(path).unwrap_or_else(|_| "".into())
         };
-        Ok(if raw {
-            format!("<pre>{}</pre>", html)
+        if raw {
+            Ok(format!("<pre>{}</pre>", html))
         } else {
-            render::layout(&title, &markdown_to_html(&req, &html), Some(&nav()?))
-        })
+            render::layout(&title, &markdown_to_html(&html), Some(&nav()?))
+        }
     } else {
         Err(io::Error::new(
             io::ErrorKind::NotFound,
@@ -44,7 +44,6 @@ pub fn layout(title: &str, body: &str, nav: Option<&str>) -> Result<String, io::
 
     Ok(if asset::exists("layout.html") {
         asset::to_string("layout.html")?
-            .unwrap_or_else(|_| "".into())
             .replace("{title}", title)
             .replace("{body}", body)
             .replace("{webview-app}", webview_app)
@@ -55,7 +54,7 @@ pub fn layout(title: &str, body: &str, nav: Option<&str>) -> Result<String, io::
 }
 
 /// Convert raw Markdown into HTML.
-fn markdown_to_html(req: &Request, md: &str) -> String {
+fn markdown_to_html(md: &str) -> String {
     let mut options = markdown::Options::empty();
     options.insert(markdown::Options::ENABLE_TABLES);
     options.insert(markdown::Options::ENABLE_FOOTNOTES);
@@ -77,7 +76,7 @@ fn markdown_to_html(req: &Request, md: &str) -> String {
                 let page_name = wiki_link_text.to_lowercase().replace(" ", "_");
                 let link_text = wiki_link_text.clone();
                 wiki_link_text.clear();
-                let page_exists = req.page_names().contains(&page_name);
+                let page_exists = page_names().contains(&page_name);
                 let (link_class, link_href) = if page_exists {
                     ("", format!("/{}", page_name))
                 } else {

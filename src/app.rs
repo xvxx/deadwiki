@@ -1,7 +1,7 @@
 //! (Method, URL) => Code
 
 use {
-    crate::{helper::*, render, util},
+    crate::{helper::*, render},
     atomicwrites::{AllowOverwrite, AtomicFile},
     std::{
         fs,
@@ -10,7 +10,7 @@ use {
     },
 };
 
-#[macro_use]
+use vial::owned_html;
 use vial::prelude::*;
 
 vial! {
@@ -25,11 +25,13 @@ vial! {
     POST "/new" => create;
 
     GET "/:page" => show;
+    GET "/:page/edit" => edit;
     POST "/:page" => update;
 }
 
+#[allow(dead_code)]
 fn new2(req: Request) -> impl Responder {
-    html! {
+    owned_html! {
         p {
             a(href="/") { : "home" }
             a(href="javascript:history.back()") { : "back" }
@@ -41,12 +43,12 @@ fn new2(req: Request) -> impl Responder {
                     name="name",
                     type="text",
                     placeholder="filename",
-                    value=name,
+                    value=req.query("name").unwrap_or(""),
                     id="focused"
                 );
             }
             textarea(name="markdown", id="markdown") {
-                : format!("# {}", name);
+                : format!("# {}", req.query("name").unwrap_or(""));
             }
             input(type="submit");
         }
@@ -61,7 +63,7 @@ fn new(req: Request) -> Result<impl Responder, io::Error> {
     ))
 }
 
-fn index(req: Request) -> Result<impl Responder, io::Error> {
+fn index(_req: Request) -> Result<impl Responder, io::Error> {
     render::layout(
         "deadwiki",
         &format!(
@@ -100,45 +102,38 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
     Ok(Response::from(404))
 }
 
-fn update(req: Request) -> impl Responder {
-    if query.is_empty() {
-        status = 404;
-        body = asset::to_string("404.html")?;
-    } else {
-        if let Some(disk_path) = render::page_path(path) {
-            let mut content = String::new();
-            req.as_reader().read_to_string(&mut content)?;
-            let mdown = content.split("markdown=").last().unwrap_or("");
+fn update(req: Request) -> Result<impl Responder, io::Error> {
+    if let Some(name) = req.arg("name") {
+        if let Some(disk_path) = page_path(name) {
+            let mdown = req.form("markdown").unwrap_or("");
             let af = AtomicFile::new(disk_path, AllowOverwrite);
-            af.write(|f| f.write_all(util::decode_form_value(mdown).as_bytes()))?;
-            status = 302;
-            body = path.to_string();
-        } else {
-            status = 404;
-            body = asset::to_string("404.html")?;
+            af.write(|f| f.write_all(mdown.as_bytes()))?;
+            return Ok(Response::from(302).with_body(&pathify(name)));
         }
     }
+    Ok(Response::from(404))
 }
 
-fn show(req: Request) -> impl Responder {
-    if let Some(disk_path) = render::page_path(path) {
-        status = 200;
-        if query.is_empty() {
-            body = render::page(req, path).unwrap_or_else(|_| "".into());
-        } else if query == "edit" {
-            body = render::layout(
+fn edit(req: Request) -> Result<impl Responder, io::Error> {
+    if let Some(name) = req.arg("name") {
+        if let Some(disk_path) = page_path(name) {
+            return Ok(render::layout(
                 "Edit",
                 &asset::to_string("edit.html")?
                     .replace("{markdown}", &fs::read_to_string(disk_path)?),
                 None,
-            )
+            )?
+            .to_response());
         }
-    } else if asset::exists(path) {
-        status = 200;
-        body = asset::to_string(path)?;
-        content_type = util::get_content_type(path);
-    } else {
-        status = 404;
-        body = asset::to_string("404.html")?;
     }
+    Ok(Response::from(404))
+}
+
+fn show(req: Request) -> Result<impl Responder, io::Error> {
+    if let Some(name) = req.arg("name") {
+        return Ok(render::page(name)
+            .unwrap_or_else(|_| "".into())
+            .to_response());
+    }
+    Ok(Response::from(404))
 }
