@@ -1,3 +1,10 @@
+## 0.1.15-dev
+
+This release adds a slight UI tweak - wiki pages in subdirectories are
+now swaddled in `<details>`:
+
+![details](https://user-images.githubusercontent.com/41523880/82960235-bdef0a80-9f6e-11ea-8f85-27752a9462a1.png)
+
 ## 0.1.14
 
 This release includes new keyboard shortcuts for browsing around the
