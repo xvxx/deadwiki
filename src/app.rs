@@ -8,10 +8,8 @@ use {
         io::{self, Write},
         path::Path,
     },
+    vial::{owned_html, prelude::*},
 };
-
-use vial::owned_html;
-use vial::prelude::*;
 
 vial! {
     GET "/" => index;
@@ -56,11 +54,11 @@ fn new2(req: Request) -> impl Responder {
 }
 
 fn new(req: Request) -> Result<impl Responder, io::Error> {
-    Ok(render::layout(
+    render::layout(
         "new page",
         &asset::to_string("html/new.html")?.replace("{name}", &req.query("name").unwrap_or("")),
         None,
-    ))
+    )
 }
 
 fn index(_req: Request) -> Result<impl Responder, io::Error> {
