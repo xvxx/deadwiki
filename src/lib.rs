@@ -28,9 +28,6 @@ pub fn set_wiki_root(path: &str) -> Result<(), std::io::Error> {
         ));
     }
 
-    // set current dir to wiki
-    std::env::set_current_dir(path).expect("couldn't change working dir");
-
     // if this fails, we want to blow up
     let mut lock = WIKI_ROOT.lock().unwrap();
     *lock = path.to_string();
