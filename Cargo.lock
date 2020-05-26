@@ -84,7 +84,7 @@ checksum = "5b89647f09b9f4c838cb622799b2843e4e13bff64661dab9a0362bb92985addd"
 
 [[package]]
 name = "deadwiki"
-version = "0.1.15-dev"
+version = "0.1.15"
 dependencies = [
  "ascii",
  "atomicwrites",

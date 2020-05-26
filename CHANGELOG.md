@@ -1,4 +1,4 @@
-## 0.1.15-dev
+## 0.1.15
 
 This release adds a slight UI tweak - wiki pages in subdirectories are
 now swaddled in `<details>`:
