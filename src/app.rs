@@ -22,9 +22,9 @@ vial! {
     GET "/new" => new;
     POST "/new" => create;
 
-    GET "/:name" => show;
-    GET "/:name/edit" => edit;
-    POST "/:name" => update;
+    GET "/edit/*name" => edit;
+    GET "/*name" => show;
+    POST "/*name" => update;
 }
 
 #[allow(dead_code)]
