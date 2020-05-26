@@ -66,7 +66,6 @@ fn main() {
         }
     }
 
-    vial::asset_dir!("assets");
     if let Err(e) = vial::run!(format!("{}:{}", host, port), app) {
         eprintln!("WebServer Error: {}", e);
     }
