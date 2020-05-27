@@ -87,21 +87,25 @@ pub fn new_page_path(path: &str) -> Option<String> {
 
 /// Returns a wiki path on disk, regardless of whether it exists.
 pub fn page_disk_path(path: &str) -> String {
-    format!("{}.md", pathify(path))
+    format!("{}/{}.md", crate::wiki_root(), pathify(path))
 }
 
 /// All the wiki pages, in alphabetical order.
 pub fn page_names() -> Vec<String> {
     let mut dirs = vec![];
+    let root = crate::wiki_root();
 
-    for entry in walkdir::WalkDir::new("./")
+    for entry in walkdir::WalkDir::new(&root)
         .into_iter()
         .filter_map(|e| e.ok())
     {
         if !entry.file_type().is_dir() && entry.file_name().to_str().unwrap_or("").ends_with(".md")
         {
             let dir = entry.path().display().to_string();
-            let dir = dir.trim_start_matches("./").trim_end_matches(".md");
+            let dir = dir
+                .trim_start_matches("./")
+                .trim_start_matches(&root)
+                .trim_end_matches(".md");
             if !dir.is_empty() {
                 dirs.push(format!("{}", dir));
             }
