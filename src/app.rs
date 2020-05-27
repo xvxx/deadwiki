@@ -104,7 +104,7 @@ pub fn index(_req: Request) -> Result<impl Responder, io::Error> {
 }
 
 fn create(req: Request) -> Result<impl Responder, io::Error> {
-    let path = pathify(&req.query("name").unwrap_or(""));
+    let path = pathify(&req.form("name").unwrap_or(""));
     if !page_names().contains(&path) {
         if let Some(disk_path) = new_page_path(&path) {
             if disk_path.contains('/') {
@@ -113,9 +113,12 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
                 }
             }
             let mut file = fs::File::create(disk_path)?;
-            let mdown = req.arg("markdown").unwrap_or("");
-            write!(file, "{}", mdown)?;
-            return Ok(Response::from(302).with_body(&path));
+            return if let Some(mdown) = req.form("markdown") {
+                write!(file, "{}", mdown)?;
+                Ok(Response::redirect_to(path))
+            } else {
+                Ok(Response::redirect_to("/new"))
+            };
         }
     }
     Ok(response_404())
