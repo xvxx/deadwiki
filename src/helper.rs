@@ -34,8 +34,8 @@ pub fn wiki_path_to_title(path: &str) -> String {
 }
 
 /// Return the <nav> for a page
-pub fn nav() -> Result<String, io::Error> {
-    asset::to_string("html/nav.html")
+pub fn nav(current_path: &str) -> Result<String, io::Error> {
+    Ok(asset::to_string("html/nav.html")?.replace("{current_path}", current_path))
 }
 
 /// Is the file at the given path `chmod +x`?

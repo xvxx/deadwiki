@@ -10,6 +10,7 @@ use {
 /// Render a wiki page to a fully loaded HTML string, with layout.
 pub fn page(path: &str) -> Result<String, io::Error> {
     let raw = path.ends_with(".md");
+    let orig_path = path;
     let path = if raw {
         path.trim_end_matches(".md")
     } else {
@@ -20,12 +21,12 @@ pub fn page(path: &str) -> Result<String, io::Error> {
         let html = if is_executable(&path) {
             shell(&path, &[]).unwrap_or_else(|e| e.to_string())
         } else {
-            fs::read_to_string(path).unwrap_or_else(|_| "".into())
+            fs::read_to_string(&path).unwrap_or_else(|_| "".into())
         };
         if raw {
             Ok(format!("<pre>{}</pre>", html))
         } else {
-            render::layout(&title, &markdown_to_html(&html), Some(&nav()?))
+            render::layout(&title, &markdown_to_html(&html), Some(&nav(&orig_path)?))
         }
     } else {
         Err(io::Error::new(
