@@ -23,8 +23,8 @@ routes! {
     POST "/new" => create;
 
     GET "/edit/*name" => edit;
+    POST "/edit/*name" => update;
     GET "/*name" => show;
-    POST "/*name" => update;
 }
 
 #[allow(dead_code)]
@@ -106,7 +106,10 @@ fn update(req: Request) -> Result<impl Responder, io::Error> {
             let mdown = req.form("markdown").unwrap_or("");
             let af = AtomicFile::new(disk_path, AllowOverwrite);
             af.write(|f| f.write_all(mdown.as_bytes()))?;
-            return Ok(Response::from(302).with_body(&pathify(name)));
+            return Ok(Response::redirect_to(format!(
+                "/{}",
+                pathify(name).replace("edit/", "")
+            )));
         }
     }
     Ok(response_404())
