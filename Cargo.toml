@@ -1,6 +1,6 @@
 [package]
 name = "deadwiki"
-version = "0.1.16-dev"
+version = "0.1.16"
 authors = ["chris west <c@xvxx.io>"]
 edition = "2018"
 license = "MIT"

@@ -1,4 +1,4 @@
-## 0.1.16-dev
+## 0.1.16
 
 Another small UI tweak: when the default page is empty, it gives you a
 hint about what it's for.
