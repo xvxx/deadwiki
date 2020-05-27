@@ -1,3 +1,8 @@
+## 0.1.16-dev
+
+Another small UI tweak: when the default page is empty, it gives you a
+hint about what it's for.
+
 ## 0.1.15
 
 This release adds a slight UI tweak - wiki pages in subdirectories are
