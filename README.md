@@ -39,7 +39,7 @@ Okay, so how do you get started? With [cargo]:
 
     cargo install deadwiki
 
-That'll give you a handy dead `dead` CLI tool, if everything is setup
+That'll give you a handy dandy `dead` CLI tool, if everything is setup
 and `~/.cargo/bin` is in your `$PATH`. You should now be able to run
 `dead -h` to see the possibilities.
 
