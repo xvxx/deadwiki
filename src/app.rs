@@ -11,7 +11,7 @@ use {
     vial::{owned_html, prelude::*},
 };
 
-vial! {
+routes! {
     GET "/" => index;
 
     GET "/sleep" => |_| {
