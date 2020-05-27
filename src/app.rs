@@ -61,8 +61,11 @@ fn new(req: Request) -> Result<impl Responder, io::Error> {
     )
 }
 
-fn index(_req: Request) -> Result<impl Responder, io::Error> {
-    render::layout(
+/// Render the index page which lists all wiki pages.
+pub fn index(_req: Request) -> Result<impl Responder, io::Error> {
+    let mut folded = "";
+
+    Ok(render::layout(
         "deadwiki",
         &format!(
             "{}",
@@ -70,16 +73,34 @@ fn index(_req: Request) -> Result<impl Responder, io::Error> {
                 "{pages}",
                 &page_names()
                     .iter()
-                    .map(|name| format!(
-                        "  <li><a href='{}'>{}</a></li>\n",
-                        name,
-                        wiki_path_to_title(name)
-                    ))
+                    .map(|name| {
+                        let mut prefix = "".to_string();
+                        if let Some(idx) = name.trim_start_matches('/').find('/') {
+                            if folded.is_empty() {
+                                folded = &name[..=idx];
+                                prefix = format!("<details><summary>{}</summary>", folded);
+                            } else if folded != &name[..=idx] {
+                                folded = &name[..=idx];
+                                prefix =
+                                    format!("</details><details><summary>{}</summary>", folded);
+                            }
+                        } else if !folded.is_empty() {
+                            prefix = "</details>".to_string();
+                            folded = "";
+                        }
+
+                        format!(
+                            "{}  <li><a href='{}'>{}</a></li>\n",
+                            prefix,
+                            name,
+                            wiki_path_to_title(name)
+                        )
+                    })
                     .collect::<String>()
             )
         ),
         None,
-    )
+    ))
 }
 
 fn create(req: Request) -> Result<impl Responder, io::Error> {

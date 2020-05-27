@@ -21,6 +21,11 @@ a.new {
   border-bottom: none;
 }
 
+.markdown-body summary {
+  margin-left: -1em;
+  margin-top: 0.5em;
+}
+
 img {
   max-width: 400px;
 }
