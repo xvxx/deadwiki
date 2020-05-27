@@ -14,35 +14,44 @@ pub fn index(req: &Request) -> Result<String, io::Error> {
         "deadwiki",
         &format!(
             "{}",
-            asset::to_string("index.html")?.replace(
-                "{pages}",
-                &req.page_names()
-                    .iter()
-                    .map(|name| {
-                        let mut prefix = "".to_string();
-                        if let Some(idx) = name.find('/') {
-                            if folded.is_empty() {
-                                folded = &name[..=idx];
-                                prefix = format!("<details><summary>{}</summary>", folded);
-                            } else if folded != &name[..=idx] {
-                                folded = &name[..=idx];
-                                prefix =
-                                    format!("</details><details><summary>{}</summary>", folded);
+            asset::to_string("index.html")?
+                .replace(
+                    "{empty-list-msg}",
+                    if req.page_names().is_empty() {
+                        "<i>Wiki Pages you create will show up here.</i>"
+                    } else {
+                        ""
+                    }
+                )
+                .replace(
+                    "{pages}",
+                    &req.page_names()
+                        .iter()
+                        .map(|name| {
+                            let mut prefix = "".to_string();
+                            if let Some(idx) = name.find('/') {
+                                if folded.is_empty() {
+                                    folded = &name[..=idx];
+                                    prefix = format!("<details><summary>{}</summary>", folded);
+                                } else if folded != &name[..=idx] {
+                                    folded = &name[..=idx];
+                                    prefix =
+                                        format!("</details><details><summary>{}</summary>", folded);
+                                }
+                            } else if !folded.is_empty() {
+                                prefix = "</details>".to_string();
+                                folded = "";
                             }
-                        } else if !folded.is_empty() {
-                            prefix = "</details>".to_string();
-                            folded = "";
-                        }
 
-                        format!(
-                            "{}  <li><a href='{}'>{}</a></li>\n",
-                            prefix,
-                            name,
-                            wiki_path_to_title(name)
-                        )
-                    })
-                    .collect::<String>()
-            )
+                            format!(
+                                "{}  <li><a href='{}'>{}</a></li>\n",
+                                prefix,
+                                name,
+                                wiki_path_to_title(name)
+                            )
+                        })
+                        .collect::<String>()
+                )
         ),
         None,
     ))
