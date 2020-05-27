@@ -58,7 +58,7 @@ document.onkeydown = (e) => {
     // ctrl-e edit
     var editLink = document.getElementById("edit-link");
     if (editLink)
-      if (e.ctrlKey && e.key == "e") return (window.location = "/new");
+      if (e.ctrlKey && e.key == "e") return (window.location = editLink.href);
 
     ////
     // everything after this are shortcuts only for the editor
