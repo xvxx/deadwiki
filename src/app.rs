@@ -8,7 +8,7 @@ use {
         io::{self, Write},
         path::Path,
     },
-    vial::{owned_html, prelude::*},
+    vial::prelude::*,
 };
 
 routes! {
@@ -25,32 +25,6 @@ routes! {
     GET "/edit/*name" => edit;
     POST "/edit/*name" => update;
     GET "/*name" => show;
-}
-
-#[allow(dead_code)]
-fn new2(req: Request) -> impl Responder {
-    owned_html! {
-        p {
-            a(href="/") { : "home" }
-            a(href="javascript:history.back()") { : "back" }
-        }
-
-        form(method="POST", action="/new", id="form") {
-            p {
-                input(
-                    name="name",
-                    type="text",
-                    placeholder="filename",
-                    value=req.query("name").unwrap_or(""),
-                    id="focused"
-                );
-            }
-            textarea(name="markdown", id="markdown") {
-                : format!("# {}", req.query("name").unwrap_or(""));
-            }
-            input(type="submit");
-        }
-    }
 }
 
 fn new(req: Request) -> Result<impl Responder, io::Error> {
