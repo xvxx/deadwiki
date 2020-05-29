@@ -62,7 +62,11 @@ filesystem, and a dream.
 
 In addition to [CommonMark], Markdown files can link to each other by
 putting the `[Page Name]` in brackets. Like most wikis, it'll either
-be a link to the actual page or a way to create it.
+be a link to the actual page or a link to create it.
+
+deadwiki also includes support for `#hashtags`. Any hashtag appearing
+in wiki text will be linked to a search page that lists all wiki pages
+containing that hashtag.
 
 Finally, if you want to sync your wiki automatically, there is some
 _very basic_ git support. Basically, if you start the `dead`

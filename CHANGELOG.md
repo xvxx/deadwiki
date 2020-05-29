@@ -1,3 +1,13 @@
+## 0.1.17-dev
+
+This release adds support for #hashtags! Very simple: any #hashtag
+in wiki content will get turned into a link that takes you to a
+search page. The search page will display all the wiki pages that
+include the hashtag.
+
+Nothing fancy like searching for more than one hashtag at a time.
+Just the basics. Enjoy!
+
 ## 0.1.16
 
 Another small UI tweak: when the default page is empty, it gives you a
