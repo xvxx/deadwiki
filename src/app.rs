@@ -1,14 +1,14 @@
 //! (Method, URL) => Code
 
 use {
-    crate::{helper::*, render},
+    crate::{helper::*, render, util, wiki_root},
     atomicwrites::{AllowOverwrite, AtomicFile},
     std::{
         fs,
         io::{self, Write},
         path::Path,
     },
-    vial::{owned_html, prelude::*},
+    vial::prelude::*,
 };
 
 routes! {
@@ -22,34 +22,70 @@ routes! {
     GET "/new" => new;
     POST "/new" => create;
 
+    GET "/search" => search;
+
     GET "/edit/*name" => edit;
     POST "/edit/*name" => update;
     GET "/*name" => show;
 }
 
-#[allow(dead_code)]
-fn new2(req: Request) -> impl Responder {
-    owned_html! {
-        p {
-            a(href="/") { : "home" }
-            a(href="javascript:history.back()") { : "back" }
-        }
+// Don't include the '#' when you search, eg pass in "hashtag" to
+// search for #hashtag.
+fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
+    let tag = if tag.starts_with('#') {
+        tag.to_string()
+    } else {
+        format!("#{}", tag)
+    };
 
-        form(method="POST", action="/new", id="form") {
-            p {
-                input(
-                    name="name",
-                    type="text",
-                    placeholder="filename",
-                    value=req.query("name").unwrap_or(""),
-                    id="focused"
-                );
+    println!("{:?}", std::env::current_dir().unwrap());
+    let out = util::shell("grep", &["-r", &tag, &wiki_root()])?;
+    println!("GREP: {:?}", out);
+    Ok(out
+        .split("\n")
+        .filter_map(|line| {
+            if !line.is_empty() {
+                Some(
+                    line.split(':')
+                        .next()
+                        .unwrap_or("?")
+                        .trim_end_matches(".md")
+                        .trim_start_matches(&wiki_root())
+                        .trim_start_matches('/')
+                        .to_string(),
+                )
+            } else {
+                None
             }
-            textarea(name="markdown", id="markdown") {
-                : format!("# {}", req.query("name").unwrap_or(""));
-            }
-            input(type="submit");
-        }
+        })
+        .collect::<Vec<_>>())
+}
+
+fn search(req: Request) -> Result<impl Responder, io::Error> {
+    if let Some(tag) = req.query("tag") {
+        Ok(render::layout(
+            "search",
+            &asset::to_string("html/search.html")?
+                .replace("{tag}", &format!("#{}", tag))
+                .replace(
+                    "{results}",
+                    &pages_with_tag(tag)?
+                        .iter()
+                        .map(|page| {
+                            format!(
+                                "<li><a href='/{}'>{}</a></li>",
+                                page,
+                                wiki_path_to_title(page)
+                            )
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                ),
+            None,
+        )?
+        .to_response())
+    } else {
+        Ok(Response::from(404))
     }
 }
 

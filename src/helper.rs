@@ -15,6 +15,7 @@ pub fn capitalize(s: &str) -> String {
 /// some_page -> Some Page
 pub fn wiki_path_to_title(path: &str) -> String {
     path.trim_start_matches('/')
+        .trim_end_matches(".md")
         .split('_')
         .map(|part| {
             if part.contains('/') {

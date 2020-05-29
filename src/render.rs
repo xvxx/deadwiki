@@ -108,7 +108,7 @@ fn markdown_to_html(md: &str) -> String {
                     let linked = text[idx..]
                         .split(' ')
                         .map(|word| {
-                            if word.starts_with('#') {
+                            if word.starts_with('#') && word.len() > 1 {
                                 let word = word.trim_start_matches('#');
                                 format!("<a href='/search?tag={}'>#{}</a>", word, word)
                             } else {
