@@ -158,7 +158,7 @@ There's a basic wiki included that shows off some features.
 - take your data with you (scm friendly)
 - js only for user input (keyboard shortcuts, markdown editor, finder)
 - no js frameworks/helpers
-- build time matters (72 crates currently, ~22s release ~10s debug)
+- build time matters (42 crates currently, ~8s release ~6s debug)
 
 ## ~ screenies ~
 
