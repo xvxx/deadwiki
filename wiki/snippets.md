@@ -13,3 +13,5 @@ function scratch
   end
 end
 ```
+
+tags: #shell #fish #snippet
