@@ -144,7 +144,6 @@ fn markdown_to_html(req: &Request, md: &str) -> String {
     let parser = markdown::Parser::new_ext(&md, options).map(|event| match event {
         markdown::Event::Text(text) => {
             let text = text.replace("<", "&lt;").replace(">", "&gt;");
-            println!("{:?}", text);
 
             if &text == "[" && !wiki_link {
                 wiki_link = true;
