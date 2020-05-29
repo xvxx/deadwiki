@@ -1,4 +1,4 @@
-## 0.1.17-dev
+## 0.1.17
 
 This release adds support for #hashtags! Very simple: any #hashtag
 in wiki content will get turned into a link that takes you to a
