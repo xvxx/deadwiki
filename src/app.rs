@@ -1,7 +1,7 @@
 //! (Method, URL) => Code
 
 use {
-    crate::{helper::*, render},
+    crate::{helper::*, render, util, wiki_root},
     atomicwrites::{AllowOverwrite, AtomicFile},
     std::{
         fs,
@@ -22,9 +22,71 @@ routes! {
     GET "/new" => new;
     POST "/new" => create;
 
+    GET "/search" => search;
+
     GET "/edit/*name" => edit;
     POST "/edit/*name" => update;
     GET "/*name" => show;
+}
+
+// Don't include the '#' when you search, eg pass in "hashtag" to
+// search for #hashtag.
+fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
+    let tag = if tag.starts_with('#') {
+        tag.to_string()
+    } else {
+        format!("#{}", tag)
+    };
+
+    println!("{:?}", std::env::current_dir().unwrap());
+    let out = util::shell("grep", &["-r", &tag, &wiki_root()])?;
+    println!("GREP: {:?}", out);
+    Ok(out
+        .split("\n")
+        .filter_map(|line| {
+            if !line.is_empty() {
+                Some(
+                    line.split(':')
+                        .next()
+                        .unwrap_or("?")
+                        .trim_end_matches(".md")
+                        .trim_start_matches(&wiki_root())
+                        .trim_start_matches('/')
+                        .to_string(),
+                )
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>())
+}
+
+fn search(req: Request) -> Result<impl Responder, io::Error> {
+    if let Some(tag) = req.query("tag") {
+        Ok(render::layout(
+            "search",
+            &asset::to_string("html/search.html")?
+                .replace("{tag}", &format!("#{}", tag))
+                .replace(
+                    "{results}",
+                    &pages_with_tag(tag)?
+                        .iter()
+                        .map(|page| {
+                            format!(
+                                "<li><a href='/{}'>{}</a></li>",
+                                page,
+                                wiki_path_to_title(page)
+                            )
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                ),
+            None,
+        )?
+        .to_response())
+    } else {
+        Ok(Response::from(404))
+    }
 }
 
 fn new(req: Request) -> Result<impl Responder, io::Error> {

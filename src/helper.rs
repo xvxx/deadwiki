@@ -15,6 +15,7 @@ pub fn capitalize(s: &str) -> String {
 /// some_page -> Some Page
 pub fn wiki_path_to_title(path: &str) -> String {
     path.trim_start_matches('/')
+        .trim_end_matches(".md")
         .split('_')
         .map(|part| {
             if part.contains('/') {
@@ -92,7 +93,7 @@ pub fn page_disk_path(path: &str) -> String {
 
 /// All the wiki pages, in alphabetical order.
 pub fn page_names() -> Vec<String> {
-    let mut dirs = vec![];
+    let mut names = vec![];
     let root = crate::wiki_root();
 
     for entry in walkdir::WalkDir::new(&root)
@@ -101,17 +102,18 @@ pub fn page_names() -> Vec<String> {
     {
         if !entry.file_type().is_dir() && entry.file_name().to_str().unwrap_or("").ends_with(".md")
         {
-            let dir = entry.path().display().to_string();
-            let dir = dir
-                .trim_start_matches("./")
+            let name = entry.path().display().to_string();
+            let name = name
                 .trim_start_matches(&root)
+                .trim_start_matches('.')
+                .trim_start_matches('/')
                 .trim_end_matches(".md");
-            if !dir.is_empty() {
-                dirs.push(format!("{}", dir));
+            if !name.is_empty() {
+                names.push(name.to_lowercase());
             }
         }
     }
 
-    dirs.sort();
-    dirs
+    names.sort();
+    names
 }

@@ -69,10 +69,12 @@ fn markdown_to_html(md: &str) -> String {
 
     let parser = markdown::Parser::new_ext(&md, options).map(|event| match event {
         markdown::Event::Text(text) => {
-            if text.as_ref() == "[" && !wiki_link {
+            let text = text.replace("<", "&lt;").replace(">", "&gt;");
+
+            if &text == "[" && !wiki_link {
                 wiki_link = true;
                 markdown::Event::Text("".into())
-            } else if text.as_ref() == "]" && wiki_link {
+            } else if &text == "]" && wiki_link {
                 wiki_link = false;
                 let page_name = wiki_link_text.to_lowercase().replace(" ", "_");
                 let link_text = wiki_link_text.clone();
@@ -94,7 +96,6 @@ fn markdown_to_html(md: &str) -> String {
                 wiki_link_text.push_str(&text);
                 markdown::Event::Text("".into())
             } else {
-                let text = text.replace("<", "&lt;").replace(">", "&gt;");
                 if text.contains("http://") || text.contains("https://") {
                     let linked = autolink::auto_link(&text, &[]);
                     if linked.len() == text.len() {
@@ -102,6 +103,21 @@ fn markdown_to_html(md: &str) -> String {
                     } else {
                         markdown::Event::Html(linked.into())
                     }
+                } else if let Some(idx) = text.find('#') {
+                    // look for and link #hashtags
+                    let linked = text[idx..]
+                        .split(' ')
+                        .map(|word| {
+                            if word.starts_with('#') && word.len() > 1 {
+                                let word = word.trim_start_matches('#');
+                                format!("<a href='/search?tag={}'>#{}</a>", word, word)
+                            } else {
+                                word.into()
+                            }
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" ");
+                    markdown::Event::Html(format!("{}{}", &text[..idx], linked).into())
                 } else {
                     markdown::Event::Text(text.into())
                 }
