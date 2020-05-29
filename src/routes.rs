@@ -41,6 +41,10 @@ pub fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error
             body = "Zzzzz...".into();
             std::thread::sleep(std::time::Duration::from_secs(5));
         }
+        (Get, "/search") => {
+            status = 200;
+            body = render::search(req.param("tag"))?;
+        }
         (Get, "/404") => {
             status = 404;
             body = asset::to_string("404.html")?;
