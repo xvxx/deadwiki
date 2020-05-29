@@ -307,7 +307,7 @@ fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
     };
 
     let out = shell("grep", &["-r", &tag, "."])?;
-    Ok(out
+    let mut pages = out
         .split("\n")
         .filter_map(|line| {
             if !line.is_empty() {
@@ -325,5 +325,8 @@ fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
                 None
             }
         })
-        .collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+    pages.sort();
+    pages.dedup();
+    Ok(pages)
 }
