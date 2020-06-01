@@ -117,3 +117,21 @@ pub fn page_names() -> Vec<String> {
     names.sort();
     names
 }
+
+/// [{ title: "My Page", path: "my_page" }]
+pub fn pages_as_json() -> String {
+    format!(
+        "[{}]",
+        page_names()
+            .iter()
+            .map(|page| {
+                format!(
+                    r#"{{ name: "{}", path: "{}" }}"#,
+                    wiki_path_to_title(page),
+                    page
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
+}

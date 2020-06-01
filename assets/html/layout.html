@@ -9,6 +9,7 @@
 
     <script src="/js/highlight.min.js" defer></script>
     <script src="/js/simplemde.min.js" defer></script>
+    <script src="/js/fuse-v6.0.0.js" defer></script>
     <script src="/js/deadwiki.js" defer></script>
 
     <meta charset="utf-8" />
@@ -18,5 +19,9 @@
     <div id="main" class="markdown-body {webview-app}">
       {nav} {body}
     </div>
+    <script>
+      // for fuzzy finder
+      window.WIKI_PAGES = {pages.json};
+    </script>
   </body>
 </html>
