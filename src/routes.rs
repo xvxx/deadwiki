@@ -33,6 +33,7 @@ pub fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error
             body = render::layout(
                 "new page",
                 &asset::to_string("new.html")?.replace("{name}", &name),
+                &req.page_names(),
                 None,
             );
         }
@@ -43,7 +44,7 @@ pub fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error
         }
         (Get, "/search") => {
             status = 200;
-            body = render::search(req.param("tag"))?;
+            body = render::search(req)?;
         }
         (Get, "/404") => {
             status = 404;
@@ -96,6 +97,7 @@ pub fn route(req: &mut Request) -> Result<(i32, String, &'static str), io::Error
                         "Edit",
                         &asset::to_string("edit.html")?
                             .replace("{markdown}", &fs::read_to_string(disk_path)?),
+                        &req.page_names(),
                         None,
                     )
                 }

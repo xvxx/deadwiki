@@ -27,6 +27,11 @@ window.onload = () => {
     tabSize: 4,
     element: document.getElementById("markdown"),
   });
+
+  // jump-to-page
+  const fuse = new Fuse(window.WIKI_PAGES, { keys: ["name"] });
+  const pattern = "";
+  console.log(fuse.search(pattern));
 };
 
 document.onkeydown = (e) => {

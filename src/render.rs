@@ -53,6 +53,7 @@ pub fn index(req: &Request) -> Result<String, io::Error> {
                         .collect::<String>()
                 )
         ),
+        &req.page_names(),
         None,
     ))
 }
@@ -75,7 +76,12 @@ pub fn page(req: &Request, path: &str) -> Result<String, io::Error> {
         Ok(if raw {
             format!("<pre>{}</pre>", html)
         } else {
-            render::layout(&title, &markdown_to_html(&req, &html), Some(&nav()?))
+            render::layout(
+                &title,
+                &markdown_to_html(&req, &html),
+                &req.page_names(),
+                Some(&nav()?),
+            )
         })
     } else {
         Err(io::Error::new(
@@ -86,7 +92,8 @@ pub fn page(req: &Request, path: &str) -> Result<String, io::Error> {
 }
 
 // #hashtag results
-pub fn search(tag: &str) -> Result<String, io::Error> {
+pub fn search(req: &mut Request) -> Result<String, io::Error> {
+    let tag = &req.param("tag");
     Ok(render::layout(
         "search",
         &asset::to_string("html/search.html")?
@@ -105,12 +112,13 @@ pub fn search(tag: &str) -> Result<String, io::Error> {
                     .collect::<Vec<_>>()
                     .join("\n"),
             ),
+        &req.page_names(),
         Some("<a href='/'>home</a>"),
     ))
 }
 
 /// Renders a chunk of HTML surrounded by `static/layout.html`.
-pub fn layout(title: &str, body: &str, nav: Option<&str>) -> String {
+pub fn layout(title: &str, body: &str, pages: &[String], nav: Option<&str>) -> String {
     let mut webview_app = "";
     if cfg!(feature = "gui") {
         webview_app = "webview-app";
@@ -122,6 +130,7 @@ pub fn layout(title: &str, body: &str, nav: Option<&str>) -> String {
             .replace("{title}", title)
             .replace("{body}", body)
             .replace("{webview-app}", webview_app)
+            .replace("{pages.json}", &pages_as_json(pages))
             .replace("{nav}", nav.unwrap_or(""))
     } else {
         body.to_string()
@@ -328,4 +337,22 @@ fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
     pages.sort();
     pages.dedup();
     Ok(pages)
+}
+
+/// [{ title: "My Page", path: "my_page" }]
+fn pages_as_json(page_names: &[String]) -> String {
+    format!(
+        "[{}]",
+        page_names
+            .iter()
+            .map(|page| {
+                format!(
+                    r#"{{ name: "{}", path: "{}" }}"#,
+                    wiki_path_to_title(page),
+                    page
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
 }
