@@ -2,6 +2,9 @@ window.onload = () => {
   // focus the element with id=focused
   var focused = document.getElementById("focused");
   if (focused && focused.value == "") focused.focus();
+  // or class=focused
+  var focused = document.getElementsByClassName("focused");
+  if (focused[0] && focused[0].value == "") focused[0].focus();
 
   // dbl click wiki content to edit
   var editLink = document.getElementById("edit-link");
@@ -27,11 +30,33 @@ window.onload = () => {
     tabSize: 4,
     element: document.getElementById("markdown"),
   });
+};
 
-  // jump-to-page
-  const fuse = new Fuse(window.WIKI_PAGES, { keys: ["name"] });
-  const pattern = "";
-  console.log(fuse.search(pattern));
+document.onkeyup = (e) => {
+  // jump-to-page js
+  let jumpInput = document.getElementById("jump-pattern");
+  if (jumpInput) {
+    const fuse = new Fuse(window.WIKI_PAGES, { keys: ["name"] });
+    const pattern = jumpInput.value;
+    let list = document.getElementById("jump-list");
+    console.log(jumpInput.value);
+    if (pattern == "") {
+      for (var i = 0; i < list.children.length; i++) {
+        let el = list.children[i];
+        el.style.display = "";
+      }
+    } else {
+      let matches = fuse.search(pattern);
+      for (var i = 0; i < list.children.length; i++) {
+        let el = list.children[i];
+        el.style.display = "none";
+      }
+      for (var i = 0; i < matches.length; i++) {
+        document.getElementById("jump-" + matches[i].refIndex).style.display =
+          "";
+      }
+    }
+  }
 };
 
 document.onkeydown = (e) => {

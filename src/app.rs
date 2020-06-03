@@ -19,6 +19,8 @@ routes! {
         "Zzzzz..."
     };
 
+    GET "/jump" => jump;
+
     GET "/new" => new;
     POST "/new" => create;
 
@@ -167,6 +169,29 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
         }
     }
     Ok(response_404())
+}
+
+fn jump(_: Request) -> vial::Result<impl Responder> {
+    let partial = asset::to_string("html/_jump_page.html")?;
+
+    render::layout(
+        "Jump to Wiki Page",
+        asset::to_string("html/jump.html")?.replace(
+            "{pages}",
+            &page_names()
+                .iter()
+                .enumerate()
+                .map(|(id, page)| {
+                    partial
+                        .replace("{page.id}", &id.to_string())
+                        .replace("{page.path}", page)
+                        .replace("{page.name}", &wiki_path_to_title(page))
+                })
+                .collect::<Vec<_>>()
+                .join("\n"),
+        ),
+        None,
+    )
 }
 
 fn update(req: Request) -> Result<impl Responder, io::Error> {
