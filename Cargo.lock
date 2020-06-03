@@ -278,7 +278,7 @@ checksum = "078775d0255232fb988e6fccf26ddc9d1ac274299aaedcedce21c6f72cc533ce"
 
 [[package]]
 name = "vial"
-version = "0.0.7-dev"
+version = "0.0.8-dev"
 dependencies = [
  "libc-strftime",
  "percent-encoding",
