@@ -62,17 +62,19 @@ document.onkeydown = (e) => {
 
   // check if we're running the native app
   if (document.querySelector("#main.webview-app")) {
-    if (e.metaKey && (e.key == "[" || e.keyCode == 37)) {
-      // history back: cmd+[ or cmd+left-arrow
-      e.preventDefault();
-      history.back();
-      return;
-    } else if (e.metaKey && (e.key == "]" || e.keyCode == 47)) {
-      // history forward: cmd+] or cmd+right-arrow
-      e.preventDefault();
-      history.forward();
-      return;
-    }
+  }
+
+  // history navigation
+  if (e.metaKey && (e.key == "[" || e.keyCode == 37)) {
+    // history back: cmd+[ or cmd+left-arrow
+    e.preventDefault();
+    history.back();
+    return;
+  } else if (e.metaKey && (e.key == "]" || e.keyCode == 47)) {
+    // history forward: cmd+] or cmd+right-arrow
+    e.preventDefault();
+    history.forward();
+    return;
   }
 
   // jump-to-page js
