@@ -68,5 +68,9 @@ code a, code a:visited {
 
 #jump-page {
   margin: 0 auto;
-    width: 300px;
+  width: 300px;
+}
+
+#jump-page ul> :first-child {
+  font-weight: bold;
 }
