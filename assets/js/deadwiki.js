@@ -1,13 +1,13 @@
 window.onload = () => {
   // focus the element with id=focused
-  var focused = document.getElementById("focused");
+  var focused = document.querySelector("#focused");
   if (focused && focused.value == "") focused.focus();
   // or class=focused
-  var focused = document.getElementsByClassName("focused");
-  if (focused[0] && focused[0].value == "") focused[0].focus();
+  var focused = document.querySelector(".focused");
+  if (focused && focused.value == "") focused.focus();
 
   // dbl click wiki content to edit
-  var editLink = document.getElementById("edit-link");
+  var editLink = document.querySelector("#edit-link");
   if (editLink) {
     window.addEventListener("dblclick", function () {
       window.location = editLink.href;
@@ -28,7 +28,7 @@ window.onload = () => {
     },
     status: false,
     tabSize: 4,
-    element: document.getElementById("markdown"),
+    element: document.querySelector("#markdown"),
   });
 };
 
@@ -61,7 +61,7 @@ document.onkeydown = (e) => {
   e = e || window.event || {};
 
   // check if we're running the native app
-  if (document.getElementById("main").classList.contains("webview-app")) {
+  if (document.querySelector("#main.webview-app")) {
     if (e.metaKey && (e.key == "[" || e.keyCode == 37)) {
       // history back: cmd+[ or cmd+left-arrow
       e.preventDefault();
@@ -76,9 +76,9 @@ document.onkeydown = (e) => {
   }
 
   // jump-to-page js
-  let jumpInput = document.getElementById("jump-pattern");
+  let jumpInput = document.querySelector("#jump-pattern");
   if (jumpInput && e.keyCode == 13) {
-    let jumpList = document.getElementById("jump-list");
+    let jumpList = document.querySelector("#jump-list");
     for (var i = 0; i < jumpList.children.length; i++) {
       let el = jumpList.children[i];
       if (el.style.display != "none") {
@@ -90,15 +90,18 @@ document.onkeydown = (e) => {
   }
 
   // global shortcuts for pages that don't have the editor
-  if (!document.getElementById("markdown")) {
+  if (!document.querySelector("#markdown")) {
     // ctrl-h goes home
     if (e.ctrlKey && e.key == "h") return (window.location = "/");
+
+    // ctrl-j jump to page
+    if (e.ctrlKey && e.key == "j") return (window.location = "/jump");
 
     // ctrl-n new
     if (e.ctrlKey && e.key == "n") return (window.location = "/new");
 
     // ctrl-e edit
-    var editLink = document.getElementById("edit-link");
+    var editLink = document.querySelector("#edit-link");
     if (editLink)
       if (e.ctrlKey && e.key == "e") return (window.location = editLink.href);
 
@@ -112,5 +115,5 @@ document.onkeydown = (e) => {
 
   // CTRL+ENTER to submit when editing
   if ((e.ctrlKey || e.metaKey) && e.keyCode == 13)
-    document.getElementById("form").submit();
+    document.querySelector("#form").submit();
 };

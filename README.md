@@ -92,6 +92,7 @@ quicker and more nimble.
 | -------------- | ---------------------------- |
 | `Double Click` | Enter edit or create mode    |
 | `Ctrl-h`       | Go to the home page          |
+| `Ctrl-j`       | Jump to page (fuzzy finder)  |
 | `Ctrl-n`       | Go to the "new" page         |
 | `Ctrl-e`       | Open editor for current page |
 
