@@ -173,6 +173,9 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
 
 fn jump(_: Request) -> vial::Result<impl Responder> {
     let partial = asset::to_string("html/_jump_page.html")?;
+    if page_names().is_empty() {
+        return Ok("Add a few wiki pages then come back.".to_string());
+    }
 
     render::layout(
         "Jump to Wiki Page",
