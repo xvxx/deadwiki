@@ -5,7 +5,7 @@
 use web_view;
 
 use {
-    crate::{server, set_wiki_root},
+    crate::{app, set_wiki_root},
     std::{io, thread},
 };
 
@@ -13,8 +13,8 @@ type Result<T> = std::result::Result<T, io::Error>;
 
 /// Start a web server and launch the GUI.
 pub fn run(host: &str, port: usize, wiki_root: &str) -> Result<()> {
-    let host = host.to_string();
-    let url = format!("http://{}:{}", host, port);
+    let addr = format!("{}:{}", host, port);
+    let url = format!("http://{}", addr);
 
     let mut wv = web_view::builder()
         .title("deadwiki")
@@ -37,9 +37,11 @@ pub fn run(host: &str, port: usize, wiki_root: &str) -> Result<()> {
                 "No Wiki Root Selected.",
             ));
         }
+    } else {
+        set_wiki_root(wiki_root)?;
     }
 
-    thread::spawn(move || server::run(&host, port));
+    thread::spawn(move || vial::run!(addr.to_string(), app));
 
     wv.run().unwrap();
     Ok(())
