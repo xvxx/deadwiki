@@ -94,18 +94,30 @@ document.onkeydown = (e) => {
   // global shortcuts for pages that don't have the editor
   if (!document.querySelector("#markdown")) {
     // ctrl-h goes home
-    if (e.ctrlKey && e.key == "h") return (window.location = "/");
+    if (e.ctrlKey && e.key == "h") {
+      e.preventDefault();
+      return (window.location = "/");
+    }
 
     // ctrl-j jump to page
-    if (e.ctrlKey && e.key == "j") return (window.location = "/jump");
+    if (e.ctrlKey && e.key == "j") {
+      e.preventDefault();
+      return (window.location = "/jump");
+    }
 
     // ctrl-n new
-    if (e.ctrlKey && e.key == "n") return (window.location = "/new");
+    if (e.ctrlKey && e.key == "n") {
+      e.preventDefault();
+      return (window.location = "/new");
+    }
 
     // ctrl-e edit
     var editLink = document.querySelector("#edit-link");
     if (editLink)
-      if (e.ctrlKey && e.key == "e") return (window.location = editLink.href);
+      if (e.ctrlKey && e.key == "e") {
+        e.preventDefault();
+        return (window.location = editLink.href);
+      }
 
     ////
     // everything after this are shortcuts only for the editor
@@ -113,9 +125,14 @@ document.onkeydown = (e) => {
   }
 
   // ESC key to go back when editing
-  if (e.keyCode == 27) history.back();
+  if (e.keyCode == 27) {
+    e.preventDefault();
+    return history.back();
+  }
 
   // CTRL+ENTER to submit when editing
-  if ((e.ctrlKey || e.metaKey) && e.keyCode == 13)
-    document.querySelector("#form").submit();
+  if ((e.ctrlKey || e.metaKey) && e.keyCode == 13) {
+    e.preventDefault();
+    return document.querySelector("#form").submit();
+  }
 };
