@@ -43,7 +43,7 @@ fn main() {
     #[cfg(feature = "gui")]
     {
         if gui {
-            if let Err(e) = deadwiki::gui::run(host, port, path) {
+            if let Err(e) = deadwiki::gui::run(host, port, path, sync) {
                 eprintln!("GUI Error: {}", e);
             }
             return;
