@@ -76,12 +76,10 @@ fn markdown_to_html(md: &str) -> String {
 
     let parser = markdown::Parser::new_ext(&md, options).map(|event| match event {
         markdown::Event::Text(text) => {
-            let text = text.replace("<", "&lt;").replace(">", "&gt;");
-
-            if &text == "[" && !wiki_link {
+            if *text == *"[" && !wiki_link {
                 wiki_link = true;
                 markdown::Event::Text("".into())
-            } else if &text == "]" && wiki_link {
+            } else if *text == *"]" && wiki_link {
                 wiki_link = false;
                 let page_name = wiki_link_text.to_lowercase().replace(" ", "_");
                 let link_text = wiki_link_text.clone();
