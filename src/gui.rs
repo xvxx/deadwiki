@@ -5,14 +5,14 @@
 use web_view;
 
 use {
-    crate::{app, set_wiki_root},
+    crate::{app, set_wiki_root, sync},
     std::{io, thread},
 };
 
 type Result<T> = std::result::Result<T, io::Error>;
 
 /// Start a web server and launch the GUI.
-pub fn run(host: &str, port: usize, wiki_root: &str) -> Result<()> {
+pub fn run(host: &str, port: usize, wiki_root: &str, sync: bool) -> Result<()> {
     let addr = format!("{}:{}", host, port);
     let url = format!("http://{}", addr);
 
@@ -39,6 +39,15 @@ pub fn run(host: &str, port: usize, wiki_root: &str) -> Result<()> {
         }
     } else {
         set_wiki_root(wiki_root)?;
+    }
+
+    if sync {
+        if let Err(e) = sync::start() {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                format!("Sync Error: {}", e),
+            ));
+        }
     }
 
     thread::spawn(move || vial::run!(addr.to_string(), app));
