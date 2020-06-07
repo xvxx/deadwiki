@@ -171,7 +171,7 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
     Ok(response_404())
 }
 
-fn jump(_: Request) -> vial::Result<impl Responder> {
+fn jump(_: Request) -> Result<impl Responder, io::Error> {
     let partial = asset::to_string("html/_jump_page.html")?;
     if page_names().is_empty() {
         return Ok("Add a few wiki pages then come back.".to_string());
