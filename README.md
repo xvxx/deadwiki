@@ -1,4 +1,4 @@
-<img src="/img/rip.gif" alt="R.I.P." height="200" align="left">
+<img src="/assets/img/rip.gif" alt="R.I.P." height="200" align="left">
 
 # deadwiki
 
@@ -167,7 +167,7 @@ There's a basic wiki included that shows off some features.
 
 ## ~ screenies ~
 
-| ![screenie1](/img/screenie1.jpeg) | ![screenie1](/img/screenie2.jpeg) |
+| ![screenie1](/assets/img/screenie1.jpeg) | ![screenie1](/assets/img/screenie2.jpeg) |
 | :-------------------------------: | :-------------------------------: |
 |    Rendering Markdown. `Wow.`     |   Editing Markdown. `Amazing.`    |
 
