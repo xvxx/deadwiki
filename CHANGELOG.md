@@ -1,4 +1,4 @@
-## 0.1.18-dev
+## 0.1.18
 
 Jump-to-page via fuzzy finder is now live! Use `ctrl-j` to open the
 menu and start typing a page title. This will gain functionality in
