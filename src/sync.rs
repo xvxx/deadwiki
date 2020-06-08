@@ -28,7 +28,8 @@ pub fn start() -> Result<(), io::Error> {
 
 /// Is this wiki a git repo?
 fn is_git_repo() -> bool {
-    let path = Path::new(".git");
+    let dir = format!("{}.git", wiki_root());
+    let path = Path::new(&dir);
     if let Ok(file) = fs::File::open(path) {
         if let Ok(meta) = file.metadata() {
             return meta.is_dir();
@@ -39,6 +40,7 @@ fn is_git_repo() -> bool {
 
 /// Run the sync and then sleep.
 fn sync_periodically() -> Result<(), io::Error> {
+    // set current dir to wiki
     let period = time::Duration::from_millis(SYNC_WAIT * 1000);
     loop {
         save_changes()?;
@@ -47,9 +49,15 @@ fn sync_periodically() -> Result<(), io::Error> {
     }
 }
 
+macro_rules! git {
+    ($($arg:expr),+) => {
+        git(&[$($arg),+])
+    };
+}
+
 /// Try to add and commit any new or modified wiki pages.
 fn save_changes() -> Result<bool, io::Error> {
-    let pending = shell("git", &["status", "-s"])?;
+    let pending = git!("status", "-s")?;
     if pending.is_empty() {
         return Ok(false);
     }
@@ -63,14 +71,22 @@ fn save_changes() -> Result<bool, io::Error> {
     let status = changes.join(if changes.len() == 1 { "" } else { ", " });
 
     println!("~> saving changes: {}", status);
-    shell("git", &["add", "."])?;
-    shell("git", &["commit", "-am", &status])?;
+    git!("add", ".")?;
+    git!("commit", "-am", &status)?;
     Ok(true)
 }
 
 fn sync_changes() -> Result<bool, io::Error> {
     println!("~> syncing changes");
-    shell("git", &["pull", "origin", "master"])?;
-    shell("git", &["push", "origin", "master"])?;
+    git!("pull", "origin", "master")?;
+    git!("push", "origin", "master")?;
     Ok(true)
+}
+
+fn git(args: &[&str]) -> Result<String, std::io::Error> {
+    let git_dir = format!("{}.git", wiki_root());
+    let root = wiki_root();
+    let mut git_args = vec!["--git-dir", &git_dir, "--work-tree", &root];
+    git_args.extend_from_slice(args);
+    shell("git", &git_args)
 }

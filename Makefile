@@ -1,6 +1,10 @@
 CARGO_DEBUG = cargo build
 CARGO_RELEASE = cargo build --release
 
+.PHONY: watch
+watch:
+	cargo watch -i wiki/ -x 'run wiki/ -p 9999'
+
 .PHONY: debug
 debug: target/debug/dead
 	cp $< .

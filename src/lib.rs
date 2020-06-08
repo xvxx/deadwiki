@@ -1,17 +1,13 @@
 #[macro_use]
 extern crate lazy_static;
 
-pub mod asset;
+pub mod app;
 #[cfg(feature = "gui")]
 pub mod gui;
+pub mod helper;
 pub mod render;
-pub mod request;
-pub mod routes;
-pub mod server;
 pub mod sync;
 pub mod util;
-
-pub use request::Request;
 
 lazy_static! {
     pub static ref WIKI_ROOT: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());
@@ -25,19 +21,33 @@ pub fn wiki_root() -> String {
 /// Use sparingly! Set the wiki root.
 /// panic! on fail
 pub fn set_wiki_root(path: &str) -> Result<(), std::io::Error> {
-    if !dir_exists(path) {
+    let path = if path.contains('~') {
+        match std::env::var("HOME") {
+            Ok(home) => path.replace('~', &home),
+            Err(_) => {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "No $HOME env var! Can't decode `~`",
+                ))
+            }
+        }
+    } else {
+        path.to_string()
+    };
+
+    // ensure there's always one trailing /
+    let path = format!("{}/", path.trim_end_matches('/'));
+
+    if !dir_exists(&path) {
         return Err(std::io::Error::new(
             std::io::ErrorKind::NotFound,
             format!("{} isn't a directory", path),
         ));
     }
 
-    // set current dir to wiki
-    std::env::set_current_dir(path).expect("couldn't change working dir");
-
     // if this fails, we want to blow up
     let mut lock = WIKI_ROOT.lock().unwrap();
-    *lock = path.to_string();
+    *lock = path;
 
     Ok(())
 }

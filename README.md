@@ -1,4 +1,4 @@
-<img src="./static/img/rip.gif" alt="R.I.P." height="200" align="left">
+<img src="/img/rip.gif" alt="R.I.P." height="200" align="left">
 
 # deadwiki
 
@@ -96,6 +96,7 @@ quicker and more nimble.
 | -------------- | ---------------------------- |
 | `Double Click` | Enter edit or create mode    |
 | `Ctrl-h`       | Go to the home page          |
+| `Ctrl-j`       | Jump to page (fuzzy finder)  |
 | `Ctrl-n`       | Go to the "new" page         |
 | `Ctrl-e`       | Open editor for current page |
 
@@ -162,13 +163,13 @@ There's a basic wiki included that shows off some features.
 - take your data with you (scm friendly)
 - js only for user input (keyboard shortcuts, markdown editor, finder)
 - no js frameworks/helpers
-- build time matters (72 crates currently, ~22s release ~10s debug)
+- build time matters (42 crates currently, ~8s release ~6s debug)
 
 ## ~ screenies ~
 
-| ![screenie1](static/img/screenie1.jpeg) | ![screenie1](static/img/screenie2.jpeg) |
-| :-------------------------------------: | :-------------------------------------: |
-|       Rendering Markdown. `Wow.`        |      Editing Markdown. `Amazing.`       |
+| ![screenie1](/img/screenie1.jpeg) | ![screenie1](/img/screenie2.jpeg) |
+| :-------------------------------: | :-------------------------------: |
+|    Rendering Markdown. `Wow.`     |   Editing Markdown. `Amazing.`    |
 
 ## ~ bug reports ~
 
