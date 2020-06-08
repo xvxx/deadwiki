@@ -1,3 +1,18 @@
+## 0.1.18-dev
+
+Jump-to-page via fuzzy finder is now live! Use `ctrl-j` to open the
+menu and start typing a page title. This will gain functionality in
+the future.
+
+This release also switches deadwiki to a new backend,
+[Vial](https://vial.sh). **Vial** is a micro micro-framework for Rust.
+This change has cut the dependency count from 72 to 42 and release
+compile time from ~22s to ~8s on my machine:
+
+https://github.com/xvxx/deadwiki/commit/c7b844a90dc433703d64059ce7de5bebc5d4fd8f
+
+Enjoy!
+
 ## 0.1.17
 
 This release adds support for #hashtags! Very simple: any #hashtag
