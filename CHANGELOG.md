@@ -1,3 +1,7 @@
+## 0.1.19-dev
+
+This is a small release that upgrades Vial, fixing a few minor bugs.
+
 ## 0.1.18
 
 Jump-to-page via fuzzy finder is now live! Use `ctrl-j` to open the
