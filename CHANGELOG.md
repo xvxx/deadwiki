@@ -1,4 +1,4 @@
-## 0.1.19-dev
+## 0.1.19
 
 This is a small release that upgrades Vial, fixing a few minor bugs.
 
