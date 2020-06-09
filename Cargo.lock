@@ -278,9 +278,9 @@ checksum = "078775d0255232fb988e6fccf26ddc9d1ac274299aaedcedce21c6f72cc533ce"
 
 [[package]]
 name = "vial"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a28681de3419eb9c7f54bb4a2e5f793420924303c390c4f388e4b6cb992c4b83"
+checksum = "a4299e043c249f10e87534798b167abdd49a05929654d98805a60e2b1e428685"
 dependencies = [
  "libc-strftime",
  "percent-encoding",
