@@ -7,6 +7,12 @@ license = "MIT"
 description = "dead simple personal wiki"
 repository = "https://github.com/xvxx/deadwiki"
 readme = "README.md"
+keywords = ["wiki", "markdown", "cli"]
+categories = ["command-line-utilities"]
+exclude = [
+  "assets/*",
+  "wiki/*",
+]
 
 [[bin]]
 name = "dead"
