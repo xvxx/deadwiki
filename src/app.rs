@@ -40,9 +40,10 @@ fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
         format!("#{}", tag)
     };
 
-    println!("{:?}", std::env::current_dir().unwrap());
-    let out = util::shell("grep", &["-r", &tag, &wiki_root()])?;
-    println!("GREP: {:?}", out);
+    let out = util::shell(
+        "grep",
+        &["--exclude-dir", ".git", "-l", "-r", &tag, &wiki_root()],
+    )?;
     Ok(out
         .split("\n")
         .filter_map(|line| {
