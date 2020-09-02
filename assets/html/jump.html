@@ -21,22 +21,35 @@
     });
   });
 
-  // jump-to-page js
-  document.querySelector("#jump-pattern").addEventListener("keyup", (e) => {
-    // down arrow
-    if (e.keyCode == 40) {
+  document.querySelector("#jump-pattern").addEventListener("keydown", (e) => {
+    // down arrow or ctrl-n
+    if (e.keyCode == 40 || (e.keyCode == 78 && e.ctrlKey)) {
       let el = document.querySelector("#jump-list .active");
       el.classList.remove("active");
-      el.nextSibling.classList.add("active");
-      return;
+      el.nextElementSibling.classList.add("active");
+      e.stopPropagation();
+      return false;
     }
 
-    // up arrow
-    if (e.keyCode == 38) {
+    // up arrow or ctrl-p
+    if (e.keyCode == 38 || (e.keyCode == 80 && e.ctrlKey)) {
       let el = document.querySelector("#jump-list .active");
       el.classList.remove("active");
-      el.previousSibling.classList.add("active");
-      return;
+      el.previousElementSibling.classList.add("active");
+      e.stopPropagation();
+      return false;
+    }
+
+    if (e.keyCode == 13) {
+      let jumpList = document.querySelector("#jump-list");
+      for (var i = 0; i < jumpList.children.length; i++) {
+        let el = jumpList.children[i];
+        if (el.style.display != "none") {
+          window.location = el.children[0].href;
+          e.preventDefault();
+          return;
+        }
+      }
     }
 
     const fuse = new Fuse(window.WIKI_PAGES, { keys: ["name"] });

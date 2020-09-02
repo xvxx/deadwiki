@@ -52,20 +52,6 @@ document.onkeydown = (e) => {
     return;
   }
 
-  // jump-to-page js
-  let jumpInput = document.querySelector("#jump-pattern");
-  if (jumpInput && e.keyCode == 13) {
-    let jumpList = document.querySelector("#jump-list");
-    for (var i = 0; i < jumpList.children.length; i++) {
-      let el = jumpList.children[i];
-      if (el.style.display != "none") {
-        window.location = el.children[0].href;
-        e.preventDefault();
-        return;
-      }
-    }
-  }
-
   // global shortcuts for pages that don't have the editor
   if (!document.querySelector("#markdown")) {
     // ctrl-h goes home
