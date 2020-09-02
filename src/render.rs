@@ -54,7 +54,6 @@ where
             .replace("{title}", title)
             .replace("{body}", body)
             .replace("{webview-app}", webview_app)
-            .replace("{pages.json}", &pages_as_json())
             .replace("{nav}", nav.unwrap_or(""))
     } else {
         body.to_string()

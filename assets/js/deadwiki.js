@@ -39,7 +39,6 @@ document.onkeyup = (e) => {
     const fuse = new Fuse(window.WIKI_PAGES, { keys: ["name"] });
     const pattern = jumpInput.value;
     let list = document.querySelectorAll("#jump-list li");
-    console.log(list);
     if (pattern == "") {
       list.forEach((el) => (el.style.display = ""));
     } else {

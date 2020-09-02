@@ -6,3 +6,13 @@
     {pages}
   </ul>
 </div>
+
+<script>
+  window.WIKI_PAGES = [];
+  document.querySelectorAll("#jump-list li a").forEach((el) => {
+    window.WIKI_PAGES.push({
+      name: el.innerText,
+      path: el.href.split("/").slice(-1)[0],
+    });
+  });
+</script>
