@@ -32,50 +32,6 @@ window.onload = () => {
   });
 };
 
-document.onkeyup = (e) => {
-  // jump-to-page js
-  let jumpInput = document.querySelector("#jump-pattern");
-  if (jumpInput) {
-
-    // down arrow
-    if (e.keyCode == 40) {
-      let el = document.querySelector("#jump-list .active");
-      el.classList.remove("active");
-      el.nextSibling.classList.add("active");
-      return;
-    }
-
-    // up arrow
-    if (e.keyCode == 38) {
-      let el = document.querySelector("#jump-list .active");
-      el.classList.remove("active");
-      el.previousSibling.classList.add("active");
-      return;
-    }
-
-    const fuse = new Fuse(window.WIKI_PAGES, { keys: ["name"] });
-    const pattern = jumpInput.value;
-    let list = document.querySelectorAll("#jump-list li");
-    if (pattern == "") {
-      list.forEach((el) => (el.style.display = ""));
-    } else {
-      let matches = fuse.search(pattern);
-      list.forEach((el) => (el.style.display = "none"));
-      for (var i = matches.length - 1; i >= 0; i--) {
-        let match = matches[i];
-        let el = document.querySelector("#jump-" + match.refIndex);
-        let jumpList = document.querySelector("#jump-list");
-        jumpList.removeChild(el);
-        var active = document.querySelector(".active");
-        if (active) active.classList.toggle("active");
-        el.classList.add("active");
-        jumpList.insertBefore(el, jumpList.childNodes[0]);
-        el.style.display = "";
-      }
-    }
-  }
-};
-
 document.onkeydown = (e) => {
   e = e || window.event || {};
 
