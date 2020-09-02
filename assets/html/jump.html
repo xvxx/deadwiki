@@ -9,7 +9,12 @@
 
 <script>
   window.WIKI_PAGES = [];
+  var first = true;
   document.querySelectorAll("#jump-list li a").forEach((el) => {
+    if (first) {
+      el.closest("li").classList.add("active");
+      first = false;
+    }
     window.WIKI_PAGES.push({
       name: el.innerText,
       path: el.href.split("/").slice(-1)[0],

@@ -71,6 +71,6 @@ code a, code a:visited {
   width: 300px;
 }
 
-#jump-page ul> :first-child {
+#jump-page .active {
   font-weight: bold;
 }
