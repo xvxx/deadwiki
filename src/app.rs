@@ -178,22 +178,28 @@ fn jump(_: Request) -> Result<impl Responder, io::Error> {
         return Ok("Add a few wiki pages then come back.".to_string());
     }
 
+    let mut id = -1;
+    let mut entries = page_names()
+        .iter()
+        .map(|page| {
+            id += 1;
+            partial
+                .replace("{page.id}", &format!("{}", id))
+                .replace("{page.path}", page)
+                .replace("{page.name}", &wiki_path_to_title(page))
+        })
+        .collect::<Vec<_>>();
+    entries.extend(tag_names().iter().map(|tag| {
+        id += 1;
+        partial
+            .replace("{page.id}", &format!("{}", id))
+            .replace("{page.path}", &format!("search?tag={}", tag))
+            .replace("{page.name}", &format!("#{}", tag))
+    }));
+
     render::layout(
         "Jump to Wiki Page",
-        asset::to_string("html/jump.html")?.replace(
-            "{pages}",
-            &page_names()
-                .iter()
-                .enumerate()
-                .map(|(id, page)| {
-                    partial
-                        .replace("{page.id}", &id.to_string())
-                        .replace("{page.path}", page)
-                        .replace("{page.name}", &wiki_path_to_title(page))
-                })
-                .collect::<Vec<_>>()
-                .join("\n"),
-        ),
+        asset::to_string("html/jump.html")?.replace("{pages}", &format!("{}", entries.join(""))),
         None,
     )
 }

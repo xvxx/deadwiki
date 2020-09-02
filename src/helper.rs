@@ -1,4 +1,5 @@
 use {
+    crate::{util, wiki_root},
     std::{fs, io, os::unix::fs::PermissionsExt, path::Path},
     vial::asset,
 };
@@ -88,13 +89,13 @@ pub fn new_page_path(path: &str) -> Option<String> {
 
 /// Returns a wiki path on disk, regardless of whether it exists.
 pub fn page_disk_path(path: &str) -> String {
-    format!("{}/{}.md", crate::wiki_root(), pathify(path))
+    format!("{}/{}.md", wiki_root(), pathify(path))
 }
 
 /// All the wiki pages, in alphabetical order.
 pub fn page_names() -> Vec<String> {
     let mut names = vec![];
-    let root = crate::wiki_root();
+    let root = wiki_root();
 
     for entry in walkdir::WalkDir::new(&root)
         .into_iter()
@@ -118,20 +119,27 @@ pub fn page_names() -> Vec<String> {
     names
 }
 
-/// [{ title: "My Page", path: "my_page" }]
-pub fn pages_as_json() -> String {
-    format!(
-        "[{}]",
-        page_names()
-            .iter()
-            .map(|page| {
-                format!(
-                    r#"{{ name: "{}", path: "{}" }}"#,
-                    wiki_path_to_title(page),
-                    page
-                )
-            })
-            .collect::<Vec<_>>()
-            .join(", ")
-    )
+/// All the tags used, in alphabetical order.
+pub fn tag_names() -> Vec<String> {
+    let grep = format!(
+        "grep --exclude-dir .git -E -h -o -r '#(\\w+)' {} | sort | uniq",
+        wiki_root()
+    );
+    let out = match util::shell("sh", &["-c", &grep]) {
+        Err(e) => {
+            eprintln!("EGREP ERROR: {}", e);
+            return vec![];
+        }
+        Ok(out) => out,
+    };
+
+    out.split('\n')
+        .filter_map(|s| {
+            if s.is_empty() {
+                None
+            } else {
+                Some(s[1..].to_string())
+            }
+        })
+        .collect::<Vec<_>>()
 }
