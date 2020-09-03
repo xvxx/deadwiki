@@ -15,7 +15,6 @@ target/debug/dead: src/*.rs
 
 .PHONY: release
 release: target/release/dead
-	cp $< .
 
 target/release/dead: src/*.rs
 	$(CARGO_RELEASE)
@@ -23,10 +22,9 @@ target/release/dead: src/*.rs
 .PHONY: gui
 gui:
 	$(CARGO_RELEASE) --features gui
-	cp target/release/dead .
 
 clean:
-	rm -f target/{release,debug}/dead dead
+	rm -rf target
 
 install: release
 	cp target/release/dead $(PREFIX)/bin
