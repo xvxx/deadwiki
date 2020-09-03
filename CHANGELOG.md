@@ -1,3 +1,12 @@
+## 0.1.20-dev
+
+- "Recently edited pages" page added.
+- "Jump to page" (`ctrl-j`) now lets you jump to `#hashtags`.
+- "Jump to page" results can now be selected using
+  `up`/`down`/`ctrl-n`/`ctrl-p` keyboard shortcuts.
+- `make install` will build and install the `dead` binary to
+  `$PREFIX/bin`, where `$PREFIX` defaults to `$HOME` (`~/bin`).
+
 ## 0.1.19
 
 This is a small release that upgrades Vial, fixing a few minor bugs.
