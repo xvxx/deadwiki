@@ -27,6 +27,7 @@
       let el = document.querySelector("#jump-list .active");
       el.classList.remove("active");
       el.nextElementSibling.classList.add("active");
+      e.preventDefault();
       e.stopPropagation();
       return false;
     }
@@ -36,6 +37,7 @@
       let el = document.querySelector("#jump-list .active");
       el.classList.remove("active");
       el.previousElementSibling.classList.add("active");
+      e.preventDefault();
       e.stopPropagation();
       return false;
     }
