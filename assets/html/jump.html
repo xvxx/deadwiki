@@ -40,16 +40,11 @@
       return false;
     }
 
+    // enter (open page/tag)
     if (e.keyCode == 13) {
-      let jumpList = document.querySelector("#jump-list");
-      for (var i = 0; i < jumpList.children.length; i++) {
-        let el = jumpList.children[i];
-        if (el.style.display != "none") {
-          window.location = el.children[0].href;
-          e.preventDefault();
-          return;
-        }
-      }
+      window.location = document.querySelector("#jump-list .active a").href;
+      e.preventDefault();
+      return false;
     }
 
     const fuse = new Fuse(window.WIKI_PAGES, { keys: ["name"] });
