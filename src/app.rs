@@ -4,6 +4,7 @@ use {
     crate::{helper::*, render, util, wiki_root},
     atomicwrites::{AllowOverwrite, AtomicFile},
     std::{
+        collections::HashMap,
         fs,
         io::{self, Write},
         path::Path,
@@ -20,6 +21,7 @@ routes! {
     };
 
     GET "/jump" => jump;
+    GET "/recent" => recent;
 
     GET "/new" => new;
     POST "/new" => create;
@@ -170,6 +172,62 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
         }
     }
     Ok(response_404())
+}
+
+// Recently modified wiki pages.
+fn recent(_: Request) -> Result<impl Responder, io::Error> {
+    let out = util::shell(
+        "sh",
+        &[
+            "-c",
+            &format!(
+                "git --git-dir={}/.git log --pretty=format: --name-only -n 30 | grep \"\\.md\\$\"",
+                wiki_root()
+            ),
+        ],
+    )?;
+    let mut pages = vec![];
+    let mut seen = HashMap::new();
+    for page in out.split("\n") {
+        if seen.get(page).is_some() || page == ".md" || page.is_empty() {
+            // TODO: .md hack
+            continue;
+        } else {
+            pages.push(page);
+            seen.insert(page, true);
+        }
+    }
+
+    render::layout(
+        "deadwiki",
+        &format!(
+            "{}",
+            asset::to_string("html/list.html")?
+                .replace(
+                    "{empty-list-msg}",
+                    if pages.is_empty() {
+                        "<i>No Wiki Pages found.</i>"
+                    } else {
+                        ""
+                    }
+                )
+                .replace(
+                    "{pages}",
+                    &pages
+                        .iter()
+                        .map(|page| {
+                            format!(
+                                "<li><a href='/{}'>{}</a></li>",
+                                page.replace(".md", ""),
+                                &wiki_path_to_title(page)
+                            )
+                        })
+                        .collect::<Vec<_>>()
+                        .join("")
+                )
+        ),
+        Some(&nav("/")?),
+    )
 }
 
 fn jump(_: Request) -> Result<impl Responder, io::Error> {
