@@ -1,5 +1,6 @@
 CARGO_DEBUG = cargo build
 CARGO_RELEASE = cargo build --release
+PREFIX=$(HOME)
 
 .PHONY: watch
 watch:
@@ -26,3 +27,9 @@ gui:
 
 clean:
 	rm -f target/{release,debug}/dead dead
+
+install: release
+	cp target/release/dead $(PREFIX)/bin
+
+uninstall: release
+	rm -f $(PREFIX)/bin/dead
