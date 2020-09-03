@@ -25,8 +25,12 @@
     // down arrow or ctrl-n
     if (e.keyCode == 40 || (e.keyCode == 78 && e.ctrlKey)) {
       let el = document.querySelector("#jump-list .active");
-      el.classList.remove("active");
-      el.nextElementSibling.classList.add("active");
+      var next = el.nextElementSibling;
+      while (next && !next.offsetParent) next = next.nextElementSibling;
+      if (next && next.offsetParent) {
+        el.classList.remove("active");
+        next.classList.add("active");
+      }
       e.preventDefault();
       e.stopPropagation();
       return false;
@@ -35,8 +39,12 @@
     // up arrow or ctrl-p
     if (e.keyCode == 38 || (e.keyCode == 80 && e.ctrlKey)) {
       let el = document.querySelector("#jump-list .active");
-      el.classList.remove("active");
-      el.previousElementSibling.classList.add("active");
+      var prev = el.previousElementSibling;
+      while (prev && !prev.offsetParent) prev = prev.previousElementSibling;
+      if (prev && prev.offsetParent) {
+        el.classList.remove("active");
+        prev.classList.add("active");
+      }
       e.preventDefault();
       e.stopPropagation();
       return false;
