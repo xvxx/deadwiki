@@ -90,7 +90,7 @@ a few deadwiki-specific shortcuts.
 Browsing mode includes a few keyboard shortcuts to make navigation
 quicker and more nimble.
 
-### MODE: Browse
+### Browse Mode
 
 | **Shortcut**   | **Notes**                    |
 | -------------- | ---------------------------- |
@@ -101,7 +101,7 @@ quicker and more nimble.
 | `Ctrl-e`       | Open editor for current page |
 | `i`            | Insert mode: Edit or New     |
 
-### MODE: Edit
+### Edit Mode
 
 | **Shortcut**  | **Notes**                |
 | ------------- | ------------------------ |
@@ -136,8 +136,9 @@ passing the `-g` flag to it:
 
 ## ~ hacking ~
 
-The code is in pretty rough shape right now, so enter at your own
-risk, but you can hack on it pretty easily using [cargo]:
+The code is in pretty rough shape right now, as this is mostly a
+prototype-in-progress. But you can hack on it pretty easily with
+[cargo]:
 
     $ git clone https://github.com/xvxx/deadwiki
     $ cd deadwiki
