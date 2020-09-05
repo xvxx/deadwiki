@@ -15,11 +15,6 @@ use {
 routes! {
     GET "/" => index;
 
-    GET "/sleep" => |_| {
-        std::thread::sleep(std::time::Duration::from_secs(5));
-        "Zzzzz..."
-    };
-
     GET "/jump" => jump;
     GET "/recent" => recent;
 
