@@ -35,7 +35,11 @@ dir and can browse them using a fancy, 1990s-era HTML interface.
 
 ## ~ installation ~
 
-Okay, so how do you get started? With [cargo]:
+Okay, so how do you get started? You just need `grep`, which you
+probably already have, and [cargo], which is usually pretty easy to
+install.
+
+Once you've got both of them you can install it with:
 
     cargo install deadwiki
 
