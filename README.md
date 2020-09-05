@@ -146,7 +146,6 @@ There's a basic wiki included that shows off some features.
 
 ## ~ future features ~
 
-- jump to wiki page (via fuzzy finder)
 - `--read-only` mode, so i can have a copy i can view anywhere
 - mobile-friendly CSS
 - search (probably just `grep`)
