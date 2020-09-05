@@ -1,4 +1,4 @@
-## 0.1.20-dev
+## 0.1.20
 
 - "Recently edited pages" page added.
 - "Jump to page" (`ctrl-j`) now lets you jump to `#hashtags`.
