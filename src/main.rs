@@ -40,6 +40,8 @@ fn main() {
         }
     }
 
+    println!("~> deadwiki v{}", env!("CARGO_PKG_VERSION"));
+
     #[cfg(feature = "gui")]
     {
         if gui {
