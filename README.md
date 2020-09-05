@@ -99,6 +99,7 @@ quicker and more nimble.
 | `Ctrl-j`       | Jump to page (fuzzy finder)  |
 | `Ctrl-n`       | Go to the "new" page         |
 | `Ctrl-e`       | Open editor for current page |
+| `i`            | Insert mode: Edit or New     |
 
 ### MODE: Edit
 
@@ -167,8 +168,8 @@ There's a basic wiki included that shows off some features.
 ## ~ screenies ~
 
 | ![screenie1](/assets/img/screenie1.jpeg) | ![screenie1](/assets/img/screenie2.jpeg) |
-| :-------------------------------: | :-------------------------------: |
-|    Rendering Markdown. `Wow.`     |   Editing Markdown. `Amazing.`    |
+| :--------------------------------------: | :--------------------------------------: |
+|        Rendering Markdown. `Wow.`        |       Editing Markdown. `Amazing.`       |
 
 ## ~ bug reports ~
 

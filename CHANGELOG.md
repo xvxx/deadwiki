@@ -1,3 +1,7 @@
+## 0.1.21-dev
+
+- Added `i` keyboard shortcut to edit the current page.
+
 ## 0.1.20
 
 - "Recently edited pages" page added.

@@ -66,19 +66,18 @@ document.onkeydown = (e) => {
       return (window.location = "/jump");
     }
 
-    // ctrl-n new
-    if (e.ctrlKey && e.key == "n") {
+    // ctrl-n new / i insert
+    if (e.key == "i" || (e.ctrlKey && e.key == "n")) {
       e.preventDefault();
       return (window.location = "/new");
     }
 
-    // ctrl-e edit
+    // ctrl-e edit / i insert mode
     var editLink = document.querySelector("#edit-link");
-    if (editLink)
-      if (e.ctrlKey && e.key == "e") {
-        e.preventDefault();
-        return (window.location = editLink.href);
-      }
+    if (editLink && ((e.ctrlKey && e.key == "e") || e.key == "i")) {
+      e.preventDefault();
+      return (window.location = editLink.href);
+    }
 
     ////
     // everything after this are shortcuts only for the editor
