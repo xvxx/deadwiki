@@ -37,7 +37,21 @@ pub fn wiki_path_to_title(path: &str) -> String {
 
 /// Return the <nav> for a page
 pub fn nav(current_path: &str) -> Result<String, io::Error> {
-    Ok(asset::to_string("html/nav.html")?.replace("{current_path}", current_path))
+    let new_link = if current_path.contains('/') {
+        format!(
+            "/new?name={}/",
+            current_path
+                .split('/')
+                .take(current_path.matches('/').count())
+                .collect::<Vec<_>>()
+                .join("/")
+        )
+    } else {
+        "/new".to_string()
+    };
+    Ok(asset::to_string("html/nav.html")?
+        .replace("{current_path}", current_path)
+        .replace("{new_link}", &new_link))
 }
 
 /// Is the file at the given path `chmod +x`?

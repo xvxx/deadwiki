@@ -69,7 +69,12 @@ document.onkeydown = (e) => {
     // ctrl-n new / i insert
     if (e.key == "i" || (e.ctrlKey && e.key == "n")) {
       e.preventDefault();
-      return (window.location = "/new");
+      let newLink = document.querySelector("#new-link");
+      if (newLink) {
+        return (window.location = newLink.href);
+      } else {
+        return (window.location = "/new");
+      }
     }
 
     // ctrl-e edit / i insert mode
