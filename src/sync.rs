@@ -84,9 +84,9 @@ fn sync_changes() -> Result<bool, io::Error> {
 }
 
 fn git(args: &[&str]) -> Result<String, std::io::Error> {
-    let git_dir = format!("{}.git", wiki_root());
-    let root = wiki_root();
-    let mut git_args = vec!["--git-dir", &git_dir, "--work-tree", &root];
-    git_args.extend_from_slice(args);
-    shell("git", &git_args)
+    shell!(
+        "git --git-dir {root}.git --work-tree {root} {args}",
+        root = wiki_root(),
+        args = args.join(" ")
+    )
 }

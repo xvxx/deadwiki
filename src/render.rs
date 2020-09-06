@@ -1,7 +1,7 @@
 //! Rendering "logic".
 
 use {
-    crate::{helper::*, render, util::shell},
+    crate::{helper::*, render},
     pulldown_cmark as markdown,
     std::{fs, io, str},
     vial::asset,
@@ -19,7 +19,7 @@ pub fn page(path: &str) -> Result<String, io::Error> {
     let title = wiki_path_to_title(path);
     if let Some(path) = page_path(path) {
         let html = if is_executable(&path) {
-            shell(&path, &[]).unwrap_or_else(|e| e.to_string())
+            shell!(path).unwrap_or_else(|e| e.to_string())
         } else {
             fs::read_to_string(&path).unwrap_or_else(|_| "".into())
         };

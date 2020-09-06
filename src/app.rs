@@ -37,10 +37,7 @@ fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
         format!("#{}", tag)
     };
 
-    let out = util::shell(
-        "grep",
-        &["--exclude-dir", ".git", "-l", "-r", &tag, &wiki_root()],
-    )?;
+    let out = shell!("grep --exclude-dir .git -l -r {} {}", tag, wiki_root())?;
     Ok(out
         .split("\n")
         .filter_map(|line| {
@@ -171,15 +168,9 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
 
 // Recently modified wiki pages.
 fn recent(_: Request) -> Result<impl Responder, io::Error> {
-    let out = util::shell(
-        "sh",
-        &[
-            "-c",
-            &format!(
-                "git --git-dir={}/.git log --pretty=format: --name-only -n 30 | grep \"\\.md\\$\"",
-                wiki_root()
-            ),
-        ],
+    let out = shell!(
+        r#"git --git-dir={}/.git log --pretty=format: --name-only -n 30 | grep "\\.md\\$""#,
+        wiki_root()
     )?;
     let mut pages = vec![];
     let mut seen = HashMap::new();

@@ -1,3 +1,13 @@
+/// Run a shell command, ex: shell!("grep -R '#deadwiki' {}", wiki_root())
+macro_rules! shell {
+    ($cmd:expr) => {
+        crate::util::shell("sh", &["-c", $cmd.as_ref()])
+    };
+    ($cmd:expr, $($arg:tt)+) => {
+        shell!(format!($cmd, $($arg)+));
+    };
+}
+
 /// Run a script and return its output.
 pub fn shell(path: &str, args: &[&str]) -> Result<String, std::io::Error> {
     let output = std::process::Command::new(path).args(args).output()?;

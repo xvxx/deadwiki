@@ -135,11 +135,10 @@ pub fn page_names() -> Vec<String> {
 
 /// All the tags used, in alphabetical order.
 pub fn tag_names() -> Vec<String> {
-    let grep = format!(
+    let out = match shell!(
         "grep --exclude-dir .git -E -h -o -r '#(\\w+)' {} | sort | uniq",
         wiki_root()
-    );
-    let out = match util::shell("sh", &["-c", &grep]) {
+    ) {
         Err(e) => {
             eprintln!("EGREP ERROR: {}", e);
             return vec![];
