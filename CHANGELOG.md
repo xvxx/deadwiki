@@ -1,4 +1,4 @@
-## 0.1.21-dev
+## 0.1.21
 
 - Added `i` keyboard shortcut to edit the current page.
 - The "new" form now prefills the title with the current directory.
