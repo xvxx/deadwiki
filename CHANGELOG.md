@@ -1,3 +1,7 @@
+## 0.1.22-dev
+
+- Bugfix release.
+
 ## 0.1.21
 
 - Added `i` keyboard shortcut to edit the current page.
