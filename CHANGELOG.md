@@ -1,4 +1,4 @@
-## 0.1.22-dev
+## 0.1.22
 
 - Bugfix release.
 
