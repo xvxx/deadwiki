@@ -169,7 +169,7 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
 // Recently modified wiki pages.
 fn recent(_: Request) -> Result<impl Responder, io::Error> {
     let out = shell!(
-        r#"git --git-dir={}/.git log --pretty=format: --name-only -n 30 | grep "\\.md\\$""#,
+        r#"git --git-dir={}/.git log --pretty=format: --name-only -n 30 | grep "\.md\$""#,
         wiki_root()
     )?;
     let mut pages = vec![];
