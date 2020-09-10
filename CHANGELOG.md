@@ -1,6 +1,8 @@
 ## 0.1.21-dev
 
 - Added `i` keyboard shortcut to edit the current page.
+- The "new" form now prefills the title with the current directory.
+- Fixed `cargo install deadwiki`.
 
 ## 0.1.20
 
