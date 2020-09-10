@@ -37,7 +37,7 @@ fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
         format!("#{}", tag)
     };
 
-    let out = shell!("grep --exclude-dir .git -l -r {} {}", tag, wiki_root())?;
+    let out = shell!("grep --exclude-dir .git -l -r '{}' {}", tag, wiki_root())?;
     Ok(out
         .split("\n")
         .filter_map(|line| {
