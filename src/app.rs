@@ -28,36 +28,6 @@ routes! {
     GET "/*name" => show;
 }
 
-// Don't include the '#' when you search, eg pass in "hashtag" to
-// search for #hashtag.
-fn pages_with_tag(tag: &str) -> Result<Vec<String>, io::Error> {
-    let tag = if tag.starts_with('#') {
-        tag.to_string()
-    } else {
-        format!("#{}", tag)
-    };
-
-    let out = shell!("grep --exclude-dir .git -l -r '{}' {}", tag, wiki_root())?;
-    Ok(out
-        .split("\n")
-        .filter_map(|line| {
-            if !line.is_empty() {
-                Some(
-                    line.split(':')
-                        .next()
-                        .unwrap_or("?")
-                        .trim_end_matches(".md")
-                        .trim_start_matches(&wiki_root())
-                        .trim_start_matches('/')
-                        .to_string(),
-                )
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<_>>())
-}
-
 fn search(req: Request) -> Result<impl Responder, io::Error> {
     if let Some(tag) = req.query("tag") {
         Ok(render::layout(
@@ -66,7 +36,7 @@ fn search(req: Request) -> Result<impl Responder, io::Error> {
                 .replace("{tag}", &format!("#{}", tag))
                 .replace(
                     "{results}",
-                    &pages_with_tag(tag)?
+                    &find_pages_with_tag(tag)?
                         .iter()
                         .map(|page| {
                             format!(

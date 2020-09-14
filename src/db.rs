@@ -68,4 +68,34 @@ impl DB {
             })
             .collect::<Vec<_>>())
     }
+
+    // Don't include the '#' when you search, eg pass in "hashtag" to
+    // search for #hashtag.
+    pub fn find_pages_with_tag(&self, tag: &str) -> Result<Vec<String>> {
+        let tag = if tag.starts_with('#') {
+            tag.to_string()
+        } else {
+            format!("#{}", tag)
+        };
+
+        let out = shell!("grep --exclude-dir .git -l -r '{}' {}", tag, self.root)?;
+        Ok(out
+            .split("\n")
+            .filter_map(|line| {
+                if !line.is_empty() {
+                    Some(
+                        line.split(':')
+                            .next()
+                            .unwrap_or("?")
+                            .trim_end_matches(".md")
+                            .trim_start_matches(&self.root)
+                            .trim_start_matches('/')
+                            .to_string(),
+                    )
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>())
+    }
 }
