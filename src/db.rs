@@ -1,4 +1,4 @@
-use {crate::Page, std::collections::HashMap, walkdir::WalkDir};
+use {crate::Page, std::collections::HashMap};
 
 pub type Result<T> = std::result::Result<T, std::io::Error>;
 
@@ -51,18 +51,11 @@ impl DB {
 
     /// All the wiki pages, in alphabetical order.
     pub fn pages(&self) -> Result<Vec<Page>> {
-        let mut pages = vec![];
-
-        for entry in WalkDir::new(&self.root).into_iter().filter_map(|e| e.ok()) {
-            if !entry.file_type().is_dir()
-                && entry.file_name().to_str().unwrap_or("").ends_with(".md")
-            {
-                let path = entry.path().display().to_string();
-                pages.push(Page::new(&self.root, &path));
-            }
-        }
-
-        Ok(pages)
+        Ok(shell!("find {} -type f -name '*.md' | sort", self.root)?
+            .trim()
+            .split('\n')
+            .map(|line| Page::new(&self.root, line.trim().to_string()))
+            .collect())
     }
 
     /// All the wiki page names, in alphabetical order.
@@ -160,5 +153,15 @@ mod test {
         let db = DB::new("./src/");
         assert_eq!(0, db.len());
         assert_eq!(true, db.is_empty());
+    }
+
+    #[test]
+    fn test_pages() {
+        let db = DB::new("./wiki/");
+        let pages = db.pages().unwrap();
+        assert_eq!("TODO", pages[0].name());
+        assert_eq!("TODO", pages[0].title());
+        assert_eq!("keyboard_shortcuts", pages[1].name());
+        assert_eq!("Keyboard Shortcuts", pages[1].title());
     }
 }
