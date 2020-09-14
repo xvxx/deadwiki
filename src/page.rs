@@ -13,19 +13,22 @@ impl Page {
     }
 
     pub fn name(&self) -> &str {
-        self.path
-            .trim_start_matches(&self.root)
-            .trim_start_matches('.')
-            .trim_start_matches('/')
-            .trim_end_matches(".md")
+        self.path_without_root().trim_end_matches(".md")
     }
 
     pub fn url(&self) -> String {
-        self.path.to_string()
+        format!("/{}", self.name())
     }
 
     pub fn path(&self) -> &str {
         &self.path
+    }
+
+    pub fn path_without_root(&self) -> &str {
+        self.path
+            .trim_start_matches(&self.root)
+            .trim_start_matches('.')
+            .trim_start_matches('/')
     }
 
     pub fn title(&self) -> String {
@@ -67,11 +70,13 @@ mod test {
         let page = Page::new("./wiki", "./wiki/info.md");
         assert_eq!(page.name(), "info");
         assert_eq!(page.title(), "Info");
+        assert_eq!(page.url(), "/info");
         assert_eq!(page.path, "./wiki/info.md");
 
         let page = Page::new("./wiki", "./wiki/linux_laptops.md");
         assert_eq!(page.name(), "linux_laptops");
         assert_eq!(page.title(), "Linux Laptops");
+        assert_eq!(page.url(), "/linux_laptops");
         assert_eq!(page.path, "./wiki/linux_laptops.md");
     }
 }
