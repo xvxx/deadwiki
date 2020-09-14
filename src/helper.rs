@@ -1,58 +1,7 @@
 use {
-    crate::{util, wiki_root},
-    std::{fs, io, os::unix::fs::PermissionsExt, path::Path},
-    vial::asset,
+    crate::wiki_root,
+    std::{fs, os::unix::fs::PermissionsExt, path::Path},
 };
-
-/// Capitalize the first letter of a string.
-pub fn capitalize(s: &str) -> String {
-    format!(
-        "{}{}",
-        s.chars().next().unwrap_or('?').to_uppercase(),
-        &s.chars().skip(1).collect::<String>()
-    )
-}
-
-/// some_page -> Some Page
-pub fn wiki_path_to_title(path: &str) -> String {
-    path.trim_start_matches('/')
-        .trim_end_matches(".md")
-        .split('_')
-        .map(|part| {
-            if part.contains('/') {
-                let mut parts = part.split('/').rev();
-                let last = parts.next().unwrap_or("?");
-                format!(
-                    "{}/{}",
-                    parts.rev().collect::<Vec<_>>().join("/"),
-                    capitalize(last)
-                )
-            } else {
-                capitalize(&part)
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-/// Return the <nav> for a page
-pub fn nav(current_path: &str) -> Result<String, io::Error> {
-    let new_link = if current_path.contains('/') {
-        format!(
-            "/new?name={}/",
-            current_path
-                .split('/')
-                .take(current_path.matches('/').count())
-                .collect::<Vec<_>>()
-                .join("/")
-        )
-    } else {
-        "/new".to_string()
-    };
-    Ok(asset::to_string("html/nav.html")?
-        .replace("{current_path}", current_path)
-        .replace("{new_link}", &new_link))
-}
 
 /// Is the file at the given path `chmod +x`?
 pub fn is_executable(path: &str) -> bool {
@@ -104,55 +53,4 @@ pub fn new_page_path(path: &str) -> Option<String> {
 /// Returns a wiki path on disk, regardless of whether it exists.
 pub fn page_disk_path(path: &str) -> String {
     format!("{}/{}.md", wiki_root(), pathify(path))
-}
-
-/// All the wiki pages, in alphabetical order.
-pub fn page_names() -> Vec<String> {
-    let mut names = vec![];
-    let root = wiki_root();
-
-    for entry in walkdir::WalkDir::new(&root)
-        .into_iter()
-        .filter_map(|e| e.ok())
-    {
-        if !entry.file_type().is_dir() && entry.file_name().to_str().unwrap_or("").ends_with(".md")
-        {
-            let name = entry.path().display().to_string();
-            let name = name
-                .trim_start_matches(&root)
-                .trim_start_matches('.')
-                .trim_start_matches('/')
-                .trim_end_matches(".md");
-            if !name.is_empty() {
-                names.push(name.to_lowercase());
-            }
-        }
-    }
-
-    names.sort();
-    names
-}
-
-/// All the tags used, in alphabetical order.
-pub fn tag_names() -> Vec<String> {
-    let out = match shell!(
-        "grep --exclude-dir .git -E -h -o -r '#(\\w+)' {} | sort | uniq",
-        wiki_root()
-    ) {
-        Err(e) => {
-            eprintln!("EGREP ERROR: {}", e);
-            return vec![];
-        }
-        Ok(out) => out,
-    };
-
-    out.split('\n')
-        .filter_map(|s| {
-            if s.is_empty() {
-                None
-            } else {
-                Some(s[1..].to_string())
-            }
-        })
-        .collect::<Vec<_>>()
 }
