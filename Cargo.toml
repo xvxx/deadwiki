@@ -31,7 +31,7 @@ dev-version-ext = "dev"
 vial = "0.1.1"
 
 [dependencies]
-vial = "0.1.1"
+vial = { version = "0.1.1", features = ['state'] }
 
 pulldown-cmark = { version = "0.7", default-features = false }
 autolink = "0.3.0"

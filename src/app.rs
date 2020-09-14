@@ -1,10 +1,9 @@
 //! (Method, URL) => Code
 
 use {
-    crate::{helper::*, render, util, wiki_root},
+    crate::{db::ReqWithDB, helper::*, render},
     atomicwrites::{AllowOverwrite, AtomicFile},
     std::{
-        collections::HashMap,
         fs,
         io::{self, Write},
         path::Path,
@@ -36,14 +35,11 @@ fn search(req: Request) -> Result<impl Responder, io::Error> {
                 .replace("{tag}", &format!("#{}", tag))
                 .replace(
                     "{results}",
-                    &find_pages_with_tag(tag)?
+                    &req.db()
+                        .find_pages_with_tag(tag)?
                         .iter()
                         .map(|page| {
-                            format!(
-                                "<li><a href='/{}'>{}</a></li>",
-                                page,
-                                wiki_path_to_title(page)
-                            )
+                            format!("<li><a href='/{}'>{}</a></li>", page.url(), page.title())
                         })
                         .collect::<Vec<_>>()
                         .join("\n"),
@@ -65,7 +61,7 @@ fn new(req: Request) -> Result<impl Responder, io::Error> {
 }
 
 /// Render the index page which lists all wiki pages.
-pub fn index(_req: Request) -> Result<impl Responder, io::Error> {
+fn index(req: Request) -> Result<impl Responder, io::Error> {
     let mut folded = "";
 
     Ok(render::layout(
@@ -75,7 +71,7 @@ pub fn index(_req: Request) -> Result<impl Responder, io::Error> {
             asset::to_string("html/index.html")?
                 .replace(
                     "{empty-list-msg}",
-                    if page_names().is_empty() {
+                    if req.db().is_empty() {
                         "<i>Wiki Pages you create will show up here.</i>"
                     } else {
                         ""
@@ -83,9 +79,11 @@ pub fn index(_req: Request) -> Result<impl Responder, io::Error> {
                 )
                 .replace(
                     "{pages}",
-                    &page_names()
+                    &req.db()
+                        .pages()?
                         .iter()
-                        .map(|name| {
+                        .map(|page| {
+                            let name = page.name();
                             let mut prefix = "".to_string();
                             if let Some(idx) = name.trim_start_matches('/').find('/') {
                                 if folded.is_empty() {
@@ -104,8 +102,8 @@ pub fn index(_req: Request) -> Result<impl Responder, io::Error> {
                             format!(
                                 "{}  <li><a href='{}'>{}</a></li>\n",
                                 prefix,
-                                name,
-                                wiki_path_to_title(name)
+                                page.url(),
+                                page.title(),
                             )
                         })
                         .collect::<String>()
@@ -117,7 +115,7 @@ pub fn index(_req: Request) -> Result<impl Responder, io::Error> {
 
 fn create(req: Request) -> Result<impl Responder, io::Error> {
     let path = pathify(&req.form("name").unwrap_or(""));
-    if !page_names().contains(&path) {
+    if !req.db().names()?.contains(&path) {
         if let Some(disk_path) = new_page_path(&path) {
             if disk_path.contains('/') {
                 if let Some(dir) = Path::new(&disk_path).parent() {
@@ -137,23 +135,7 @@ fn create(req: Request) -> Result<impl Responder, io::Error> {
 }
 
 // Recently modified wiki pages.
-fn recent(_: Request) -> Result<impl Responder, io::Error> {
-    let out = shell!(
-        r#"git --git-dir={}/.git log --pretty=format: --name-only -n 30 | grep "\.md\$""#,
-        wiki_root()
-    )?;
-    let mut pages = vec![];
-    let mut seen = HashMap::new();
-    for page in out.split("\n") {
-        if seen.get(page).is_some() || page == ".md" || page.is_empty() {
-            // TODO: .md hack
-            continue;
-        } else {
-            pages.push(page);
-            seen.insert(page, true);
-        }
-    }
-
+fn recent(req: Request) -> Result<impl Responder, io::Error> {
     render::layout(
         "deadwiki",
         &format!(
@@ -161,7 +143,7 @@ fn recent(_: Request) -> Result<impl Responder, io::Error> {
             asset::to_string("html/list.html")?
                 .replace(
                     "{empty-list-msg}",
-                    if pages.is_empty() {
+                    if req.db().is_empty() {
                         "<i>No Wiki Pages found.</i>"
                     } else {
                         ""
@@ -169,41 +151,40 @@ fn recent(_: Request) -> Result<impl Responder, io::Error> {
                 )
                 .replace(
                     "{pages}",
-                    &pages
+                    &req.db()
+                        .recent()?
                         .iter()
                         .map(|page| {
-                            format!(
-                                "<li><a href='/{}'>{}</a></li>",
-                                page.replace(".md", ""),
-                                &wiki_path_to_title(page)
-                            )
+                            format!("<li><a href='{}'>{}</a></li>", page.url(), page.title())
                         })
                         .collect::<Vec<_>>()
                         .join("")
                 )
         ),
-        Some(&nav("/")?),
+        None,
     )
 }
 
-fn jump(_: Request) -> Result<impl Responder, io::Error> {
+fn jump(req: Request) -> Result<impl Responder, io::Error> {
     let partial = asset::to_string("html/_jump_page.html")?;
-    if page_names().is_empty() {
+    if req.db().is_empty() {
         return Ok("Add a few wiki pages then come back.".to_string());
     }
 
     let mut id = -1;
-    let mut entries = page_names()
+    let mut entries = req
+        .db()
+        .pages()?
         .iter()
         .map(|page| {
             id += 1;
             partial
                 .replace("{page.id}", &format!("{}", id))
-                .replace("{page.path}", page)
-                .replace("{page.name}", &wiki_path_to_title(page))
+                .replace("{page.path}", &page.url())
+                .replace("{page.name}", &page.title())
         })
         .collect::<Vec<_>>();
-    entries.extend(tag_names().iter().map(|tag| {
+    entries.extend(req.db().tags()?.iter().map(|tag| {
         id += 1;
         partial
             .replace("{page.id}", &format!("{}", id))
@@ -250,8 +231,9 @@ fn edit(req: Request) -> Result<impl Responder, io::Error> {
 
 fn show(req: Request) -> Result<impl Responder, io::Error> {
     if let Some(name) = req.arg("name") {
-        if let Some(_disk_path) = page_path(name) {
-            return Ok(render::page(name)?.to_response());
+        let raw = name.ends_with(".md");
+        if let Some(page) = req.db().find(name.trim_end_matches(".md")) {
+            return Ok(render::page(page, raw, &req.db().names()?)?.to_response());
         }
     }
     Ok(response_404())

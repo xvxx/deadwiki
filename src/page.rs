@@ -1,17 +1,35 @@
 /// Single Wiki Page
-
-pub struct Page<'s> {
-    pub name: &'s str,
-    pub path: &'s str,
+pub struct Page {
+    path: String,
+    root: String,
 }
 
-impl<'s> Page<'s> {
-    pub fn new(name: &'s str, path: &'s str) -> Page<'s> {
-        Page { name, path }
+impl Page {
+    pub fn new<S: AsRef<str>, T: AsRef<str>>(root: S, path: T) -> Page {
+        Page {
+            root: root.as_ref().into(),
+            path: path.as_ref().into(),
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        self.path
+            .trim_start_matches(&self.root)
+            .trim_start_matches('.')
+            .trim_start_matches('/')
+            .trim_end_matches(".md")
+    }
+
+    pub fn url(&self) -> String {
+        self.path.to_string()
+    }
+
+    pub fn path(&self) -> &str {
+        &self.path
     }
 
     pub fn title(&self) -> String {
-        self.name
+        self.name()
             .split('_')
             .map(|part| {
                 if part.contains('/') {

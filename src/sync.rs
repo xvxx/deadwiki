@@ -5,7 +5,7 @@
 //!   git push origin master
 
 use {
-    crate::{util::shell, wiki_root},
+    crate::wiki_root,
     std::{fs, io, path::Path, thread, time},
 };
 

@@ -1,16 +1,50 @@
-use crate::Page;
-use walkdir::WalkDir;
+use {crate::Page, std::collections::HashMap, walkdir::WalkDir};
 
 pub type Result<T> = std::result::Result<T, std::io::Error>;
+
+pub trait ReqWithDB {
+    fn db(&self) -> &DB;
+}
+
+impl ReqWithDB for vial::Request {
+    fn db(&self) -> &DB {
+        self.state::<DB>()
+    }
+}
 
 pub struct DB {
     root: String,
 }
 
+unsafe impl Sync for DB {}
+unsafe impl Send for DB {}
+
 impl DB {
     /// Create a new DB object. Should only have one per run.
     pub fn new(root: String) -> DB {
         DB { root }
+    }
+
+    /// Is this DB empty?
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// How many wiki pages have been created?
+    pub fn len(&self) -> usize {
+        if let Ok(res) = shell!("ls -R -1 {} | grep '\\.md' | wc -l", self.root) {
+            res.parse::<usize>().unwrap_or(0)
+        } else {
+            0
+        }
+    }
+
+    /// Find a single wiki page by name.
+    pub fn find(&self, name: &str) -> Option<Page> {
+        self.pages()
+            .unwrap_or_else(|_| vec![])
+            .into_iter()
+            .find(|p| p.name() == name)
     }
 
     /// All the wiki pages, in alphabetical order.
@@ -22,26 +56,45 @@ impl DB {
                 && entry.file_name().to_str().unwrap_or("").ends_with(".md")
             {
                 let path = entry.path().display().to_string();
-                let name = path
-                    .trim_start_matches(&self.root)
-                    .trim_start_matches('.')
-                    .trim_start_matches('/')
-                    .trim_end_matches(".md")
-                    .to_lowercase();
-                if !name.is_empty() {
-                    pages.push(Page::new(&name, &path));
-                }
+                pages.push(Page::new(&self.root, &path));
             }
         }
 
         Ok(pages)
     }
 
-    /// All the wiki page titles, in alphabetical order.
-    pub fn titles(&self) -> Result<Vec<String>> {
-        let mut names: Vec<_> = self.pages()?.iter().map(|p| p.name.to_string()).collect();
+    /// All the wiki page names, in alphabetical order.
+    pub fn names(&self) -> Result<Vec<String>> {
+        let mut names: Vec<_> = self.pages()?.iter().map(|p| p.name().to_string()).collect();
         names.sort();
         Ok(names)
+    }
+
+    /// All the wiki page titles, in alphabetical order.
+    pub fn titles(&self) -> Result<Vec<String>> {
+        let mut names: Vec<_> = self.pages()?.iter().map(|p| p.title()).collect();
+        names.sort();
+        Ok(names)
+    }
+
+    /// Recently modified wiki pages.
+    pub fn recent(&self) -> Result<Vec<Page>> {
+        let out = shell!(
+            r#"git --git-dir={}/.git log --pretty=format: --name-only -n 30 | grep "\.md\$""#,
+            self.root
+        )?;
+        let mut pages = vec![];
+        let mut seen = HashMap::new();
+        for path in out.split("\n") {
+            if seen.get(path).is_some() || path == ".md" || path.is_empty() {
+                // TODO: .md hack
+                continue;
+            } else {
+                pages.push(Page::new(&self.root, path));
+                seen.insert(path, true);
+            }
+        }
+        Ok(pages)
     }
 
     /// All the tags used, in alphabetical order.
@@ -52,7 +105,7 @@ impl DB {
         ) {
             Err(e) => {
                 eprintln!("EGREP ERROR: {}", e);
-                return vec![];
+                return Err(e);
             }
             Ok(out) => out,
         };
@@ -71,7 +124,7 @@ impl DB {
 
     // Don't include the '#' when you search, eg pass in "hashtag" to
     // search for #hashtag.
-    pub fn find_pages_with_tag(&self, tag: &str) -> Result<Vec<String>> {
+    pub fn find_pages_with_tag(&self, tag: &str) -> Result<Vec<Page>> {
         let tag = if tag.starts_with('#') {
             tag.to_string()
         } else {
@@ -83,15 +136,7 @@ impl DB {
             .split("\n")
             .filter_map(|line| {
                 if !line.is_empty() {
-                    Some(
-                        line.split(':')
-                            .next()
-                            .unwrap_or("?")
-                            .trim_end_matches(".md")
-                            .trim_start_matches(&self.root)
-                            .trim_start_matches('/')
-                            .to_string(),
-                    )
+                    Some(Page::new(&self.root, line.split(':').next().unwrap_or("?")))
                 } else {
                     None
                 }
