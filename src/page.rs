@@ -57,3 +57,21 @@ fn capitalize(s: &str) -> String {
         &s.chars().skip(1).collect::<String>()
     )
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_name() {
+        let page = Page::new("./wiki", "./wiki/info.md");
+        assert_eq!(page.name(), "info");
+        assert_eq!(page.title(), "Info");
+        assert_eq!(page.path, "./wiki/info.md");
+
+        let page = Page::new("./wiki", "./wiki/linux_laptops.md");
+        assert_eq!(page.name(), "linux_laptops");
+        assert_eq!(page.title(), "Linux Laptops");
+        assert_eq!(page.path, "./wiki/linux_laptops.md");
+    }
+}
