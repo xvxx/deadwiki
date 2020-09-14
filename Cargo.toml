@@ -35,7 +35,6 @@ vial = { version = "0.1.1", features = ['state'] }
 
 pulldown-cmark = { version = "0.7", default-features = false }
 autolink = "0.3.0"
-walkdir = "2"
 atomicwrites = "0.2.5"
 lazy_static = "1.4"
 
