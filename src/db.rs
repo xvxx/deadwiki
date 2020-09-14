@@ -21,8 +21,10 @@ unsafe impl Send for DB {}
 
 impl DB {
     /// Create a new DB object. Should only have one per run.
-    pub fn new(root: String) -> DB {
-        DB { root }
+    pub fn new<S: AsRef<str>>(root: S) -> DB {
+        DB {
+            root: root.as_ref().to_string(),
+        }
     }
 
     /// Is this DB empty?
@@ -33,7 +35,7 @@ impl DB {
     /// How many wiki pages have been created?
     pub fn len(&self) -> usize {
         if let Ok(res) = shell!("ls -R -1 {} | grep '\\.md' | wc -l", self.root) {
-            res.parse::<usize>().unwrap_or(0)
+            res.trim().parse::<usize>().unwrap_or(0)
         } else {
             0
         }
@@ -142,5 +144,21 @@ impl DB {
                 }
             })
             .collect::<Vec<_>>())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_len() {
+        let db = DB::new("./wiki/");
+        assert_eq!(5, db.len());
+        assert_eq!(false, db.is_empty());
+
+        let db = DB::new("./src/");
+        assert_eq!(0, db.len());
+        assert_eq!(true, db.is_empty());
     }
 }
