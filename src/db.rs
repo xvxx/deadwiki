@@ -1,4 +1,13 @@
-use {crate::Page, std::collections::HashMap};
+use {
+    crate::Page,
+    atomicwrites::{AllowOverwrite, AtomicFile},
+    std::{
+        collections::HashMap,
+        fs,
+        io::{self, Write},
+        path::Path,
+    },
+};
 
 pub type Result<T> = std::result::Result<T, std::io::Error>;
 
@@ -47,6 +56,14 @@ impl DB {
             .unwrap_or_else(|_| vec![])
             .into_iter()
             .find(|p| p.name() == name)
+    }
+
+    /// Check if a wiki page exists by name.
+    pub fn exists(&self, name: &str) -> bool {
+        !shell!("find {} -type f -name '{}.md'", self.root, name)
+            .unwrap_or_else(|_| "".into())
+            .trim()
+            .is_empty()
     }
 
     /// All the wiki pages, in alphabetical order.
@@ -137,6 +154,59 @@ impl DB {
                 }
             })
             .collect::<Vec<_>>())
+    }
+
+    /// Create a new wiki page on disk. Name should be the title, such
+    /// as "Linux Laptops" - it'll get converted to linux_laptops.md.
+    pub fn create(&self, name: &str, body: &str) -> Result<Page> {
+        let path = self.pathify(name);
+        if self.exists(&path) {
+            return Err(io::Error::new(
+                io::ErrorKind::AlreadyExists,
+                format!("Already Exists: {}", path),
+            ));
+        }
+        // mkdir -p
+        if path.contains('/') {
+            if let Some(dir) = Path::new(&path).parent() {
+                fs::create_dir_all(&dir.display().to_string())?;
+            }
+        }
+        let mut file = fs::File::create(&path)?;
+        write!(file, "{}", body)?;
+        Ok(Page::new(&self.root, path))
+    }
+
+    /// Save a page to disk. Doesn't track renames, just content
+    /// changes for now.
+    pub fn update(&self, name: &str, body: &str) -> Result<Page> {
+        let path = self.pathify(name);
+        if !self.exists(&path) {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                format!("Doesn't exist: {}", path),
+            ));
+        }
+        let af = AtomicFile::new(&path, AllowOverwrite);
+        af.write(|f| f.write_all(body.as_bytes()))?;
+        Ok(Page::new(&self.root, path))
+    }
+
+    /// Convert a wiki page name or file path to cleaned up path.
+    /// Ex: "Test Results" -> "test_results"
+    fn pathify(&self, path: &str) -> String {
+        let path = if path.ends_with(".html") && !path.starts_with("html/") {
+            format!("html/{}", path)
+        } else {
+            path.to_string()
+        };
+        path.to_lowercase()
+            .trim_start_matches('/')
+            .replace("..", ".")
+            .replace(" ", "_")
+            .chars()
+            .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
+            .collect::<String>()
     }
 }
 

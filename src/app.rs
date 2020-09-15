@@ -2,11 +2,9 @@
 
 use {
     crate::{db::ReqWithDB, helper::*, render},
-    atomicwrites::{AllowOverwrite, AtomicFile},
     std::{
         fs,
-        io::{self, Write},
-        path::Path,
+        io::{self},
     },
     vial::prelude::*,
 };
@@ -113,25 +111,11 @@ fn index(req: Request) -> Result<impl Responder, io::Error> {
     ))
 }
 
+// POST new page
 fn create(req: Request) -> Result<impl Responder, io::Error> {
-    let path = pathify(&req.form("name").unwrap_or(""));
-    if !req.db().names()?.contains(&path) {
-        if let Some(disk_path) = new_page_path(&path) {
-            if disk_path.contains('/') {
-                if let Some(dir) = Path::new(&disk_path).parent() {
-                    fs::create_dir_all(&dir.display().to_string())?;
-                }
-            }
-            let mut file = fs::File::create(disk_path)?;
-            return if let Some(mdown) = req.form("markdown") {
-                write!(file, "{}", mdown)?;
-                Ok(Response::redirect_to(path))
-            } else {
-                Ok(Response::redirect_to("/new"))
-            };
-        }
-    }
-    Ok(response_404())
+    let name = req.form("name").unwrap_or("note.md");
+    let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
+    Ok(Response::redirect_to(page.url()))
 }
 
 // Recently modified wiki pages.
@@ -201,26 +185,20 @@ fn jump(req: Request) -> Result<impl Responder, io::Error> {
 
 fn update(req: Request) -> Result<impl Responder, io::Error> {
     if let Some(name) = req.arg("name") {
-        if let Some(disk_path) = page_path(name) {
-            let mdown = req.form("markdown").unwrap_or("");
-            let af = AtomicFile::new(disk_path, AllowOverwrite);
-            af.write(|f| f.write_all(mdown.as_bytes()))?;
-            return Ok(Response::redirect_to(format!(
-                "/{}",
-                pathify(name).replace("edit/", "")
-            )));
-        }
+        let page = req.db().update(name, req.form("markdown").unwrap_or(""))?;
+        Ok(Response::redirect_to(page.url()))
+    } else {
+        Ok(Response::from(404))
     }
-    Ok(response_404())
 }
 
 fn edit(req: Request) -> Result<impl Responder, io::Error> {
     if let Some(name) = req.arg("name") {
-        if let Some(disk_path) = page_path(name) {
+        if let Some(page) = req.db().find(name) {
             return Ok(render::layout(
                 "Edit",
                 &asset::to_string("html/edit.html")?
-                    .replace("{markdown}", &fs::read_to_string(disk_path)?),
+                    .replace("{markdown}", &fs::read_to_string(page.path())?),
                 None,
             )?
             .to_response());
