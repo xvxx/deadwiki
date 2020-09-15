@@ -13,7 +13,7 @@ pub fn is_executable(path: &str) -> bool {
 }
 
 /// Return the <nav> for a page
-pub fn nav(current_path: &str) -> Result<String, io::Error> {
+pub fn nav(current_path: &str) -> io::Result<String> {
     let new_link = if current_path.contains('/') {
         format!(
             "/new?name={}/",

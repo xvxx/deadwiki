@@ -25,7 +25,7 @@ routes! {
     GET "/*name" => show;
 }
 
-fn search(req: Request) -> Result<impl Responder, io::Error> {
+fn search(req: Request) -> io::Result<impl Responder> {
     if let Some(tag) = req.query("tag") {
         Ok(render::layout(
             "search",
@@ -50,7 +50,7 @@ fn search(req: Request) -> Result<impl Responder, io::Error> {
     }
 }
 
-fn new(req: Request) -> Result<impl Responder, io::Error> {
+fn new(req: Request) -> io::Result<impl Responder> {
     render::layout(
         "new page",
         &asset::to_string("html/new.html")?.replace("{name}", &req.query("name").unwrap_or("")),
@@ -59,7 +59,7 @@ fn new(req: Request) -> Result<impl Responder, io::Error> {
 }
 
 /// Render the index page which lists all wiki pages.
-fn index(req: Request) -> Result<impl Responder, io::Error> {
+fn index(req: Request) -> io::Result<impl Responder> {
     let mut folded = "";
 
     Ok(render::layout(
@@ -112,14 +112,14 @@ fn index(req: Request) -> Result<impl Responder, io::Error> {
 }
 
 // POST new page
-fn create(req: Request) -> Result<impl Responder, io::Error> {
+fn create(req: Request) -> io::Result<impl Responder> {
     let name = req.form("name").unwrap_or("note.md");
     let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
     Ok(Response::redirect_to(page.url()))
 }
 
 // Recently modified wiki pages.
-fn recent(req: Request) -> Result<impl Responder, io::Error> {
+fn recent(req: Request) -> io::Result<impl Responder> {
     render::layout(
         "deadwiki",
         &format!(
@@ -149,7 +149,7 @@ fn recent(req: Request) -> Result<impl Responder, io::Error> {
     )
 }
 
-fn jump(req: Request) -> Result<impl Responder, io::Error> {
+fn jump(req: Request) -> io::Result<impl Responder> {
     let partial = asset::to_string("html/_jump_page.html")?;
     if req.db().is_empty() {
         return Ok("Add a few wiki pages then come back.".to_string());
@@ -183,7 +183,7 @@ fn jump(req: Request) -> Result<impl Responder, io::Error> {
     )
 }
 
-fn update(req: Request) -> Result<impl Responder, io::Error> {
+fn update(req: Request) -> io::Result<impl Responder> {
     if let Some(name) = req.arg("name") {
         let page = req.db().update(name, req.form("markdown").unwrap_or(""))?;
         Ok(Response::redirect_to(page.url()))
@@ -192,7 +192,7 @@ fn update(req: Request) -> Result<impl Responder, io::Error> {
     }
 }
 
-fn edit(req: Request) -> Result<impl Responder, io::Error> {
+fn edit(req: Request) -> io::Result<impl Responder> {
     if let Some(name) = req.arg("name") {
         if let Some(page) = req.db().find(name) {
             return Ok(render::layout(
@@ -207,7 +207,7 @@ fn edit(req: Request) -> Result<impl Responder, io::Error> {
     Ok(response_404())
 }
 
-fn show(req: Request) -> Result<impl Responder, io::Error> {
+fn show(req: Request) -> io::Result<impl Responder> {
     if let Some(name) = req.arg("name") {
         let raw = name.ends_with(".md");
         if let Some(page) = req.db().find(name.trim_end_matches(".md")) {

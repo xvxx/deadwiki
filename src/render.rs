@@ -7,7 +7,7 @@ use {
 };
 
 /// Render a wiki page to a fully loaded HTML string, with layout.
-pub fn page(page: Page, raw: bool, page_names: &[String]) -> Result<String, io::Error> {
+pub fn page(page: Page, raw: bool, page_names: &[String]) -> io::Result<String> {
     let html = if is_executable(&page.path()) {
         shell!(page.path()).unwrap_or_else(|e| e.to_string())
     } else {
@@ -25,7 +25,7 @@ pub fn page(page: Page, raw: bool, page_names: &[String]) -> Result<String, io::
 }
 
 /// Renders a chunk of HTML surrounded by `static/html/layout.html`.
-pub fn layout<T, S>(title: T, body: S, nav: Option<&str>) -> Result<String, io::Error>
+pub fn layout<T, S>(title: T, body: S, nav: Option<&str>) -> io::Result<String>
 where
     T: AsRef<str>,
     S: AsRef<str>,

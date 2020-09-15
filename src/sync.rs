@@ -10,7 +10,7 @@ use std::{fs, io, path::Path, thread, time};
 const SYNC_WAIT: u64 = 30;
 
 /// Start the syncing service.
-pub fn start(root: &str) -> Result<(), io::Error> {
+pub fn start(root: &str) -> io::Result<()> {
     if !is_git_repo(root) {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
@@ -37,7 +37,7 @@ fn is_git_repo(root: &str) -> bool {
 }
 
 /// Run the sync and then sleep.
-fn sync_periodically(root: &str) -> Result<(), io::Error> {
+fn sync_periodically(root: &str) -> io::Result<()> {
     // set current dir to wiki
     let period = time::Duration::from_millis(SYNC_WAIT * 1000);
     loop {
@@ -54,7 +54,7 @@ macro_rules! git {
 }
 
 /// Try to add and commit any new or modified wiki pages.
-fn save_changes(root: &str) -> Result<bool, io::Error> {
+fn save_changes(root: &str) -> io::Result<bool> {
     let pending = git!(root, "status", "-s")?;
     if pending.is_empty() {
         return Ok(false);
@@ -74,14 +74,14 @@ fn save_changes(root: &str) -> Result<bool, io::Error> {
     Ok(true)
 }
 
-fn sync_changes(root: &str) -> Result<bool, io::Error> {
+fn sync_changes(root: &str) -> io::Result<bool> {
     println!("~> syncing changes");
     git!(root, "pull", "origin", "master")?;
     git!(root, "push", "origin", "master")?;
     Ok(true)
 }
 
-fn git(root: &str, args: &[&str]) -> Result<String, std::io::Error> {
+fn git(root: &str, args: &[&str]) -> io::Result<String> {
     shell!(
         "git --git-dir {root}.git --work-tree {root} {args}",
         root = root,

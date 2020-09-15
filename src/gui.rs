@@ -9,10 +9,8 @@ use {
     std::{io, thread},
 };
 
-type Result<T> = std::result::Result<T, io::Error>;
-
 /// Start a web server and launch the GUI.
-pub fn run(host: &str, port: usize, wiki_root: &str, sync: bool) -> Result<()> {
+pub fn run(host: &str, port: usize, wiki_root: &str, sync: bool) -> io::Result<()> {
     let addr = format!("{}:{}", host, port);
     let url = format!("http://{}", addr);
 
