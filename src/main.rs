@@ -56,6 +56,13 @@ fn main() {
         return print_help();
     }
 
+    // ~ -> $HOME
+    let path = if path.contains('~') {
+        path.replace('~', &std::env::var("HOME").unwrap())
+    } else {
+        path.into()
+    };
+
     if sync {
         if let Err(e) = sync::start(&path) {
             eprintln!("Sync Error: {}", e);
