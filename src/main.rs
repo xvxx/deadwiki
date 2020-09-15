@@ -68,7 +68,7 @@ fn main() {
         }
     }
 
-    if let Err(e) = vial::run!(format!("{}:{}", host, port), app) {
+    if let Err(e) = vial::run_with_banner!("~> started at {}", format!("{}:{}", host, port), app) {
         eprintln!("WebServer Error: {}", e);
     }
 }
