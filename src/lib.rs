@@ -1,5 +1,5 @@
 #[macro_use]
-pub mod util;
+pub mod shell;
 pub mod app;
 pub mod db;
 #[cfg(feature = "gui")]

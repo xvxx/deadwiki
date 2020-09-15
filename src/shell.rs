@@ -3,7 +3,7 @@ macro_rules! shell {
     ($cmd:expr) => {{
         #[cfg(debug_assertions)]
         println!("sh> {}", $cmd);
-        crate::util::shell("sh", &["-c", $cmd.as_ref()])
+        crate::shell::shell("sh", &["-c", $cmd.as_ref()])
     }};
     ($cmd:expr, $($arg:tt)+) => {
         shell!(format!($cmd, $($arg)+));
