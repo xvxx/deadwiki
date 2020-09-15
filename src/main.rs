@@ -70,8 +70,7 @@ fn main() {
 
     let db = db::DB::new(deadwiki::wiki_root());
     vial::use_state!(db);
-
-    if let Err(e) = vial::run!(format!("{}:{}", host, port), app) {
+    if let Err(e) = vial::run_with_banner!("~> started at {}", format!("{}:{}", host, port), app) {
         eprintln!("WebServer Error: {}", e);
     }
 }
