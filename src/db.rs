@@ -58,12 +58,9 @@ impl DB {
             .find(|p| p.name() == name)
     }
 
-    /// Check if a wiki page exists by name.
-    pub fn exists(&self, name: &str) -> bool {
-        !shell!("find {} -type f -name '{}.md'", self.root, name)
-            .unwrap_or_else(|_| "".into())
-            .trim()
-            .is_empty()
+    /// Check if a wiki page exists by path.
+    pub fn exists(&self, path: &str) -> bool {
+        Path::new(path).exists()
     }
 
     /// All the wiki pages, in alphabetical order.
@@ -200,13 +197,17 @@ impl DB {
         } else {
             path.to_string()
         };
-        path.to_lowercase()
-            .trim_start_matches('/')
-            .replace("..", ".")
-            .replace(" ", "_")
-            .chars()
-            .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
-            .collect::<String>()
+        format!(
+            "{}{}.md",
+            self.root,
+            path.to_lowercase()
+                .trim_start_matches('/')
+                .replace("..", ".")
+                .replace(" ", "_")
+                .chars()
+                .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
+                .collect::<String>()
+        )
     }
 }
 
