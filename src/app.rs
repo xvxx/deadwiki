@@ -39,7 +39,7 @@ fn search(req: Request) -> Result<impl Responder, io::Error> {
                         .find_pages_with_tag(tag)?
                         .iter()
                         .map(|page| {
-                            format!("<li><a href='/{}'>{}</a></li>", page.url(), page.title())
+                            format!("<li><a href='{}'>{}</a></li>", page.url(), page.title())
                         })
                         .collect::<Vec<_>>()
                         .join("\n"),
