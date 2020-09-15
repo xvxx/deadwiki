@@ -59,7 +59,6 @@ version = "0.1.23-dev"
 dependencies = [
  "atomicwrites",
  "autolink",
- "lazy_static",
  "pulldown-cmark",
  "vial",
  "web-view",

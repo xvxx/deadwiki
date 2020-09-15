@@ -5,7 +5,7 @@
 use web_view;
 
 use {
-    crate::{app, set_wiki_root, sync},
+    crate::{app, db, sync},
     std::{io, thread},
 };
 
@@ -27,10 +27,10 @@ pub fn run(host: &str, port: usize, wiki_root: &str, sync: bool) -> Result<()> {
         .build()
         .unwrap();
 
-    if wiki_root.is_empty() {
-        if let Ok(Some(wiki_root)) = wv.dialog().choose_directory("Wiki Root", "") {
-            set_wiki_root(&wiki_root.to_str().unwrap_or("."))?;
+    let root = if wiki_root.is_empty() {
+        if let Ok(Some(root)) = wv.dialog().choose_directory("Wiki Root", "") {
             wv.eval(&format!("location.href = \"{}\";", url)).unwrap();
+            root.to_str().unwrap_or(".")
         } else {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
@@ -38,8 +38,8 @@ pub fn run(host: &str, port: usize, wiki_root: &str, sync: bool) -> Result<()> {
             ));
         }
     } else {
-        set_wiki_root(wiki_root)?;
-    }
+        wiki_root
+    };
 
     if sync {
         if let Err(e) = sync::start() {
@@ -50,6 +50,8 @@ pub fn run(host: &str, port: usize, wiki_root: &str, sync: bool) -> Result<()> {
         }
     }
 
+    let db = db::DB::new(deadwiki::wiki_root());
+    vial::use_state!(db);
     thread::spawn(move || vial::run!(addr.to_string(), app));
 
     wv.run().unwrap();

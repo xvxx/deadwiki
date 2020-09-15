@@ -4,31 +4,29 @@
 //!   git pull origin master
 //!   git push origin master
 
-use {
-    crate::wiki_root,
-    std::{fs, io, path::Path, thread, time},
-};
+use std::{fs, io, path::Path, thread, time};
 
 /// How many seconds to wait before syncing.
 const SYNC_WAIT: u64 = 30;
 
 /// Start the syncing service.
-pub fn start() -> Result<(), io::Error> {
-    if !is_git_repo() {
+pub fn start(root: &str) -> Result<(), io::Error> {
+    if !is_git_repo(root) {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
-            format!("{} is not a git repo", wiki_root()),
+            format!("{} is not a git repo", root),
         ));
     }
 
     println!("~> running sync service");
-    thread::spawn(sync_periodically);
+    let root = root.to_string();
+    thread::spawn(move || sync_periodically(&root));
     Ok(())
 }
 
 /// Is this wiki a git repo?
-fn is_git_repo() -> bool {
-    let dir = format!("{}.git", wiki_root());
+fn is_git_repo(root: &str) -> bool {
+    let dir = format!("{}.git", root);
     let path = Path::new(&dir);
     if let Ok(file) = fs::File::open(path) {
         if let Ok(meta) = file.metadata() {
@@ -39,25 +37,25 @@ fn is_git_repo() -> bool {
 }
 
 /// Run the sync and then sleep.
-fn sync_periodically() -> Result<(), io::Error> {
+fn sync_periodically(root: &str) -> Result<(), io::Error> {
     // set current dir to wiki
     let period = time::Duration::from_millis(SYNC_WAIT * 1000);
     loop {
-        save_changes()?;
-        sync_changes()?;
+        save_changes(root)?;
+        sync_changes(root)?;
         thread::sleep(period);
     }
 }
 
 macro_rules! git {
-    ($($arg:expr),+) => {
-        git(&[$($arg),+])
+    ($root:expr, $($arg:expr),+) => {
+        git($root, &[$($arg),+])
     };
 }
 
 /// Try to add and commit any new or modified wiki pages.
-fn save_changes() -> Result<bool, io::Error> {
-    let pending = git!("status", "-s")?;
+fn save_changes(root: &str) -> Result<bool, io::Error> {
+    let pending = git!(root, "status", "-s")?;
     if pending.is_empty() {
         return Ok(false);
     }
@@ -71,22 +69,22 @@ fn save_changes() -> Result<bool, io::Error> {
     let status = changes.join(if changes.len() == 1 { "" } else { ", " });
 
     println!("~> saving changes: {}", status);
-    git!("add", ".")?;
-    git!("commit", "-am", &status)?;
+    git!(root, "add", ".")?;
+    git!(root, "commit", "-am", &status)?;
     Ok(true)
 }
 
-fn sync_changes() -> Result<bool, io::Error> {
+fn sync_changes(root: &str) -> Result<bool, io::Error> {
     println!("~> syncing changes");
-    git!("pull", "origin", "master")?;
-    git!("push", "origin", "master")?;
+    git!(root, "pull", "origin", "master")?;
+    git!(root, "push", "origin", "master")?;
     Ok(true)
 }
 
-fn git(args: &[&str]) -> Result<String, std::io::Error> {
+fn git(root: &str, args: &[&str]) -> Result<String, std::io::Error> {
     shell!(
         "git --git-dir {root}.git --work-tree {root} {args}",
-        root = wiki_root(),
+        root = root,
         args = args.join(" ")
     )
 }

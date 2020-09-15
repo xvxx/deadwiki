@@ -36,6 +36,5 @@ vial = { version = "0.1.2", features = ['state'] }
 pulldown-cmark = { version = "0.7", default-features = false }
 autolink = "0.3.0"
 atomicwrites = "0.2.5"
-lazy_static = "1.4"
 
 web-view = { version = "0.5.4", optional = true }

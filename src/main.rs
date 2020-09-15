@@ -56,19 +56,14 @@ fn main() {
         return print_help();
     }
 
-    if let Err(e) = deadwiki::set_wiki_root(path) {
-        eprintln!("Wiki Error: {}", e);
-        return;
-    }
-
     if sync {
-        if let Err(e) = sync::start() {
+        if let Err(e) = sync::start(&path) {
             eprintln!("Sync Error: {}", e);
             return;
         }
     }
 
-    let db = db::DB::new(deadwiki::wiki_root());
+    let db = db::DB::new(path);
     vial::use_state!(db);
     if let Err(e) = vial::run_with_banner!("~> started at {}", format!("{}:{}", host, port), app) {
         eprintln!("WebServer Error: {}", e);
