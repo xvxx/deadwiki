@@ -16,7 +16,11 @@ pub fn page(page: Page, raw: bool, page_names: &[String]) -> Result<String, io::
     if raw {
         Ok(format!("<pre>{}</pre>", html))
     } else {
-        render::layout(&page.title(), &markdown::to_html(&html, page_names), None)
+        render::layout(
+            &page.title(),
+            &markdown::to_html(&html, page_names),
+            Some(&nav(page.name())?),
+        )
     }
 }
 

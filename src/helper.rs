@@ -1,6 +1,7 @@
 use {
     crate::wiki_root,
-    std::{fs, os::unix::fs::PermissionsExt, path::Path},
+    std::{fs, io, os::unix::fs::PermissionsExt, path::Path},
+    vial::asset,
 };
 
 /// Is the file at the given path `chmod +x`?
@@ -53,4 +54,23 @@ pub fn new_page_path(path: &str) -> Option<String> {
 /// Returns a wiki path on disk, regardless of whether it exists.
 pub fn page_disk_path(path: &str) -> String {
     format!("{}/{}.md", wiki_root(), pathify(path))
+}
+
+/// Return the <nav> for a page
+pub fn nav(current_path: &str) -> Result<String, io::Error> {
+    let new_link = if current_path.contains('/') {
+        format!(
+            "/new?name={}/",
+            current_path
+                .split('/')
+                .take(current_path.matches('/').count())
+                .collect::<Vec<_>>()
+                .join("/")
+        )
+    } else {
+        "/new".to_string()
+    };
+    Ok(asset::to_string("html/nav.html")?
+        .replace("{current_path}", current_path)
+        .replace("{new_link}", &new_link))
 }

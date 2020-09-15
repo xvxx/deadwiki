@@ -161,7 +161,7 @@ fn recent(req: Request) -> Result<impl Responder, io::Error> {
                         .join("")
                 )
         ),
-        None,
+        Some(&nav("/")?),
     )
 }
 
