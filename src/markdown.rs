@@ -6,7 +6,7 @@
 //! - #tag to link to a hashtag.
 //!
 
-use pulldown_cmark as markdown;
+use {linkify::LinkFinder, pulldown_cmark as markdown, std::borrow::Cow};
 
 /// Convert raw wiki Markdown into HTML.
 /// Takes a list of all wiki pages in the system, for [Link]s.
@@ -50,11 +50,11 @@ pub fn to_html(md: &str, names: &[String]) -> String {
                 markdown::Event::Text("".into())
             } else {
                 if text.contains("http://") || text.contains("https://") {
-                    let linked = autolink::auto_link(&text, &[]);
+                    let linked = autolink(&text);
                     if linked.len() == text.len() {
                         markdown::Event::Text(text.into())
                     } else {
-                        markdown::Event::Html(linked.into())
+                        markdown::Event::Html(linked.to_string().into())
                     }
                 } else if let Some(idx) = text.find('#') {
                     // look for and link #hashtags
@@ -82,4 +82,36 @@ pub fn to_html(md: &str, names: &[String]) -> String {
     let mut html_output = String::with_capacity(md.len() * 3 / 2);
     markdown::html::push_html(&mut html_output, parser);
     html_output
+}
+
+/// Autolink https://links in a block of text.
+fn autolink(text: &str) -> Cow<'_, str> {
+    let finder = LinkFinder::new();
+    let links: Vec<_> = finder.links(text).collect();
+
+    if links.is_empty() {
+        return text.into();
+    }
+
+    let mut out = String::new();
+    let mut fst = true;
+    let mut last = 0;
+    for link in links {
+        if fst && link.start() > 0 {
+            out.push_str(&text[..link.start()]);
+            fst = false;
+        }
+        let url = &text[link.start()..link.end()];
+        last = link.end();
+        out.push_str(r#"<a href=""#);
+        out.push_str(url);
+        out.push_str(r#"">"#);
+        out.push_str(url);
+        out.push_str("</a>");
+    }
+    if last < text.len() {
+        out.push_str(&text[last..]);
+    }
+
+    out.into()
 }

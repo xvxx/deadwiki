@@ -169,7 +169,7 @@ There's a basic wiki included that shows off some features.
 - lean on standard UNIX commands (find, grep)
 - js only for user input (keyboard shortcuts, markdown editor, finder)
 - no js frameworks/helpers
-- build time matters (42 crates currently, ~8s release ~6s debug)
+- build time matters (37 crates currently, ~8s release ~6s debug)
 
 ## ~ screenies ~
 
