@@ -1,9 +1,8 @@
 use {
     crate::Page,
-    atomicwrites::{AllowOverwrite, AtomicFile},
     std::{
         collections::HashMap,
-        fs,
+        fs::{self, File},
         io::{self, Write},
         path::Path,
     },
@@ -169,7 +168,7 @@ impl DB {
                 fs::create_dir_all(&dir.display().to_string())?;
             }
         }
-        let mut file = fs::File::create(&path)?;
+        let mut file = File::create(&path)?;
         write!(file, "{}", body)?;
         Ok(Page::new(&self.root, path))
     }
@@ -184,8 +183,11 @@ impl DB {
                 format!("Doesn't exist: {}", path),
             ));
         }
-        let af = AtomicFile::new(&path, AllowOverwrite);
-        af.write(|f| f.write_all(body.as_bytes()))?;
+        // "atomic" save: write to new file then move to old file
+        let tmp = format!("{}~", path);
+        let mut file = File::create(&tmp)?;
+        file.write_all(body.as_bytes())?;
+        fs::rename(tmp, &path)?;
         Ok(Page::new(&self.root, path))
     }
 
