@@ -63,6 +63,12 @@ fn main() {
         path.into()
     };
 
+    let path = if !path.ends_with('/') {
+        format!("{}/", path)
+    } else {
+        path
+    };
+
     if sync {
         if let Err(e) = sync::start(&path) {
             eprintln!("Sync Error: {}", e);
