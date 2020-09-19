@@ -1,6 +1,8 @@
-## 0.1.23
+## 0.1.23-dev
 
-- Internal refactoring. May be some bugs.
+- We've cut down the number of dependencies from **42** to **28**,
+  shaving a few precious seconds off build time in the process.
+- We've done a bit of internal refactoring. There may be (more) bugs.
 
 ## 0.1.22
 
