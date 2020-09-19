@@ -93,7 +93,7 @@ fn autolink(text: &str) -> Cow<'_, str> {
         return text.into();
     }
 
-    let mut out = String::new();
+    let mut out = String::with_capacity(text.len() + (links.len() * 115));
     let mut fst = true;
     let mut last = 0;
     for link in links {
