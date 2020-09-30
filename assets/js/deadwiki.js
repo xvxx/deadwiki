@@ -39,21 +39,21 @@ document.onkeydown = (e) => {
   if (document.querySelector("#main.webview-app")) {
   }
 
-  // history navigation
-  if (e.metaKey && (e.key == "[" || e.keyCode == 37)) {
-    // history back: cmd+[ or cmd+left-arrow
-    e.preventDefault();
-    history.back();
-    return;
-  } else if (e.metaKey && (e.key == "]" || e.keyCode == 47)) {
-    // history forward: cmd+] or cmd+right-arrow
-    e.preventDefault();
-    history.forward();
-    return;
-  }
-
   // global shortcuts for pages that don't have the editor
   if (!document.querySelector("#markdown")) {
+    // history navigation
+    if (e.metaKey && (e.key == "[" || e.keyCode == 37)) {
+      // history back: cmd+[ or cmd+left-arrow
+      e.preventDefault();
+      history.back();
+      return;
+    } else if (e.metaKey && (e.key == "]" || e.keyCode == 47)) {
+      // history forward: cmd+] or cmd+right-arrow
+      e.preventDefault();
+      history.forward();
+      return;
+    }
+
     // ctrl-h goes home
     if (e.ctrlKey && e.key == "h") {
       e.preventDefault();
