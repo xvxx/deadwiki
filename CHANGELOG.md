@@ -3,6 +3,7 @@
 - We've cut down the number of dependencies from **42** to **28**,
   shaving a few precious seconds off build time in the process.
 - We've done a bit of internal refactoring. There may be (more) bugs.
+- Remove double click JS events. They got in the way of highlighting text.
 
 
 ## 0.1.22
