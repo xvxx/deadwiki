@@ -78,12 +78,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "percent-encoding"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
-
-[[package]]
 name = "pkg-config"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -132,12 +126,11 @@ checksum = "078775d0255232fb988e6fccf26ddc9d1ac274299aaedcedce21c6f72cc533ce"
 
 [[package]]
 name = "vial"
-version = "0.1.2"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "769cd09c28f3dd8157eaf99d37b0d12449756d3eb7cc7bf5aa8144f15bc1900e"
+checksum = "d62aac8d7f6179a7d4efe2cdba6b7354eaa991fb2d40c7ea85056f38641fc153"
 dependencies = [
  "libc-strftime",
- "percent-encoding",
  "threadpool",
 ]
 

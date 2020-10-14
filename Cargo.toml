@@ -28,10 +28,10 @@ pre-release-replacements = [
 dev-version-ext = "dev"
 
 [build-dependencies]
-vial = "0.1.2"
+vial = "0.1.5"
 
 [dependencies]
-vial = { version = "0.1.2", features = ['state'] }
+vial = "0.1.5"
 
 pulldown-cmark = { version = "0.7", default-features = false }
 linkify = "0.4.0"
