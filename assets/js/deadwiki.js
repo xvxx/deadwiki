@@ -6,14 +6,6 @@ window.onload = () => {
   var focused = document.querySelector(".focused");
   if (focused && focused.value == "") focused.focus();
 
-  // dbl click wiki content to edit
-  var editLink = document.querySelector("#edit-link");
-  if (editLink) {
-    window.addEventListener("dblclick", function () {
-      window.location = editLink.href;
-    });
-  }
-
   // markdown editor
   var simplemde = new SimpleMDE({
     autofocus: !focused || focused.value != "",

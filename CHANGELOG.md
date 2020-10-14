@@ -4,6 +4,7 @@
   shaving a few precious seconds off build time in the process.
 - We've done a bit of internal refactoring. There may be (more) bugs.
 
+
 ## 0.1.22
 
 - Bugfix release.
