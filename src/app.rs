@@ -51,6 +51,21 @@ fn new(req: Request) -> io::Result<impl Responder> {
 fn index(req: Request) -> io::Result<impl Responder> {
     let mut env = Env::new();
     env.set("pages", req.db().pages()?);
+    env.set("nested_header", |args: hatter::Args| {
+        Ok(args.need_string(0)?.split('/').next().unwrap_or("").into())
+    });
+    env.set("nested_title", |args: hatter::Args| {
+        Ok(args
+            .need_string(0)?
+            .split('/')
+            .skip(1)
+            .collect::<Vec<_>>()
+            .join("/")
+            .into())
+    });
+    env.set("nested?", |args: hatter::Args| {
+        Ok(args.need_string(0)?.contains('/').into())
+    });
     render("deadwiki", env.render("html/index.hat")?)
 }
 

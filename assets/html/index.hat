@@ -8,5 +8,18 @@
   if empty?(pages)
     <i> Wiki Pages you create will show up here.
   else
+    header := ""
     <ul> for page in pages
-      <li> <a href={page.url}> page.title
+      if nested?(page.title)
+        if header != nested_header(page.title)
+          if header != "" then print("</details>")
+          header = nested_header(page.title)
+          print("<details> {<summary> header}")
+          <li> <a href={page.url}> nested_title(page.title)
+        else
+          <li> <a href={page.url}> page.title
+      else
+        if header != ""
+          print("</details>")
+          header = ""
+        <li> <a href={page.url}> page.title
