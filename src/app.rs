@@ -58,7 +58,7 @@ fn index(req: Request) -> io::Result<impl Responder> {
 fn create(req: Request) -> io::Result<impl Responder> {
     let name = req.form("name").unwrap_or("note.md");
     let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
-    Ok(Response::redirect_to(page.url()))
+    redirect_to(page.url())
 }
 
 // Recently modified wiki pages.
@@ -98,7 +98,7 @@ fn jump(req: Request) -> io::Result<impl Responder> {
 fn update(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
     let page = req.db().update(name, &markdown_post_data(&req))?;
-    Ok(Response::redirect_to(page.url()))
+    redirect_to(page.url())
 }
 
 fn edit(req: Request) -> io::Result<impl Responder> {
@@ -134,6 +134,10 @@ fn response_404() -> Response {
 // Clean up POST'd markdown data - mostly by removing \r, which HTTP loves.
 fn markdown_post_data(req: &Request) -> String {
     req.form("markdown").unwrap_or("").replace('\r', "")
+}
+
+fn redirect_to<S: AsRef<str>>(path: S) -> io::Result<Response> {
+    Ok(Response::redirect_to(path.as_ref()))
 }
 
 fn render<S: AsRef<str>>(title: &str, body: S) -> Result<Response, io::Error> {
