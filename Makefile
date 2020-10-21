@@ -10,6 +10,10 @@ watch:
 debug: target/debug/dead
 	cp $< .
 
+.PHONY: test
+test:
+	cargo test --all-features
+
 target/debug/dead: src/*.rs
 	$(CARGO_DEBUG)
 
