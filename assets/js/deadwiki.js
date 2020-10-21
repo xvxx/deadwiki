@@ -27,10 +27,6 @@ window.onload = () => {
 document.onkeydown = (e) => {
   e = e || window.event || {};
 
-  // check if we're running the native app
-  if (document.querySelector("#main.webview-app")) {
-  }
-
   // global shortcuts for pages that don't have the editor
   if (!document.querySelector("#markdown")) {
     // history navigation

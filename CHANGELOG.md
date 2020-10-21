@@ -1,10 +1,15 @@
 ## 0.1.23-dev
 
+- The `gui` feature has been removed. We may revisit it in the future,
+  perhaps as a tray icon-style app, but for now I am using deadwiki as
+  a "pinned tab" in my browser and it is pretty convenient. I'm more
+  interested in a TUI than a WebView app at this point, as far as
+  complementing the core web app goes.
 - deadwiki will now serve non-Markdown files in your wiki, meaning
   you local images are now supported! You'll have to add them to your
   wiki directory's structure manually for now, but we may add a simple
   drag-and-drop upload function for lazy folks (like me...) in the
-  future. 
+  future.
 - We've cut down the number of dependencies from **42** to **28**,
   shaving a few precious seconds off build time in the process.
 - Remove double click JS events. They got in the way of highlighting

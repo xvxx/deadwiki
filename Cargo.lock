@@ -7,25 +7,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
-name = "boxfnonce"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5988cb1d626264ac94100be357308f29ff7cbdd3b36bda27f450a4ee3f713426"
-
-[[package]]
-name = "cc"
-version = "1.0.52"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3d87b23d6a92cd03af510a5ade527033f6aa6fa92161e2d5863a907d4c5e31d"
-
-[[package]]
 name = "deadwiki"
 version = "0.1.23-dev"
 dependencies = [
  "linkify",
  "pulldown-cmark",
  "vial",
- "web-view",
 ]
 
 [[package]]
@@ -78,12 +65,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pkg-config"
-version = "0.3.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05da548ad6865900e60eaba7f589cc0783590a92e940c26953ff81ddbab2d677"
-
-[[package]]
 name = "pulldown-cmark"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -113,12 +94,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "urlencoding"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3df3561629a8bb4c57e5a2e4c43348d9e29c7c29d9b1c4c1f47166deca8f37ed"
-
-[[package]]
 name = "version_check"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -132,26 +107,4 @@ checksum = "d62aac8d7f6179a7d4efe2cdba6b7354eaa991fb2d40c7ea85056f38641fc153"
 dependencies = [
  "libc-strftime",
  "threadpool",
-]
-
-[[package]]
-name = "web-view"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24e8c3b31d38a20bc39481ca9c043b2cfaa51e95b5a881dd17cea04bcc8cdd8c"
-dependencies = [
- "boxfnonce",
- "urlencoding",
- "webview-sys",
-]
-
-[[package]]
-name = "webview-sys"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60b233db4275df10dfec43dcc67fdbeae8df89361b8759cbf9533c218578dafd"
-dependencies = [
- "bitflags",
- "cc",
- "pkg-config",
 ]

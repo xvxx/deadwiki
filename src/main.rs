@@ -7,8 +7,6 @@ fn main() {
     let mut host = "0.0.0.0";
     let mut port = 8000;
     let mut sync = false;
-    #[cfg(feature = "gui")]
-    let mut gui = false;
 
     while let Some(arg) = args.next() {
         match arg.as_ref() {
@@ -29,8 +27,6 @@ fn main() {
                     return eprintln!("--port needs a value");
                 }
             }
-            #[cfg(feature = "gui")]
-            "-g" | "-gui" | "--gui" => gui = true,
             _ => {
                 if arg.starts_with('-') {
                     return eprintln!("unknown option: {}", arg);
@@ -41,16 +37,6 @@ fn main() {
     }
 
     println!("~> deadwiki v{}", env!("CARGO_PKG_VERSION"));
-
-    #[cfg(feature = "gui")]
-    {
-        if gui {
-            if let Err(e) = deadwiki::gui::run(host, port, path, sync) {
-                eprintln!("GUI Error: {}", e);
-            }
-            return;
-        }
-    }
 
     if path.is_empty() {
         return print_help();
@@ -88,11 +74,6 @@ fn print_version() {
 }
 
 fn print_help() {
-    let mut gui = "";
-    if cfg!(feature = "gui") {
-        gui = "    -g, --gui      Launch as WebView application.\n";
-    }
-
     print!(
         "Usage: dead [options] <PATH TO WIKI>
 
@@ -100,10 +81,8 @@ Options:
     -H, --host     Host to bind to. Default: 0.0.0.0
     -p, --port     Port to bind to. Default: 8000
     -s, --sync     Automatically sync wiki. Must be a git repo.
-{gui}
     -v, --version  Print version.
     -h, --help     Show this message.
 ",
-        gui = gui
     );
 }

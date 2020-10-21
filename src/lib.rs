@@ -2,8 +2,6 @@
 pub mod shell;
 pub mod app;
 pub mod db;
-#[cfg(feature = "gui")]
-pub mod gui;
 pub mod helper;
 pub mod markdown;
 mod page;

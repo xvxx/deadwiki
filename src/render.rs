@@ -32,16 +32,11 @@ where
 {
     let title = title.as_ref();
     let body = body.as_ref();
-    let mut webview_app = "";
-    if cfg!(feature = "gui") {
-        webview_app = "webview-app";
-    }
 
     Ok(if asset::exists("html/layout.html") {
         asset::to_string("html/layout.html")?
             .replace("{title}", title)
             .replace("{body}", body)
-            .replace("{webview-app}", webview_app)
             .replace("{nav}", nav.unwrap_or(""))
     } else {
         body.to_string()

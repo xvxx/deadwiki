@@ -19,10 +19,6 @@ release: target/release/dead
 target/release/dead: src/*.rs
 	$(CARGO_RELEASE)
 
-.PHONY: gui
-gui:
-	$(CARGO_RELEASE) --features gui
-
 clean:
 	rm -rf target
 

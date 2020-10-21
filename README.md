@@ -9,10 +9,9 @@ using its 1990s-era web interface.
 
 ---
 
-There are three built-in ways to access your deadwiki:
+There are two built-in ways to access your deadwiki:
 
 - Run the local webserver and use the (minimal) HTML UI.
-- Run a native WebView app that wraps the UI.
 - Just use your filesystem. Regular Markdown files. `cat`, `ls`, etc.
 
 ## ~ status ~
@@ -127,17 +126,6 @@ quicker and more nimble.
 | `F9`          | Toggle Side-By-Side      |
 | `F11`         | Toggle Fullscreen        |
 
-## ~ gui mode ~
-
-There is a "native" app that uses your system's WebKit to view the
-local webserver, which it starts and manages.
-
-You can start it by using `make gui` to build a `dead` binary, then
-passing the `-g` flag to it:
-
-    $ make gui
-    $ ./dead -g -p 8001 wiki/
-
 ## ~ hacking ~
 
 The code is in pretty rough shape right now, as this is mostly a
@@ -159,6 +147,7 @@ There's a basic wiki included that shows off some features.
 - `*.css` in wiki dir gets included
 - homebrew package, AUR package
 - `brew services` for running on osx, `systemd` for arch
+- basic TUI for creating new pages or opening wiki pages in `$EDITOR`.
 
 ## ~ philosophy ~
 
