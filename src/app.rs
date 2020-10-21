@@ -34,8 +34,8 @@ macro_rules! unwrap_or_404 {
 }
 
 fn search(req: Request) -> io::Result<impl Responder> {
-    let tag = unwrap_or_404!(req.query("tag"));
     let mut env = Env::new();
+    let tag = unwrap_or_404!(req.query("tag"));
     env.set("tag", tag);
     env.set("pages", req.db().find_pages_with_tag(tag)?);
     render("Search", env.render("html/search.hat")?)
@@ -73,20 +73,20 @@ fn jump(req: Request) -> io::Result<impl Responder> {
 
     let pages = req.db().pages()?;
     let pages = pages.iter().enumerate().map(|(i, p)| {
-        let mut map: HashMap<String, hatter::Value> = HashMap::new();
-        map.insert("id".into(), i.into());
-        map.insert("name".into(), p.title().into());
-        map.insert("url".into(), p.url().into());
+        let mut map: HashMap<&str, hatter::Value> = HashMap::new();
+        map.insert("id", i.into());
+        map.insert("name", p.title().into());
+        map.insert("url", p.url().into());
         map
     });
 
     let mut idx = pages.len();
     let tags = req.db().tags()?;
     let tags = tags.iter().enumerate().map(|(i, tag)| {
-        let mut map: HashMap<String, hatter::Value> = HashMap::new();
-        map.insert("id".into(), (idx + i).into());
-        map.insert("name".into(), format!("#{}", tag).into());
-        map.insert("url".into(), tag.into());
+        let mut map: HashMap<&str, hatter::Value> = HashMap::new();
+        map.insert("id", (idx + i).into());
+        map.insert("name", format!("#{}", tag).into());
+        map.insert("url", format!("/search?tag={}", tag).into());
         idx += 1;
         map
     });

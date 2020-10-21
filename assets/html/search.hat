@@ -1,3 +1,3 @@
 <h1> "#{tag}"
-<ul> for page in results
-  <li> <a href=page> wiki_path_to_title(page)
+<ul> for page in pages
+  <li> <a href={page.url}> page.title

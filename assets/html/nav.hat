@@ -1,7 +1,0 @@
-<nav>
-  <p>
-    <a href="/"> home
-    |
-    <a#new-link href=new-link> new
-    |
-    <a href="/edit/{current-path}" #edit-link> edit

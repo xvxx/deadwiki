@@ -1,5 +1,5 @@
 <p>
-  <a href="/">home</> "|"
+  <a href="/">home</> " | "
   <a href={page.url}>back
 
 <form#form POST="">
