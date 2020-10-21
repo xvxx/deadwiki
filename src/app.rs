@@ -1,7 +1,7 @@
 use {
     crate::{db::ReqWithDB, helper::html_encode, markdown},
     hatter,
-    std::{collections::HashMap, io, ops},
+    std::{collections::HashMap, io, ops, time::Instant},
     vial::prelude::*,
 };
 
@@ -144,8 +144,12 @@ fn render<S: AsRef<str>>(title: &str, body: S) -> Result<Response, io::Error> {
     let mut env = Env::new();
     env.set("title", title);
     env.set("body", body.as_ref());
-    env.set("webview-app?", false);
-    Ok(Response::from(env.render("html/layout.hat")?))
+    let start = Instant::now();
+    let html = env.render("html/layout.hat")?;
+    let end = start.elapsed();
+    Ok(Response::from(
+        html.replace("$render-time", &format!(r#""{:?}""#, end)),
+    ))
 }
 
 struct Env {
