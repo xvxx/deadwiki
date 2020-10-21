@@ -1,10 +1,30 @@
 ## 0.1.23-dev
 
+- deadwiki will now serve non-Markdown files in your wiki, meaning
+  you local images are now supported! You'll have to add them to your
+  wiki directory's structure manually for now, but we may add a simple
+  drag-and-drop upload function for lazy folks (like me...) in the
+  future. 
 - We've cut down the number of dependencies from **42** to **28**,
   shaving a few precious seconds off build time in the process.
+- Remove double click JS events. They got in the way of highlighting
+  text. You can use the `ctrl-e` keyboard shortcut to quickly jump to
+  the edit page, instead.
 - We've done a bit of internal refactoring. There may be (more) bugs.
-- Remove double click JS events. They got in the way of highlighting text.
 
+**Dev notes:**
+
+- deadwiki is evolving from a "web app" to a library that is wrapped
+  by a web app. This means creating, finding, editing wiki pages,
+  etc, is done in the `DB` module instead of directly in the HTTP
+  routes. Besides being a nicer way to organize and test the code, it
+  means we will be able to add a lightweight TUI in the future that
+  works the same as the web app.
+- Similarly, deadwiki is evolving from relying on Rust libraries to
+  relying on UNIX commands. Our "search" is powered by `grep`, for
+  example. My plan is to allow you to configure which commands are
+  used for which actions, so you can easily swap in `ripgrep` for
+  `grep` you'd like - without having to recompile deadwiki itself.
 
 ## 0.1.22
 
