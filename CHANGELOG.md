@@ -1,3 +1,9 @@
+## 0.1.24-dev
+
+- deadwiki now uses [Hatter](https://github.com/xvxx/hatter) for its
+  HTML templates. This should hopefully let us make the server-side
+  rendered views a bit more interesting.
+
 ## 0.1.23
 
 - We've cut down the number of dependencies from **42** to **28**,
