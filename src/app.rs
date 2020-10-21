@@ -25,29 +25,35 @@ routes! {
     GET "/*name" => show;
 }
 
+/// Helper for checking for presence of form/query params.
+macro_rules! unwrap_or_404 {
+    ($expr:expr) => {
+        if let Some(v) = $expr {
+            v
+        } else {
+            return Ok(response_404());
+        }
+    };
+}
+
 fn search(req: Request) -> io::Result<impl Responder> {
-    if let Some(tag) = req.query("tag") {
-        Ok(render::layout(
-            "search",
-            &asset::to_string("html/search.html")?
-                .replace("{tag}", &format!("#{}", tag))
-                .replace(
-                    "{results}",
-                    &req.db()
-                        .find_pages_with_tag(tag)?
-                        .iter()
-                        .map(|page| {
-                            format!("<li><a href='{}'>{}</a></li>", page.url(), page.title())
-                        })
-                        .collect::<Vec<_>>()
-                        .join("\n"),
-                ),
-            None,
-        )?
-        .to_response())
-    } else {
-        Ok(Response::from(404))
-    }
+    let tag = unwrap_or_404!(req.query("tag"));
+    Ok(render::layout(
+        "search",
+        &asset::to_string("html/search.html")?
+            .replace("{tag}", &format!("#{}", tag))
+            .replace(
+                "{results}",
+                &req.db()
+                    .find_pages_with_tag(tag)?
+                    .iter()
+                    .map(|page| format!("<li><a href='{}'>{}</a></li>", page.url(), page.title()))
+                    .collect::<Vec<_>>()
+                    .join("\n"),
+            ),
+        None,
+    )?
+    .to_response())
 }
 
 fn new(req: Request) -> io::Result<impl Responder> {
@@ -193,28 +199,23 @@ fn update(req: Request) -> io::Result<impl Responder> {
 }
 
 fn edit(req: Request) -> io::Result<impl Responder> {
-    if let Some(name) = req.arg("name") {
-        if let Some(page) = req.db().find(name) {
-            return Ok(render::layout(
-                "Edit",
-                &asset::to_string("html/edit.html")?
-                    .replace("{markdown}", &fs::read_to_string(page.path())?),
-                None,
-            )?
-            .to_response());
-        }
-    }
-    Ok(response_404())
+    let name = unwrap_or_404!(req.arg("name"));
+    let page = unwrap_or_404!(req.db().find(name));
+
+    Ok(render::layout(
+        "Edit",
+        &asset::to_string("html/edit.html")?
+            .replace("{markdown}", &fs::read_to_string(page.path())?),
+        None,
+    )?
+    .to_response())
 }
 
 fn show(req: Request) -> io::Result<impl Responder> {
-    if let Some(name) = req.arg("name") {
-        let raw = name.ends_with(".md");
-        if let Some(page) = req.db().find(name.trim_end_matches(".md")) {
-            return Ok(render::page(page, raw, &req.db().names()?)?.to_response());
-        }
-    }
-    Ok(response_404())
+    let name = unwrap_or_404!(req.arg("name"));
+    let raw = name.ends_with(".md");
+    let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
+    Ok(render::page(page, raw, &req.db().names()?)?.to_response())
 }
 
 fn response_404() -> Response {
