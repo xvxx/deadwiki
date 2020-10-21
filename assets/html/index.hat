@@ -1,0 +1,12 @@
+<p>
+  <a href="/new"> new </> "|"
+  <a href="/recent"> recent </> "|"
+  <a href="/jump"> jump
+
+<h1> deadwiki
+<article#index-page>
+  if empty?(pages)
+    <i> Wiki Pages you create will show up here.
+  else
+    <ul> for page in pages
+      <li> <a href={page.url}> page.title

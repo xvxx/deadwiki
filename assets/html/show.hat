@@ -1,0 +1,7 @@
+<p>
+  <a href="/"> home </> "|"
+  <a href="/new"> new </> "|"
+  <a href="/edit/{page.name}"> edit
+
+<article ondbclick=(window.location = "/new")>
+    markdown(page.body)

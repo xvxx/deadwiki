@@ -1,0 +1,7 @@
+<p>
+  <a href="/">home</> "|"
+  <a href={page.url}>back
+
+<form#form POST="">
+  <textarea#markdown@markdown> page.body
+  <input:submit />

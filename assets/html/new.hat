@@ -1,0 +1,8 @@
+<p>
+  <a href="/"> home </> "|"
+  <a href=(history.back())> back
+
+<form#form POST="/new">
+  <p> <input@name:text#focused value=name placeholder="filename" />
+  <textarea@markdown#markdown> "# {name}"
+  <input:submit />

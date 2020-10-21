@@ -1,7 +1,34 @@
-/// Single Wiki Page
+//! Single Wiki Page
+
+use {
+    hatter::{Object, Value},
+    std::{fs, rc::Rc},
+};
+
 pub struct Page {
     path: String,
     root: String,
+}
+
+/// thing.into()
+impl From<Page> for Value {
+    fn from(p: Page) -> Self {
+        Value::Object(Rc::new(p))
+    }
+}
+
+/// In Hatter: page.title, page.url, page.path
+impl Object for Page {
+    fn get(&self, key: &str) -> Option<Value> {
+        match key {
+            "title" => Some(self.title().into()),
+            "name" => Some(self.name().into()),
+            "url" => Some(self.url().into()),
+            "path" => Some(self.path().into()),
+            "body" => Some(self.body().into()),
+            _ => None,
+        }
+    }
 }
 
 impl Page {
@@ -29,6 +56,10 @@ impl Page {
             .trim_start_matches(&self.root)
             .trim_start_matches('.')
             .trim_start_matches('/')
+    }
+
+    pub fn body(&self) -> String {
+        fs::read_to_string(self.path()).unwrap_or_else(|_| "".into())
     }
 
     pub fn title(&self) -> String {

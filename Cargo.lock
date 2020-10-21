@@ -10,10 +10,15 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 name = "deadwiki"
 version = "0.1.24-dev"
 dependencies = [
+ "hatter",
  "linkify",
  "pulldown-cmark",
  "vial",
 ]
+
+[[package]]
+name = "hatter"
+version = "0.1.2-dev"
 
 [[package]]
 name = "hermit-abi"
@@ -101,9 +106,9 @@ checksum = "078775d0255232fb988e6fccf26ddc9d1ac274299aaedcedce21c6f72cc533ce"
 
 [[package]]
 name = "vial"
-version = "0.1.5"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d62aac8d7f6179a7d4efe2cdba6b7354eaa991fb2d40c7ea85056f38641fc153"
+checksum = "62ac5c4999071c362f914d1f7b3b87ee555aed25362807068ad69a0feddacb61"
 dependencies = [
  "libc-strftime",
  "threadpool",

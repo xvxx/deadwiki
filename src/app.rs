@@ -1,8 +1,7 @@
-//! (Method, URL) => Code
-
 use {
-    crate::{db::ReqWithDB, helper::*, render},
-    std::{fs, io},
+    crate::{db::ReqWithDB, helper::html_encode, markdown},
+    hatter,
+    std::{collections::HashMap, io, ops},
     vial::prelude::*,
 };
 
@@ -36,155 +35,64 @@ macro_rules! unwrap_or_404 {
 
 fn search(req: Request) -> io::Result<impl Responder> {
     let tag = unwrap_or_404!(req.query("tag"));
-    Ok(render::layout(
-        "search",
-        &asset::to_string("html/search.html")?
-            .replace("{tag}", &format!("#{}", tag))
-            .replace(
-                "{results}",
-                &req.db()
-                    .find_pages_with_tag(tag)?
-                    .iter()
-                    .map(|page| format!("<li><a href='{}'>{}</a></li>", page.url(), page.title()))
-                    .collect::<Vec<_>>()
-                    .join("\n"),
-            ),
-        None,
-    )?
-    .to_response())
+    let mut env = Env::new();
+    env.set("tag", tag);
+    env.set("pages", req.db().find_pages_with_tag(tag)?);
+    render("Search", env.render("html/search.hat")?)
 }
 
 fn new(req: Request) -> io::Result<impl Responder> {
-    render::layout(
-        "new page",
-        &asset::to_string("html/new.html")?.replace("{name}", &req.query("name").unwrap_or("")),
-        None,
-    )
+    let mut env = Env::new();
+    env.set("name", req.query("name"));
+    render("New Page", env.render("html/new.hat")?)
 }
 
 /// Render the index page which lists all wiki pages.
 fn index(req: Request) -> io::Result<impl Responder> {
-    let mut folded = "";
-
-    Ok(render::layout(
-        "deadwiki",
-        &format!(
-            "{}",
-            asset::to_string("html/index.html")?
-                .replace(
-                    "{empty-list-msg}",
-                    if req.db().is_empty() {
-                        "<i>Wiki Pages you create will show up here.</i>"
-                    } else {
-                        ""
-                    }
-                )
-                .replace(
-                    "{pages}",
-                    &req.db()
-                        .pages()?
-                        .iter()
-                        .map(|page| {
-                            let name = page.name();
-                            let mut prefix = "".to_string();
-                            if let Some(idx) = name.trim_start_matches('/').find('/') {
-                                if folded.is_empty() {
-                                    folded = &name[..=idx];
-                                    prefix = format!("<details><summary>{}</summary>", folded);
-                                } else if folded != &name[..=idx] {
-                                    folded = &name[..=idx];
-                                    prefix =
-                                        format!("</details><details><summary>{}</summary>", folded);
-                                }
-                            } else if !folded.is_empty() {
-                                prefix = "</details>".to_string();
-                                folded = "";
-                            }
-
-                            format!(
-                                "{}  <li><a href='{}'>{}</a></li>\n",
-                                prefix,
-                                page.url(),
-                                page.title(),
-                            )
-                        })
-                        .collect::<String>()
-                )
-        ),
-        None,
-    ))
+    let mut env = Env::new();
+    env.set("pages", req.db().pages()?);
+    render("deadwiki", env.render("html/index.hat")?)
 }
 
 // POST new page
 fn create(req: Request) -> io::Result<impl Responder> {
     let name = req.form("name").unwrap_or("note.md");
-    let page = req.db().create(name, &markdown_post_data(&req))?;
+    let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
     Ok(Response::redirect_to(page.url()))
 }
 
 // Recently modified wiki pages.
 fn recent(req: Request) -> io::Result<impl Responder> {
-    render::layout(
-        "deadwiki",
-        &format!(
-            "{}",
-            asset::to_string("html/list.html")?
-                .replace(
-                    "{empty-list-msg}",
-                    if req.db().is_empty() {
-                        "<i>No Wiki Pages found.</i>"
-                    } else {
-                        ""
-                    }
-                )
-                .replace(
-                    "{pages}",
-                    &req.db()
-                        .recent()?
-                        .iter()
-                        .map(|page| {
-                            format!("<li><a href='{}'>{}</a></li>", page.url(), page.title())
-                        })
-                        .collect::<Vec<_>>()
-                        .join("")
-                )
-        ),
-        Some(&nav("/")?),
-    )
+    let mut env = Env::new();
+    env.set("pages", req.db().recent()?);
+    render("Recently Modified Pages", env.render("html/list.hat")?)
 }
 
 fn jump(req: Request) -> io::Result<impl Responder> {
-    let partial = asset::to_string("html/_jump_page.html")?;
-    if req.db().is_empty() {
-        return Ok("Add a few wiki pages then come back.".to_string());
-    }
+    let mut env = Env::new();
 
-    let mut id = -1;
-    let mut entries = req
-        .db()
-        .pages()?
-        .iter()
-        .map(|page| {
-            id += 1;
-            partial
-                .replace("{page.id}", &format!("{}", id))
-                .replace("{page.path}", &page.url())
-                .replace("{page.name}", &page.title())
-        })
-        .collect::<Vec<_>>();
-    entries.extend(req.db().tags()?.iter().map(|tag| {
-        id += 1;
-        partial
-            .replace("{page.id}", &format!("{}", id))
-            .replace("{page.path}", &format!("search?tag={}", tag))
-            .replace("{page.name}", &format!("#{}", tag))
-    }));
+    let pages = req.db().pages()?;
+    let pages = pages.iter().enumerate().map(|(i, p)| {
+        let mut map: HashMap<String, hatter::Value> = HashMap::new();
+        map.insert("id".into(), i.into());
+        map.insert("name".into(), p.title().into());
+        map.insert("url".into(), p.url().into());
+        map
+    });
 
-    render::layout(
-        "Jump to Wiki Page",
-        asset::to_string("html/jump.html")?.replace("{pages}", &format!("{}", entries.join(""))),
-        None,
-    )
+    let mut idx = pages.len();
+    let tags = req.db().tags()?;
+    let tags = tags.iter().enumerate().map(|(i, tag)| {
+        let mut map: HashMap<String, hatter::Value> = HashMap::new();
+        map.insert("id".into(), (idx + i).into());
+        map.insert("name".into(), tag.into());
+        map.insert("url".into(), tag.into());
+        idx += 1;
+        map
+    });
+
+    env.set("pages", pages.chain(tags).collect::<Vec<_>>());
+    render("Jump to Wiki Page", env.render("html/jump.hat")?)
 }
 
 fn update(req: Request) -> io::Result<impl Responder> {
@@ -194,23 +102,26 @@ fn update(req: Request) -> io::Result<impl Responder> {
 }
 
 fn edit(req: Request) -> io::Result<impl Responder> {
+    let mut env = Env::new();
     let name = unwrap_or_404!(req.arg("name"));
     let page = unwrap_or_404!(req.db().find(name));
-
-    Ok(render::layout(
-        "Edit",
-        &asset::to_string("html/edit.html")?
-            .replace("{markdown}", &fs::read_to_string(page.path())?),
-        None,
-    )?
-    .to_response())
+    env.set("page", page);
+    render("Edit", env.render("html/edit.hat")?)
 }
 
 fn show(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
     if name.ends_with(".md") || !name.contains('.') {
+        let mut env = Env::new();
         let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
-        Ok(render::page(page, name.ends_with(".md"), &req.db().names()?)?.to_response())
+        let title = page.title().clone();
+        let names = req.db().names()?;
+        env.set("page", page);
+        env.set("markdown", move |args: hatter::Args| {
+            let src = args.need_string(0).unwrap();
+            Ok(markdown::to_html(&src, &names).into())
+        });
+        render(&title, env.render("html/show.hat")?)
     } else {
         Ok(Response::from_file(&req.db().absolute_path(name)))
     }
@@ -223,4 +134,84 @@ fn response_404() -> Response {
 // Clean up POST'd markdown data - mostly by removing \r, which HTTP loves.
 fn markdown_post_data(req: &Request) -> String {
     req.form("markdown").unwrap_or("").replace('\r', "")
+}
+
+fn render<S: AsRef<str>>(title: &str, body: S) -> Result<Response, io::Error> {
+    let mut env = Env::new();
+    env.set("title", title);
+    env.set("body", body.as_ref());
+    env.set("webview-app?", false);
+    #[cfg(feature = "gui")]
+    env.set("webview-app?", true);
+    Ok(Response::from(env.render("html/layout.hat")?))
+}
+
+struct Env {
+    env: hatter::Env,
+}
+impl ops::Deref for Env {
+    type Target = hatter::Env;
+    fn deref(&self) -> &Self::Target {
+        &self.env
+    }
+}
+impl ops::DerefMut for Env {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.env
+    }
+}
+impl Env {
+    fn new() -> Env {
+        Env {
+            env: hatter::Env::new(),
+        }
+    }
+    fn render(&mut self, path: &str) -> Result<String, io::Error> {
+        use hatter::ErrorKind::*;
+
+        let src = asset::to_string(path)?;
+        match self.env.render(&src) {
+            Ok(out) => Ok(out.into()),
+            Err(err) => match err.kind {
+                ParseError | SyntaxError | RuntimeError => {
+                    let (errline, errcol) = hatter::line_and_col(&src, err.pos);
+                    Ok(format!(
+                        "<html><body>
+                        <h2>{:?}: {}</h2>
+                        <h3>{}: line {}, col {}</h3>
+                        <pre>{}",
+                        err.kind,
+                        err.details,
+                        path,
+                        errline,
+                        errcol,
+                        html_encode(&src)
+                            .split('\n')
+                            .enumerate()
+                            .map(|(i, line)| if i + 1 == errline {
+                                let errcol = if errcol > 0 { errcol - 1 } else { 0 };
+                                format!(
+                                    "<b>{}</b>\n<span style='color:red'>{}{}</span>\n",
+                                    line,
+                                    " ".repeat(errcol),
+                                    "^".repeat(err.len)
+                                )
+                            } else {
+                                format!("{}\n", line)
+                            })
+                            .collect::<String>(),
+                    ))
+                }
+
+                ArgNotFound | WrongArgType => Ok(format!(
+                    "<html><body><h1>{}</h1><h3 style='color:red'>{:?}</h3>",
+                    path, err.details
+                )),
+                _ => Ok(format!(
+                    "<html><body><h1>{}</h1><h3 style='color:red'>{:?}</h3>",
+                    path, err
+                )),
+            },
+        }
+    }
 }

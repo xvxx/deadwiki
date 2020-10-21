@@ -1,13 +1,14 @@
-<div id="jump-page">
-  <form method="GET" action="/jump" autocomplete="off">
-    <input type="text" name="pattern" id="jump-pattern" class="focused" />
-  </form>
-  <ul id="jump-list">
-    {pages}
-  </ul>
-</div>
+<div#jump-page>
+  <form GET="/jump" autocomplete="off">
+    <input:text@pattern#jump-pattern.focused />
+  if empty?(pages)
+    <em> Add a few wiki pages and then come back.
+  else
+    <ul#jump-list> for page in pages
+      <li#jump-{page.id}>
+        <a href={page.url}> page.name
 
-<script>
+<script> """
   window.WIKI_PAGES = [];
   var first = true;
   document.querySelectorAll("#jump-list li a").forEach((el) => {
@@ -78,4 +79,4 @@
       }
     }
   });
-</script>
+"""
