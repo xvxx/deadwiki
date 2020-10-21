@@ -2,6 +2,8 @@
 
 - We've cut down the number of dependencies from **42** to **28**,
   shaving a few precious seconds off build time in the process.
+- Windows line endings (`\r`) are now stripped from wiki page bodies
+  on edit or create. We didn't want those in there.
 - Double click JS events are gone. They got in the way of highlighting
   text and were annoying me when trying to copy and paste. You can use
   the `ctrl-e` keyboard shortcut to quickly jump to the edit page,

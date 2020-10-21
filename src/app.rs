@@ -118,7 +118,7 @@ fn index(req: Request) -> io::Result<impl Responder> {
 // POST new page
 fn create(req: Request) -> io::Result<impl Responder> {
     let name = req.form("name").unwrap_or("note.md");
-    let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
+    let page = req.db().create(name, &markdown_post_data(&req))?;
     Ok(Response::redirect_to(page.url()))
 }
 
@@ -189,7 +189,7 @@ fn jump(req: Request) -> io::Result<impl Responder> {
 
 fn update(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
-    let page = req.db().update(name, req.form("markdown").unwrap_or(""))?;
+    let page = req.db().update(name, &markdown_post_data(&req))?;
     Ok(Response::redirect_to(page.url()))
 }
 
@@ -218,4 +218,9 @@ fn show(req: Request) -> io::Result<impl Responder> {
 
 fn response_404() -> Response {
     Response::from(404).with_asset("html/404.html")
+}
+
+// Clean up POST'd markdown data - mostly by removing \r, which HTTP loves.
+fn markdown_post_data(req: &Request) -> String {
+    req.form("markdown").unwrap_or("").replace('\r', "")
 }
