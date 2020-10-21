@@ -1,5 +1,5 @@
 use {
-    crate::{db::ReqWithDB, helper::html_encode, markdown},
+    crate::{db::ReqWithDB, markdown, utils::html_encode},
     hatter,
     std::{collections::HashMap, io, ops, time::Instant},
     vial::prelude::*,
