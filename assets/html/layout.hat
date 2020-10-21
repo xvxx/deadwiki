@@ -1,14 +1,17 @@
 <head>
-  <link rel="stylesheet" href="/css/simplemde.min.css" />
-  <link rel="stylesheet" href="/css/github.min.css" />
-  <link rel="stylesheet" href="/css/font-awesome.min.css" />
-  <link rel="stylesheet" href="/css/github-markdown.css" />
-  <link rel="stylesheet" href="/css/style.css" />
+  css := fn(name) return <link rel="stylesheet" href="/css/{name}.css" />
+  js := fn(name) return <script src="/js/{name}.js" defer></script>
 
-  <script src="/js/highlight.min.js" defer></script>
-  <script src="/js/simplemde.min.js" defer></script>
-  <script src="/js/fuse-v6.0.0.js" defer></script>
-  <script src="/js/deadwiki.js" defer></script>
+  css("simplemde.min")
+  css("github.min")
+  css("font-awesome.min")
+  css("github-markdown")
+  css("style")
+
+  js("highlight.min")
+  js("simplemde.min")
+  js("fuse-v6.0.0")
+  js("deadwiki")
 
   <meta charset="utf-8" />
   <title> title
