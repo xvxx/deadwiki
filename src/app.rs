@@ -2,10 +2,7 @@
 
 use {
     crate::{db::ReqWithDB, helper::*, render},
-    std::{
-        fs,
-        io::{self},
-    },
+    std::{fs, io},
     vial::prelude::*,
 };
 
@@ -22,6 +19,7 @@ routes! {
 
     GET "/edit/*name" => edit;
     POST "/edit/*name" => update;
+
     GET "/*name" => show;
 }
 
@@ -213,9 +211,12 @@ fn edit(req: Request) -> io::Result<impl Responder> {
 
 fn show(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
-    let raw = name.ends_with(".md");
-    let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
-    Ok(render::page(page, raw, &req.db().names()?)?.to_response())
+    if name.ends_with(".md") || !name.contains('.') {
+        let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
+        Ok(render::page(page, name.ends_with(".md"), &req.db().names()?)?.to_response())
+    } else {
+        Ok(Response::from_file(&req.db().absolute_path(name)))
+    }
 }
 
 fn response_404() -> Response {

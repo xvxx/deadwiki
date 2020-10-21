@@ -191,25 +191,32 @@ impl DB {
         Ok(Page::new(&self.root, path))
     }
 
-    /// Convert a wiki page name or file path to cleaned up path.
-    /// Ex: "Test Results" -> "test_results"
-    fn pathify(&self, path: &str) -> String {
+    /// Get an FS path to a file, without changing case or characters.
+    pub fn absolute_path(&self, path: &str) -> String {
         let path = if path.ends_with(".html") && !path.starts_with("html/") {
             format!("html/{}", path)
         } else {
             path.to_string()
         };
         format!(
-            "{}{}.md",
+            "{}{}",
             self.root,
+            path.trim_start_matches('/').replace("..", ".")
+        )
+    }
+
+    /// Convert a wiki page name or file path to cleaned up, absolute
+    /// path to its location on disk.
+    /// Ex: "Test Results" -> "./wiki_root/test_results.md"
+    fn pathify(&self, path: &str) -> String {
+        self.absolute_path(&format!(
+            "{}.md",
             path.to_lowercase()
-                .trim_start_matches('/')
-                .replace("..", ".")
                 .replace(" ", "_")
                 .chars()
                 .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
                 .collect::<String>()
-        )
+        ))
     }
 }
 
@@ -236,5 +243,16 @@ mod test {
         assert_eq!("TODO", pages[0].title());
         assert_eq!("keyboard_shortcuts", pages[1].name());
         assert_eq!("Keyboard Shortcuts", pages[1].title());
+    }
+
+    #[test]
+    fn test_absolute() {
+        let db = DB::new("./wiki/");
+        assert_eq!("./wiki/rip.gif", db.absolute_path("rip.gif"));
+        assert_eq!("./wiki/./rip.gif", db.absolute_path("../rip.gif"));
+        assert_eq!(
+            "./wiki/long/path/to/img.JPEG",
+            db.absolute_path("long/path/to/img.JPEG")
+        );
     }
 }
