@@ -85,7 +85,7 @@ fn jump(req: Request) -> io::Result<impl Responder> {
     let tags = tags.iter().enumerate().map(|(i, tag)| {
         let mut map: HashMap<String, hatter::Value> = HashMap::new();
         map.insert("id".into(), (idx + i).into());
-        map.insert("name".into(), tag.into());
+        map.insert("name".into(), format!("#{}", tag).into());
         map.insert("url".into(), tag.into());
         idx += 1;
         map
