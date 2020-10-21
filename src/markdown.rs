@@ -29,7 +29,7 @@ pub fn to_html(md: &str, names: &[String]) -> String {
                 markdown::Event::Text("".into())
             } else if *text == *"]" && wiki_link {
                 wiki_link = false;
-                let page_name = wiki_link_text.to_lowercase().replace(" ", "_");
+                let page_name = wiki_link_text.replace(" ", "_");
                 let link_text = wiki_link_text.clone();
                 wiki_link_text.clear();
                 let page_exists = names.contains(&page_name);

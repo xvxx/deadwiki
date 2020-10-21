@@ -211,7 +211,7 @@ impl DB {
     fn pathify(&self, path: &str) -> String {
         self.absolute_path(&format!(
             "{}.md",
-            path.to_lowercase()
+            path
                 .replace(" ", "_")
                 .chars()
                 .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
