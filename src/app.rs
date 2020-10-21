@@ -145,8 +145,6 @@ fn render<S: AsRef<str>>(title: &str, body: S) -> Result<Response, io::Error> {
     env.set("title", title);
     env.set("body", body.as_ref());
     env.set("webview-app?", false);
-    #[cfg(feature = "gui")]
-    env.set("webview-app?", true);
     Ok(Response::from(env.render("html/layout.hat")?))
 }
 
