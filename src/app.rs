@@ -188,12 +188,9 @@ fn jump(req: Request) -> io::Result<impl Responder> {
 }
 
 fn update(req: Request) -> io::Result<impl Responder> {
-    if let Some(name) = req.arg("name") {
-        let page = req.db().update(name, req.form("markdown").unwrap_or(""))?;
-        Ok(Response::redirect_to(page.url()))
-    } else {
-        Ok(Response::from(404))
-    }
+    let name = unwrap_or_404!(req.arg("name"));
+    let page = req.db().update(name, req.form("markdown").unwrap_or(""))?;
+    Ok(Response::redirect_to(page.url()))
 }
 
 fn edit(req: Request) -> io::Result<impl Responder> {
