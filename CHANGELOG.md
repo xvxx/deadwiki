@@ -1,4 +1,4 @@
-## 0.1.23-dev
+## 0.1.23
 
 - We've cut down the number of dependencies from **42** to **28**,
   shaving a few precious seconds off build time in the process.
