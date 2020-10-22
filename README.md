@@ -55,8 +55,10 @@ to get going:
     $ dead my-wiki-dir/
     -> deadwiki serving my-wiki-dir/ at http://0.0.0.0:8000
 
-Now visit http://0.0.0.0:8000/ in your browser! (Or don't. It's up to
-you.)
+Now visit http://0.0.0.0:8000/ in your browser!
+
+By default the main page will list all your wiki pages, but if
+`index.md` exists in your wiki it'll show that wiki page instead.
 
 You can edit wiki pages locally with something like `vim`, or by using
 the web UI. Edits show up on the next page load, as do new pages -
