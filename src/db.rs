@@ -51,15 +51,19 @@ impl DB {
 
     /// Find a single wiki page by name.
     pub fn find(&self, name: &str) -> Option<Page> {
+        let path = self.pathify(name);
         self.pages()
             .unwrap_or_else(|_| vec![])
             .into_iter()
-            .find(|p| p.name() == name)
+            .find(|p| {
+                println!("COMPARE {} AND {}", p.path(), path);
+                p.path() == path
+            })
     }
 
-    /// Check if a wiki page exists by path.
-    pub fn exists(&self, path: &str) -> bool {
-        Path::new(path).exists()
+    /// Check if a wiki page exists by name.
+    pub fn exists(&self, name: &str) -> bool {
+        self.find(name).is_some()
     }
 
     /// All the wiki pages, in alphabetical order.
@@ -67,7 +71,7 @@ impl DB {
         Ok(shell!("find {} -type f -name '*.md' | sort", self.root)?
             .trim()
             .split('\n')
-            .map(|line| Page::new(&self.root, line.trim().to_string()))
+            .map(|line| Page::new(&self.root, line.trim().replace("//", "/")))
             .collect())
     }
 
@@ -211,8 +215,8 @@ impl DB {
     fn pathify(&self, path: &str) -> String {
         self.absolute_path(&format!(
             "{}.md",
-            path
-                .replace(" ", "_")
+            path.replace(" ", "_")
+                .to_lowercase()
                 .chars()
                 .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
                 .collect::<String>()
@@ -243,6 +247,24 @@ mod test {
         assert_eq!("TODO", pages[0].title());
         assert_eq!("keyboard_shortcuts", pages[1].name());
         assert_eq!("Keyboard Shortcuts", pages[1].title());
+    }
+
+    #[test]
+    fn test_pathify() {
+        let db = DB::new("./wiki/");
+        assert_eq!(
+            "./wiki/keyboard_shortcuts.md",
+            db.pathify("Keyboard Shortcuts")
+        );
+        assert_eq!("./wiki/coool.md", db.pathify("Coool!!"));
+    }
+
+    #[test]
+    fn test_exists() {
+        let db = DB::new("./wiki/");
+        let kb = db.find("Keyboard Shortcuts").unwrap();
+        assert_eq!("Keyboard Shortcuts", kb.title());
+        assert!(db.exists("Keyboard Shortcuts"));
     }
 
     #[test]
