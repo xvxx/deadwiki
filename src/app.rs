@@ -1,7 +1,7 @@
 use {
-    crate::{db::ReqWithDB, markdown, utils::html_encode},
+    crate::{db::ReqWithDB, markdown, Hatter},
     hatter,
-    std::{collections::HashMap, io, ops, time::Instant},
+    std::{collections::HashMap, io, time::Instant},
     vial::prelude::*,
 };
 
@@ -34,7 +34,7 @@ macro_rules! unwrap_or_404 {
 }
 
 fn search(req: Request) -> io::Result<impl Responder> {
-    let mut env = Env::new();
+    let mut env = Hatter::new();
     let tag = unwrap_or_404!(req.query("tag"));
     env.set("tag", tag);
     env.set("pages", req.db().find_pages_with_tag(tag)?);
@@ -42,14 +42,14 @@ fn search(req: Request) -> io::Result<impl Responder> {
 }
 
 fn new(req: Request) -> io::Result<impl Responder> {
-    let mut env = Env::new();
+    let mut env = Hatter::new();
     env.set("name", req.query("name"));
     render("New Page", env.render("html/new.hat")?)
 }
 
 /// Render the index page which lists all wiki pages.
 fn index(req: Request) -> io::Result<impl Responder> {
-    let mut env = Env::new();
+    let mut env = Hatter::new();
     env.set("pages", req.db().pages()?);
     env.set("nested_header", |args: hatter::Args| {
         Ok(args.need_string(0)?.split('/').next().unwrap_or("").into())
@@ -78,13 +78,13 @@ fn create(req: Request) -> io::Result<impl Responder> {
 
 // Recently modified wiki pages.
 fn recent(req: Request) -> io::Result<impl Responder> {
-    let mut env = Env::new();
+    let mut env = Hatter::new();
     env.set("pages", req.db().recent()?);
     render("Recently Modified Pages", env.render("html/list.hat")?)
 }
 
 fn jump(req: Request) -> io::Result<impl Responder> {
-    let mut env = Env::new();
+    let mut env = Hatter::new();
 
     let pages = req.db().pages()?;
     let pages = pages.iter().enumerate().map(|(i, p)| {
@@ -117,7 +117,7 @@ fn update(req: Request) -> io::Result<impl Responder> {
 }
 
 fn edit(req: Request) -> io::Result<impl Responder> {
-    let mut env = Env::new();
+    let mut env = Hatter::new();
     let name = unwrap_or_404!(req.arg("name"));
     let page = unwrap_or_404!(req.db().find(name));
     env.set("page", page);
@@ -127,7 +127,7 @@ fn edit(req: Request) -> io::Result<impl Responder> {
 fn show(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
     if name.ends_with(".md") || !name.contains('.') {
-        let mut env = Env::new();
+        let mut env = Hatter::new();
         let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
         let title = page.title().clone();
         let names = req.db().names()?;
@@ -156,7 +156,7 @@ fn redirect_to<S: AsRef<str>>(path: S) -> io::Result<Response> {
 }
 
 fn render<S: AsRef<str>>(title: &str, body: S) -> Result<Response, io::Error> {
-    let mut env = Env::new();
+    let mut env = Hatter::new();
     env.set("title", title);
     env.set("body", body.as_ref());
     let start = Instant::now();
@@ -165,74 +165,4 @@ fn render<S: AsRef<str>>(title: &str, body: S) -> Result<Response, io::Error> {
     Ok(Response::from(
         html.replace("$render-time", &format!(r#""{:?}""#, end)),
     ))
-}
-
-struct Env {
-    env: hatter::Env,
-}
-impl ops::Deref for Env {
-    type Target = hatter::Env;
-    fn deref(&self) -> &Self::Target {
-        &self.env
-    }
-}
-impl ops::DerefMut for Env {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.env
-    }
-}
-impl Env {
-    fn new() -> Env {
-        Env {
-            env: hatter::Env::new(),
-        }
-    }
-    fn render(&mut self, path: &str) -> Result<String, io::Error> {
-        use hatter::ErrorKind::*;
-
-        let src = asset::to_string(path)?;
-        match self.env.render(&src) {
-            Ok(out) => Ok(out.into()),
-            Err(err) => match err.kind {
-                ParseError | SyntaxError | RuntimeError => {
-                    let (errline, errcol) = hatter::line_and_col(&src, err.pos);
-                    Ok(format!(
-                        "<html><body>
-                        <h2>{:?}: {}</h2>
-                        <h3>{}: line {}, col {}</h3>
-                        <pre>{}",
-                        err.kind,
-                        err.details,
-                        path,
-                        errline,
-                        errcol,
-                        html_encode(&src)
-                            .split('\n')
-                            .enumerate()
-                            .map(|(i, line)| if i + 1 == errline {
-                                let errcol = if errcol > 0 { errcol - 1 } else { 0 };
-                                format!(
-                                    "<b>{}</b>\n<span style='color:red'>{}{}</span>\n",
-                                    line,
-                                    " ".repeat(errcol),
-                                    "^".repeat(err.len)
-                                )
-                            } else {
-                                format!("{}\n", line)
-                            })
-                            .collect::<String>(),
-                    ))
-                }
-
-                ArgNotFound | WrongArgType => Ok(format!(
-                    "<html><body><h1>{}</h1><h3 style='color:red'>{:?}</h3>",
-                    path, err.details
-                )),
-                _ => Ok(format!(
-                    "<html><body><h1>{}</h1><h3 style='color:red'>{:?}</h3>",
-                    path, err
-                )),
-            },
-        }
-    }
 }
