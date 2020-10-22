@@ -55,10 +55,7 @@ impl DB {
         self.pages()
             .unwrap_or_else(|_| vec![])
             .into_iter()
-            .find(|p| {
-                println!("COMPARE {} AND {}", p.path(), path);
-                p.path() == path
-            })
+            .find(|p| p.path() == path)
     }
 
     /// Check if a wiki page exists by name.
@@ -71,6 +68,7 @@ impl DB {
         Ok(shell!("find {} -type f -name '*.md' | sort", self.root)?
             .trim()
             .split('\n')
+            .filter(|line| !line.trim().is_empty())
             .map(|line| Page::new(&self.root, line.trim().replace("//", "/")))
             .collect())
     }
@@ -247,6 +245,13 @@ mod test {
         assert_eq!("TODO", pages[0].title());
         assert_eq!("keyboard_shortcuts", pages[1].name());
         assert_eq!("Keyboard Shortcuts", pages[1].title());
+
+        shell!("mkdir -p ./wiki/empty").unwrap();
+        let db = DB::new("./wiki/empty");
+        let pages = db.pages().unwrap();
+        println!("{:?}", pages);
+        assert_eq!(0, pages.len());
+        shell!("rm -rf ./wiki/empty").unwrap();
     }
 
     #[test]
