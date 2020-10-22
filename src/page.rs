@@ -5,6 +5,7 @@ use {
     std::{fs, rc::Rc},
 };
 
+#[derive(Debug)]
 pub struct Page {
     path: String,
     root: String,
