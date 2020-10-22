@@ -6,7 +6,7 @@
 <h1> deadwiki
 <article#index-page>
   if empty?(pages)
-    <i> Wiki Pages you create will show up here.
+    <i> "This page will either list your wiki pages or display your `index.md` (if it exists)."
   else
     header := ""
     <ul> for page in pages

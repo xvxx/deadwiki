@@ -49,24 +49,28 @@ fn new(req: Request) -> io::Result<impl Responder> {
 
 /// Render the index page which lists all wiki pages.
 fn index(req: Request) -> io::Result<impl Responder> {
-    let mut env = Hatter::new();
-    env.set("pages", req.db().pages()?);
-    env.set("nested_header", |args: hatter::Args| {
-        Ok(args.need_string(0)?.split('/').next().unwrap_or("").into())
-    });
-    env.set("nested_title", |args: hatter::Args| {
-        Ok(args
-            .need_string(0)?
-            .split('/')
-            .skip(1)
-            .collect::<Vec<_>>()
-            .join("/")
-            .into())
-    });
-    env.set("nested?", |args: hatter::Args| {
-        Ok(args.need_string(0)?.contains('/').into())
-    });
-    render("deadwiki", env.render("html/index.hat")?)
+    if req.db().exists("index") {
+        show_page(&req, "index")
+    } else {
+        let mut env = Hatter::new();
+        env.set("pages", req.db().pages()?);
+        env.set("nested_header", |args: hatter::Args| {
+            Ok(args.need_string(0)?.split('/').next().unwrap_or("").into())
+        });
+        env.set("nested_title", |args: hatter::Args| {
+            Ok(args
+                .need_string(0)?
+                .split('/')
+                .skip(1)
+                .collect::<Vec<_>>()
+                .join("/")
+                .into())
+        });
+        env.set("nested?", |args: hatter::Args| {
+            Ok(args.need_string(0)?.contains('/').into())
+        });
+        render("deadwiki", env.render("html/index.hat")?)
+    }
 }
 
 // POST new page
@@ -127,19 +131,23 @@ fn edit(req: Request) -> io::Result<impl Responder> {
 fn show(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
     if name.ends_with(".md") || !name.contains('.') {
-        let mut env = Hatter::new();
-        let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
-        let title = page.title().clone();
-        let names = req.db().names()?;
-        env.set("page", page);
-        env.set("markdown", move |args: hatter::Args| {
-            let src = args.need_string(0).unwrap();
-            Ok(markdown::to_html(&src, &names).into())
-        });
-        render(&title, env.render("html/show.hat")?)
+        show_page(&req, name)
     } else {
         Ok(Response::from_file(&req.db().absolute_path(name)))
     }
+}
+
+fn show_page(req: &Request, name: &str) -> io::Result<Response> {
+    let mut env = Hatter::new();
+    let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
+    let title = page.title().clone();
+    let names = req.db().names()?;
+    env.set("page", page);
+    env.set("markdown", move |args: hatter::Args| {
+        let src = args.need_string(0).unwrap();
+        Ok(markdown::to_html(&src, &names).into())
+    });
+    render(&title, env.render("html/show.hat")?)
 }
 
 fn response_404() -> Response {
