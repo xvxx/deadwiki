@@ -18,7 +18,9 @@ dependencies = [
 
 [[package]]
 name = "hatter"
-version = "0.1.2-dev"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee298c0968fd069a6f158b07b044476ed4ca0c9cdcc0bf8a04f89f813d56f415"
 
 [[package]]
 name = "hermit-abi"

@@ -19,6 +19,10 @@ impl From<Page> for Value {
 
 /// In Hatter: page.title, page.url, page.path
 impl Object for Page {
+    fn typename(&self) -> &str {
+        "Page"
+    }
+
     fn get(&self, key: &str) -> Option<Value> {
         match key {
             "title" => Some(self.title().into()),

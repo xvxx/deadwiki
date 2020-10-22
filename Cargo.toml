@@ -30,7 +30,7 @@ dev-version-ext = "dev"
 vial = "0.1.7"
 
 [dependencies]
-hatter = { path = "../hatter" }
+hatter = "0.1.2"
 vial = "0.1.7"
 
 pulldown-cmark = { version = "0.7", default-features = false }
