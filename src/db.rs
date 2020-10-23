@@ -211,13 +211,17 @@ impl DB {
     /// path to its location on disk.
     /// Ex: "Test Results" -> "./wiki_root/test_results.md"
     fn pathify(&self, path: &str) -> String {
-        self.absolute_path(&format!(
-            "{}.md",
-            path.replace(" ", "_")
-                .chars()
-                .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
-                .collect::<String>()
-        ))
+        self.absolute_path(&format!("{}.md", Self::title_to_name(path)))
+    }
+
+    /// "Keyboard Shortcut" -> "Keyboard_Shortcut"
+    pub fn title_to_name(title: &str) -> String {
+        title
+            .trim()
+            .replace(" ", "_")
+            .chars()
+            .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
+            .collect::<String>()
     }
 }
 

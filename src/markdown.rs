@@ -6,7 +6,7 @@
 //! - #tag to link to a hashtag.
 //!
 
-use {linkify::LinkFinder, pulldown_cmark as markdown, std::borrow::Cow};
+use {crate::db::DB, linkify::LinkFinder, pulldown_cmark as markdown, std::borrow::Cow};
 
 /// Convert raw wiki Markdown into HTML.
 /// Takes a list of all wiki pages in the system, for [Link]s.
@@ -29,7 +29,7 @@ pub fn to_html(md: &str, names: &[String]) -> String {
                 markdown::Event::Text("".into())
             } else if *text == *"]" && wiki_link {
                 wiki_link = false;
-                let page_name = wiki_link_text.replace(" ", "_");
+                let page_name = DB::title_to_name(&wiki_link_text);
                 let link_text = wiki_link_text.clone();
                 wiki_link_text.clear();
                 let page_exists = names.contains(&page_name);
