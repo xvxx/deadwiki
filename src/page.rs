@@ -2,13 +2,14 @@
 
 use {
     hatter::{Object, Value},
-    std::{fs, rc::Rc},
+    std::{cell::RefCell, fs, rc::Rc},
 };
 
 #[derive(Debug)]
 pub struct Page {
     path: String,
     root: String,
+    body: RefCell<String>,
 }
 
 /// thing.into()
@@ -41,6 +42,7 @@ impl Page {
         Page {
             root: root.as_ref().into(),
             path: path.as_ref().into(),
+            body: RefCell::new(String::new()),
         }
     }
 
@@ -64,7 +66,12 @@ impl Page {
     }
 
     pub fn body(&self) -> String {
-        fs::read_to_string(self.path()).unwrap_or_else(|_| "".into())
+        if self.body.borrow().is_empty() {
+            self.body
+                .borrow_mut()
+                .push_str(&fs::read_to_string(self.path()).unwrap_or_else(|_| "".into()));
+        }
+        self.body.borrow().clone()
     }
 
     pub fn title(&self) -> String {
