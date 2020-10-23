@@ -214,7 +214,6 @@ impl DB {
         self.absolute_path(&format!(
             "{}.md",
             path.replace(" ", "_")
-                .to_lowercase()
                 .chars()
                 .filter(|&c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '/')
                 .collect::<String>()
@@ -259,17 +258,17 @@ mod test {
         let db = DB::new("./wiki/");
         assert_eq!(
             "./wiki/keyboard_shortcuts.md",
-            db.pathify("Keyboard Shortcuts")
+            db.pathify("keyboard shortcuts")
         );
-        assert_eq!("./wiki/coool.md", db.pathify("Coool!!"));
+        assert_eq!("./wiki/Coool.md", db.pathify("Coool!!"));
     }
 
     #[test]
     fn test_exists() {
         let db = DB::new("./wiki/");
-        let kb = db.find("Keyboard Shortcuts").unwrap();
+        let kb = db.find("keyboard shortcuts").unwrap();
         assert_eq!("Keyboard Shortcuts", kb.title());
-        assert!(db.exists("Keyboard Shortcuts"));
+        assert!(db.exists("keyboard shortcuts"));
     }
 
     #[test]
