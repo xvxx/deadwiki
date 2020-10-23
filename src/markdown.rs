@@ -32,9 +32,11 @@ pub fn to_html(md: &str, names: &[String]) -> String {
                 let page_name = DB::title_to_name(&wiki_link_text);
                 let link_text = wiki_link_text.clone();
                 wiki_link_text.clear();
-                let page_exists = names.contains(&page_name);
-                let (link_class, link_href) = if page_exists {
-                    ("", format!("/{}", page_name))
+                let (link_class, link_href) = if let Some(idx) = names
+                    .iter()
+                    .position(|n| n.to_ascii_lowercase() == page_name.to_ascii_lowercase())
+                {
+                    ("", format!("/{}", names[idx]))
                 } else {
                     ("new", format!("/new?name={}", page_name))
                 };
