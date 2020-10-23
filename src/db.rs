@@ -228,7 +228,7 @@ mod test {
     #[test]
     fn test_len() {
         let db = DB::new("./wiki/");
-        assert_eq!(5, db.len());
+        assert_eq!(6, db.len());
         assert_eq!(false, db.is_empty());
 
         let db = DB::new("./src/");
