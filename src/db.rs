@@ -178,13 +178,13 @@ impl DB {
     /// Save a page to disk. Doesn't track renames, just content
     /// changes for now.
     pub fn update(&self, name: &str, body: &str) -> Result<Page> {
-        let path = self.pathify(name);
-        if !self.exists(&path) {
+        if !self.exists(name) {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
-                format!("Doesn't exist: {}", path),
+                format!("Doesn't exist: {}", name),
             ));
         }
+        let path = self.pathify(name);
         // "atomic" save: write to new file then move to old file
         let tmp = format!("{}~", path);
         let mut file = File::create(&tmp)?;
@@ -211,7 +211,11 @@ impl DB {
     /// path to its location on disk.
     /// Ex: "Test Results" -> "./wiki_root/test_results.md"
     fn pathify(&self, path: &str) -> String {
-        self.absolute_path(&format!("{}.md", Self::title_to_name(path)))
+        if path.ends_with(".md") {
+            path.into()
+        } else {
+            self.absolute_path(&format!("{}.md", Self::title_to_name(path)))
+        }
     }
 
     /// "Keyboard Shortcut" -> "Keyboard_Shortcut"
