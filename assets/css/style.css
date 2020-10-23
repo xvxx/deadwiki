@@ -74,3 +74,9 @@ code a, code a:visited {
 #jump-page .active {
   font-weight: bold;
 }
+
+/* nested wiki pages */
+
+#index-page .inner {
+  margin-left: 2rem;
+}

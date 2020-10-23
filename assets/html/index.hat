@@ -8,18 +8,24 @@
   if empty?(pages)
     <i> "This page will either list your wiki pages or display your `index.md` (if it exists)."
   else
-    header := ""
-    <ul> for page in pages
-      if nested?(page.title)
-        if header != nested_header(page.title)
-          if header != "" then print("</details>")
-          header = nested_header(page.title)
-          print("<details> {<summary> header}")
-          <li> <a href={page.url}> nested_title(page.title)
-        else
-          <li> <a href={page.url}> page.title
-      else
-        if header != ""
-          print("</details>")
-          header = ""
-        <li> <a href={page.url}> page.title
+    map := {}
+    for page in pages
+        parts := split(page.name, '/')
+        final := pop(parts)
+        target := map
+        for part in parts
+            part = "{part}/"
+            if !target[part] then target[part] = {}
+            target = target[part]
+        target[final] = page
+
+    def print-nested(x)
+        for k, v in x
+            if type(v) == 'Page'
+                <li> <a href={v.url}> split(v.title, '/')[-1]
+            else
+                puts("<details><summary>{k}</summary><div class='inner'>")
+                print-nested(v)
+                puts("</div></details>")
+
+    <ul> print-nested(map)
