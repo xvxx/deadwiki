@@ -93,6 +93,12 @@ impl Page {
             .collect::<Vec<_>>()
             .join(" ")
     }
+
+    /// Does this page contain a git/sync conflict?
+    pub fn has_conflict(&self) -> bool {
+        let body = self.body();
+        body.contains("<<<<<<<") && body.contains(">>>>>>>")
+    }
 }
 
 /// Capitalize the first letter of a string.

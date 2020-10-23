@@ -152,7 +152,7 @@ fn show_index(req: &Request) -> io::Result<Response> {
 fn show_page(req: &Request, name: &str) -> io::Result<Response> {
     let mut env = Hatter::new();
     let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
-    if page.body().contains("<<<<<<<") && page.body().contains(">>>>>>>") {
+    if page.has_conflict() {
         return redirect_to(format!("/edit{}?conflicts=true", page.url()));
     }
     let title = page.title().clone();
