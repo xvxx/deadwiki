@@ -1,7 +1,7 @@
 <p>
   <a href="/">home</> " | "
   <a href="/new">new</> " | "
-  <a href="/edit/{page.name}"> edit
+  <a#edit-link href="/edit/{page.name}"> edit
 
 <article>
     markdown(page.body)
