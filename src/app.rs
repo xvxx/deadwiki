@@ -115,6 +115,7 @@ fn edit(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
     let page = unwrap_or_404!(req.db().find(name));
     env.set("page", page);
+    env.set("conflicts", req.query("conflicts").is_some());
     render("Edit", env.render("html/edit.hat")?)
 }
 
@@ -151,6 +152,9 @@ fn show_index(req: &Request) -> io::Result<Response> {
 fn show_page(req: &Request, name: &str) -> io::Result<Response> {
     let mut env = Hatter::new();
     let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
+    if page.body().contains("<<<<<<<") && page.body().contains(">>>>>>>") {
+        return redirect_to(format!("/edit{}?conflicts=true", page.url()));
+    }
     let title = page.title().clone();
     let names = req.db().names()?;
     env.set("page", page);

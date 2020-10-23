@@ -2,6 +2,9 @@
   <a href="/">home</> " | "
   <a href={page.url}>back
 
+if conflicts
+  <h3.sync-error> Sync Error: Conflicts in this file
+
 <form#form POST="">
   <textarea#markdown@markdown> page.body
   <input:submit />

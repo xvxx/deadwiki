@@ -80,3 +80,9 @@ code a, code a:visited {
 #index-page .inner {
   margin-left: 2rem;
 }
+
+/* sync */
+
+.sync-error {
+  color: red;
+}
