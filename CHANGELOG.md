@@ -3,6 +3,15 @@
 - deadwiki now uses [Hatter](https://github.com/xvxx/hatter) for its
   HTML templates. This should hopefully let us make the server-side
   rendered views a bit more interesting.
+- A few JS keyboard shortcut bugfixes.
+- Render time is now displayed in an HTML comment.
+- Multiple sub-directories are now folded on the index page, beyond
+  just the first.
+- If an `index.md` file exists, it will be displayed instead of a wiki
+  page list on the page page. (#8)
+- There is now an `/all` route that will always display all wiki
+  pages.
+- Fix link creation to more closely match filenames. (#7)
 
 ## 0.1.23
 
