@@ -89,14 +89,13 @@ fn jump(req: Request) -> io::Result<impl Responder> {
         map
     });
 
-    let mut idx = pages.len();
+    let idx = pages.len();
     let tags = req.db().tags()?;
     let tags = tags.iter().enumerate().map(|(i, tag)| {
         let mut map: HashMap<&str, hatter::Value> = HashMap::new();
         map.insert("id", (idx + i).into());
         map.insert("name", format!("#{}", tag).into());
         map.insert("url", format!("/search?tag={}", tag).into());
-        idx += 1;
         map
     });
 
