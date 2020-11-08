@@ -95,3 +95,75 @@ document.onkeydown = (e) => {
     return;
   }
 };
+
+window.WIKI_PAGES = [];
+var first = true;
+document.querySelectorAll("#jump-list li a").forEach((el) => {
+  if (first) {
+    el.closest("li").classList.add("active");
+    first = false;
+  }
+  window.WIKI_PAGES.push({
+    name: el.innerText,
+    path: el.href.split("/").slice(-1)[0],
+  });
+});
+
+// jump to page (ctrl-j)
+document.querySelector("#jump-pattern").addEventListener("keydown", (e) => {
+  // down arrow or ctrl-n
+  if (e.keyCode == 40 || (e.keyCode == 78 && e.ctrlKey)) {
+    let el = document.querySelector("#jump-list .active");
+    var next = el.nextElementSibling;
+    while (next && !next.offsetParent) next = next.nextElementSibling;
+    if (next && next.offsetParent) {
+      el.classList.remove("active");
+      next.classList.add("active");
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+
+  // up arrow or ctrl-p
+  if (e.keyCode == 38 || (e.keyCode == 80 && e.ctrlKey)) {
+    let el = document.querySelector("#jump-list .active");
+    var prev = el.previousElementSibling;
+    while (prev && !prev.offsetParent) prev = prev.previousElementSibling;
+    if (prev && prev.offsetParent) {
+      el.classList.remove("active");
+      prev.classList.add("active");
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+
+  // enter (open page/tag)
+  if (e.keyCode == 13) {
+    window.location = document.querySelector("#jump-list .active a").href;
+    e.preventDefault();
+    return false;
+  }
+
+  const fuse = new Fuse(window.WIKI_PAGES, { keys: ["name"] });
+  const pattern = e.target.value;
+  let list = document.querySelectorAll("#jump-list li");
+  if (pattern == "") {
+    list.forEach((el) => (el.style.display = ""));
+  } else {
+    let matches = fuse.search(pattern);
+    list.forEach((el) => (el.style.display = "none"));
+    for (var i = matches.length - 1; i >= 0; i--) {
+      let match = matches[i];
+      let el = document.querySelector("#jump-" + match.refIndex);
+      let jumpList = document.querySelector("#jump-list");
+      jumpList.removeChild(el);
+      var active = document.querySelector(".active");
+      if (active) active.classList.toggle("active");
+      el.classList.add("active");
+      jumpList.insertBefore(el, jumpList.childNodes[0]);
+      el.style.display = "";
+    }
+  }
+});
