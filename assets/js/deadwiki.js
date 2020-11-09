@@ -48,12 +48,12 @@ document.onkeydown = (e) => {
     // ignore keydown if input or textarea is focused
 
     // history navigation
-    if (e.metaKey && (e.key == "[" || e.keyCode == 37)) {
+    if (e.metaKey && e.key == "[" && !e.shiftKey) {
       // history back: cmd+[ or cmd+left-arrow
       e.preventDefault();
       history.back();
       return;
-    } else if (e.metaKey && (e.key == "]" || e.keyCode == 47)) {
+    } else if (e.metaKey && e.key == "]" && !e.shiftKey) {
       // history forward: cmd+] or cmd+right-arrow
       e.preventDefault();
       history.forward();
