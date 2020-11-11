@@ -1,3 +1,10 @@
+## 0.1.25-dev
+
+Small bugfix release:
+
+- Fixed back/forward keybindings conflict in Firefox. #11
+- Fixed fuzzy finder on "jump to" page (`ctrl-j`). #10
+
 ## 0.1.24
 
 - deadwiki now uses [Hatter](https://github.com/xvxx/hatter) for its
