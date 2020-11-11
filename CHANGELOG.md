@@ -1,4 +1,4 @@
-## 0.1.25-dev
+## 0.1.25
 
 Small bugfix release:
 
