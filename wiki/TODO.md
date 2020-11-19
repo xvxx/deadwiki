@@ -2,7 +2,7 @@
 
 - [ ] redo css
     - [ ] mobile view
-    - [ ] dark mode
+    - [x] dark mode
 - [ ] sidebar with all pages
     - [ ] sidebar with current page TOC
     - [ ] hide/show sidebar
