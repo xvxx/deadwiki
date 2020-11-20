@@ -1,3 +1,9 @@
+## 0.1.26-dev
+
+- Dark Mode CSS added. There's an icon in the UI.
+- Added error message on 'Recently Edited' when wiki isn't in git.
+- Added basic navigation to 'Recently Edited' page, too.
+
 ## 0.1.25
 
 Small bugfix release:
