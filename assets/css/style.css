@@ -8,42 +8,45 @@
 
 /* dark mode */
 
-@media (prefers-color-scheme: dark) {
-  * {
-    background-color: #181a1b;
-    color: #cecac3;
-  }
-  .markdown-body a {
-    color: rgb(76, 172, 252);
-  }
-  .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5 {
-    border-bottom-color: rgb(53, 58, 60);
-  }
-  .markdown-body hr {
-    background-color: rgb(53, 58, 60);
-  }
-  .markdown-body .highlight pre:not(.CodeMirror-line), .markdown-body pre:not(.CodeMirror-line) {
-    background-color: rgb(28, 30, 31);
-  }
-  .CodeMirror {
-    background-color: transparent;
-  }
-  .editor-toolbar a {
-    border-color: transparent;
-    text-decoration-color: initial !important;
-    color: rgb(174, 194, 211) !important;
-  }
-  .editor-toolbar, .CodeMirror {
-    border-color: rgb(59, 64, 66);
-  }
-  .editor-toolbar i.separator {
-    border-left-color: rgb(59, 64, 66);
-    border-right-color: rgb(48, 52, 54);
-    color: transparent;
-  }
+body.dark, body.dark * {
+  background-color: #181a1b;
+  color: #cecac3;
+}
+body.dark .markdown-body a {
+  color: rgb(76, 172, 252);
+}
+body.dark .markdown-body h1, body.dark .markdown-body h2, body.dark .markdown-body h3, body.dark .markdown-body h4, body.dark .markdown-body h5 {
+  border-bottom-color: rgb(53, 58, 60);
+}
+body.dark .markdown-body hr {
+  background-color: rgb(53, 58, 60);
+}
+body.dark .markdown-body .highlight pre:not(.CodeMirror-line), body.dark .markdown-body pre:not(.CodeMirror-line) {
+  background-color: rgb(28, 30, 31);
+}
+body.dark .CodeMirror {
+  background-color: transparent;
+}
+body.dark .editor-toolbar a {
+  border-color: transparent;
+  text-decoration-color: initial !important;
+  color: rgb(174, 194, 211) !important;
+}
+body.dark .editor-toolbar, body.dark .CodeMirror {
+  border-color: rgb(59, 64, 66);
+}
+body.dark .editor-toolbar i.separator {
+  border-left-color: rgb(59, 64, 66);
+  border-right-color: rgb(48, 52, 54);
+  color: transparent;
 }
 
-/* content  */
+/* nav */
+#toggle-ui-mode {
+  float: right;
+}
+
+/* content */
 
 a.new {
   color: red;
@@ -62,8 +65,9 @@ a.new {
   margin-top: 0.5em;
 }
 
-img {
+.markdown-body img {
   max-width: 400px;
+  background-color: transparent;
 }
 
 /* code  */

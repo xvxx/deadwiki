@@ -15,7 +15,15 @@
 
   <meta charset="utf-8" />
   <title> title
-<body>
+
+<body.dark=dark-mode?>
   <div#main.markdown-body>
+    <div id="toggle-ui-mode">
+      if dark-mode?
+        <a href="/toggle-ui-mode"><img src="/img/sun.svg"/></a>
+      else
+        <a href="/toggle-ui-mode"><img src="/img/moon.svg"/></a>
+
     body
+
   <!-- Render Time: $render-time -->
