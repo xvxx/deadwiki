@@ -27,11 +27,11 @@ pre-release-replacements = [
 dev-version-ext = "dev"
 
 [build-dependencies]
-vial = "0.1.7"
+vial = "0.1.8"
 
 [dependencies]
 hatter = "0.1.4"
-vial = "0.1.7"
+vial = { version = "0.1.8", features = ["cookies"] }
 
 pulldown-cmark = { version = "0.7", default-features = false }
 linkify = "0.4.0"
