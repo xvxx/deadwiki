@@ -107,6 +107,15 @@ document.onkeydown = (e) => {
   }
 };
 
+/* toggle ui mode */
+$("#toggle-ui-mode").addEventListener("click", (e) => {
+  GET('/toggle-ui-mode');
+  $("body").classList.toggle("dark");
+  e.preventDefault();
+  e.stopPropagation();
+  return false;
+});
+
 /* jump to page (ctrl-j) */
 window.WIKI_PAGES = [];
 var first = true;
