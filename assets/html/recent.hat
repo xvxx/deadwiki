@@ -4,8 +4,10 @@
 
 <h1> Recently edited pages
 <article#list-page>
-  if empty?(pages)
-    <i> Wiki Pages you create will show up here.
+  if !is_git?
+    <b> Not a git repository.
+  else if empty?(pages)
+    <i> Wiki pages you create will show up here.
   else
     <ul> for page in pages
       <li> <a href={page.url}> page.title

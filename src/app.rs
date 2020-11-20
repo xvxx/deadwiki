@@ -73,6 +73,7 @@ fn create(req: Request) -> io::Result<impl Responder> {
 // Recently modified wiki pages.
 fn recent(req: Request) -> io::Result<impl Responder> {
     let mut env = Hatter::new();
+    env.set("is_git?", req.db().is_git());
     env.set("pages", req.db().recent()?);
     render("Recently Modified Pages", env.render("html/recent.hat")?)
 }

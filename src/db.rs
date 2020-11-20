@@ -222,7 +222,7 @@ impl DB {
     }
 
     /// Is this DB tracked with git?
-    fn is_git(&self) -> bool {
+    pub fn is_git(&self) -> bool {
         self.git_dir().exists()
     }
 
