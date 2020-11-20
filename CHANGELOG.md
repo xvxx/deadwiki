@@ -1,4 +1,4 @@
-## 0.1.26-dev
+## 0.1.26
 
 - Dark Mode CSS added. There's an icon in the UI.
 - Added error message on 'Recently Edited' when wiki isn't in git.
