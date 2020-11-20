@@ -17,7 +17,7 @@ dependencies = [
 
 [[package]]
 name = "deadwiki"
-version = "0.1.26"
+version = "0.1.27-dev"
 dependencies = [
  "hatter",
  "linkify",
