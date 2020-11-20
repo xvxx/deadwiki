@@ -20,6 +20,8 @@ routes! {
     GET "/edit/*name" => edit;
     POST "/edit/*name" => update;
 
+    GET "/toggle-ui-mode" => toggle_ui_mode;
+
     GET "/*name" => show;
 }
 
@@ -39,13 +41,13 @@ fn search(req: Request) -> io::Result<impl Responder> {
     let tag = unwrap_or_404!(req.query("tag"));
     env.set("tag", tag);
     env.set("pages", req.db().find_pages_with_tag(tag)?);
-    render("Search", env.render("html/search.hat")?)
+    req.render("Search", env.render("html/search.hat")?)
 }
 
 fn new(req: Request) -> io::Result<impl Responder> {
     let mut env = Hatter::new();
     env.set("name", req.query("name"));
-    render("New Page", env.render("html/new.hat")?)
+    req.render("New Page", env.render("html/new.hat")?)
 }
 
 /// Render the index page which lists all wiki pages or displays your
@@ -63,6 +65,17 @@ fn all_pages(req: Request) -> io::Result<impl Responder> {
     show_index(&req)
 }
 
+/// GET /toggle-ui-mode
+fn toggle_ui_mode(req: Request) -> impl Responder {
+    let mut res = Response::redirect_to("/");
+    if matches!(req.cookie("ui-mode"), Some("dark")) {
+        res.set_cookie("ui-mode", "light");
+    } else {
+        res.set_cookie("ui-mode", "dark");
+    }
+    res
+}
+
 // POST new page
 fn create(req: Request) -> io::Result<impl Responder> {
     let name = req.form("name").unwrap_or("note.md");
@@ -75,7 +88,7 @@ fn recent(req: Request) -> io::Result<impl Responder> {
     let mut env = Hatter::new();
     env.set("is_git?", req.db().is_git());
     env.set("pages", req.db().recent()?);
-    render("Recently Modified Pages", env.render("html/recent.hat")?)
+    req.render("Recently Modified Pages", env.render("html/recent.hat")?)
 }
 
 fn jump(req: Request) -> io::Result<impl Responder> {
@@ -101,7 +114,7 @@ fn jump(req: Request) -> io::Result<impl Responder> {
     });
 
     env.set("pages", pages.chain(tags).collect::<Vec<_>>());
-    render("Jump to Wiki Page", env.render("html/jump.hat")?)
+    req.render("Jump to Wiki Page", env.render("html/jump.hat")?)
 }
 
 fn update(req: Request) -> io::Result<impl Responder> {
@@ -116,7 +129,7 @@ fn edit(req: Request) -> io::Result<impl Responder> {
     let page = unwrap_or_404!(req.db().find(name));
     env.set("page", page);
     env.set("conflicts", req.query("conflicts").is_some());
-    render("Edit", env.render("html/edit.hat")?)
+    req.render("Edit", env.render("html/edit.hat")?)
 }
 
 fn show(req: Request) -> io::Result<impl Responder> {
@@ -146,7 +159,7 @@ fn show_index(req: &Request) -> io::Result<Response> {
     env.set("nested?", |args: hatter::Args| {
         Ok(args.need_string(0)?.contains('/').into())
     });
-    render("deadwiki", env.render("html/index.hat")?)
+    req.render("deadwiki", env.render("html/index.hat")?)
 }
 
 fn show_page(req: &Request, name: &str) -> io::Result<Response> {
@@ -162,7 +175,7 @@ fn show_page(req: &Request, name: &str) -> io::Result<Response> {
         let src = args.need_string(0).unwrap();
         Ok(markdown::to_html(&src, &names).into())
     });
-    render(&title, env.render("html/show.hat")?)
+    req.render(&title, env.render("html/show.hat")?)
 }
 
 fn response_404() -> Response {
@@ -178,14 +191,21 @@ fn redirect_to<S: AsRef<str>>(path: S) -> io::Result<Response> {
     Ok(Response::redirect_to(path.as_ref()))
 }
 
-fn render<S: AsRef<str>>(title: &str, body: S) -> Result<Response, io::Error> {
-    let mut env = Hatter::new();
-    env.set("title", title);
-    env.set("body", body.as_ref());
-    let start = Instant::now();
-    let html = env.render("html/layout.hat")?;
-    let end = start.elapsed();
-    Ok(Response::from(
-        html.replace("$render-time", &format!(r#""{:?}""#, end)),
-    ))
+trait Render {
+    fn render<S: AsRef<str>>(&self, title: &str, body: S) -> Result<Response, io::Error>;
+}
+
+impl Render for Request {
+    fn render<S: AsRef<str>>(&self, title: &str, body: S) -> Result<Response, io::Error> {
+        let mut env = Hatter::new();
+        env.set("title", title);
+        env.set("body", body.as_ref());
+        env.set("dark-mode?", matches!(self.cookie("ui-mode"), Some("dark")));
+        let start = Instant::now();
+        let html = env.render("html/layout.hat")?;
+        let end = start.elapsed();
+        Ok(Response::from(
+            html.replace("$render-time", &format!(r#""{:?}""#, end)),
+        ))
+    }
 }
