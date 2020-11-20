@@ -74,7 +74,7 @@ fn create(req: Request) -> io::Result<impl Responder> {
 fn recent(req: Request) -> io::Result<impl Responder> {
     let mut env = Hatter::new();
     env.set("pages", req.db().recent()?);
-    render("Recently Modified Pages", env.render("html/list.hat")?)
+    render("Recently Modified Pages", env.render("html/recent.hat")?)
 }
 
 fn jump(req: Request) -> io::Result<impl Responder> {
