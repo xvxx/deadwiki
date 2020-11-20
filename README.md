@@ -174,8 +174,15 @@ Please direct all known and unknown (suspected) bugs to this URL:
 
 - https://github.com/xvxx/deadwiki/issues/new
 
+## ~ credits ~
+
+All SVG icons are Feather icons: https://feathericons.com/
+
+deadwiki's source is licensed under the [MIT License].
+
 [cargo]: https://rustup.rs
 [simplemde]: https://simplemde.com/
 [keys]: https://github.com/sparksuite/simplemde-markdown-editor#keyboard-shortcuts
 [commonmark]: https://commonmark.org/
 [phd]: https://github.com/xvxx/phd
+[mit license]: https://opensource.org/licenses/MIT
