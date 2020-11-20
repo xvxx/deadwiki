@@ -44,6 +44,22 @@ body.dark .editor-toolbar i.separator {
 /* nav */
 #toggle-ui-mode {
   float: right;
+  width: 30px;
+  height: 30px;
+  background-image: url(/img/moon.svg);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+body.dark #toggle-ui-mode {
+  background-image: url(/img/sun.svg);
+}
+
+#toggle-ui-mode a {
+  display: block;
+  width: 30px;
+  height: 30px;
+  background: transparent;
 }
 
 /* content */

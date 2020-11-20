@@ -20,9 +20,9 @@
   <div#main.markdown-body>
     <div id="toggle-ui-mode">
       if dark-mode?
-        <a href="/toggle-ui-mode"><img src="/img/sun.svg"/></a>
+        <a href="/toggle-ui-mode">" "</a>
       else
-        <a href="/toggle-ui-mode"><img src="/img/moon.svg"/></a>
+        <a href="/toggle-ui-mode">" "</a>
 
     body
 
