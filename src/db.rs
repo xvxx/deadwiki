@@ -4,7 +4,7 @@ use {
         collections::HashMap,
         fs::{self, File},
         io::{self, Write},
-        path::Path,
+        path::{Path, PathBuf},
     },
 };
 
@@ -89,9 +89,13 @@ impl DB {
 
     /// Recently modified wiki pages.
     pub fn recent(&self) -> Result<Vec<Page>> {
+        if !self.is_git() {
+            return Ok(vec![]);
+        }
+
         let out = shell!(
-            r#"git --git-dir={}/.git log --pretty=format: --name-only -n 30 | grep "\.md\$""#,
-            self.root
+            r#"git --git-dir={:?} log --pretty=format: --name-only -n 30 | grep "\.md\$""#,
+            self.git_dir()
         )?;
         let mut pages = vec![];
         let mut seen = HashMap::new();
@@ -109,8 +113,13 @@ impl DB {
 
     /// All the tags used, in alphabetical order.
     pub fn tags(&self) -> Result<Vec<String>> {
+        if !self.is_git() {
+            return Ok(vec![]);
+        }
+
         let out = match shell!(
-            "grep --exclude-dir .git -E -h -o -r '#(\\w+)' {} | sort | uniq",
+            "grep --exclude-dir {:?} -E -h -o -r '#(\\w+)' {} | sort | uniq",
+            self.git_dir(),
             self.root
         ) {
             Err(e) => {
@@ -141,7 +150,12 @@ impl DB {
             format!("#{}", tag)
         };
 
-        let out = shell!("grep --exclude-dir .git -l -r '{}' {}", tag, self.root)?;
+        let out = shell!(
+            "grep --exclude-dir {:?} -l -r '{}' {}",
+            self.git_dir(),
+            tag,
+            self.root
+        )?;
         Ok(out
             .split("\n")
             .filter_map(|line| {
@@ -205,6 +219,16 @@ impl DB {
             self.root,
             path.trim_start_matches('/').replace("..", ".")
         )
+    }
+
+    /// Is this DB tracked with git?
+    fn is_git(&self) -> bool {
+        self.git_dir().exists()
+    }
+
+    /// Path to wiki's Git directory. Doesn't check if it exists.
+    fn git_dir(&self) -> PathBuf {
+        Path::new(&format!("{}.git", self.root)).to_path_buf()
     }
 
     /// Convert a wiki page name or file path to cleaned up, absolute
@@ -288,5 +312,20 @@ mod test {
             "./wiki/long/path/to/img.JPEG",
             db.absolute_path("long/path/to/img.JPEG")
         );
+    }
+
+    #[test]
+    fn test_is_git() {
+        let db = DB::new("./wiki/");
+        assert!(!db.is_git());
+
+        let db = DB::new("./");
+        assert!(db.is_git());
+    }
+
+    #[test]
+    fn test_git_dir() {
+        let db = DB::new("./wiki/");
+        assert_eq!("./wiki/.git", db.git_dir().to_str().unwrap());
     }
 }
