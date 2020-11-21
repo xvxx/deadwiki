@@ -3,7 +3,7 @@
   <a href=(history.back())>back
 
 if error?
-  <div class="error"> error
+  <.error> error
 
 <form#form POST="/new">
   <p> <input@name:text#focused value=name placeholder="filename" />
