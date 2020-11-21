@@ -1,3 +1,8 @@
+## 0.1.27-dev
+
+- Nice error now shown when trying to create wiki page that already
+  exists.
+
 ## 0.1.26
 
 - Dark Mode CSS added. There's an icon in the UI.

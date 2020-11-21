@@ -46,7 +46,12 @@ fn search(req: Request) -> io::Result<impl Responder> {
 
 fn new(req: Request) -> io::Result<impl Responder> {
     let mut env = Hatter::new();
+    env.set("error?", false);
     env.set("name", req.query("name"));
+    env.set(
+        "page-body",
+        format!("# {}", req.query("name").unwrap_or("")),
+    );
     req.render("New Page", env.render("html/new.hat")?)
 }
 
@@ -79,8 +84,17 @@ fn toggle_ui_mode(req: Request) -> impl Responder {
 // POST new page
 fn create(req: Request) -> io::Result<impl Responder> {
     let name = req.form("name").unwrap_or("note.md");
-    let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
-    redirect_to(page.url())
+    if !req.db().exists(name) {
+        let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
+        redirect_to(page.url())
+    } else {
+        let mut env = Hatter::new();
+        env.set("name", name);
+        env.set("error?", true);
+        env.set("error", "Wiki page with that name already exists.");
+        env.set("page-body", req.form("markdown").unwrap_or(""));
+        req.render("New Page", env.render("html/new.hat")?)
+    }
 }
 
 // Recently modified wiki pages.
