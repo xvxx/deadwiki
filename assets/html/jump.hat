@@ -1,3 +1,7 @@
+<p>
+  <a href="/">home</> " | "
+  <a href="/new">new
+
 <div#jump-page>
   <form GET="/jump" autocomplete="off">
     <input:text@pattern#jump-pattern.focused />
