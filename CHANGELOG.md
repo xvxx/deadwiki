@@ -2,6 +2,7 @@
 
 - Nice error now shown when trying to create wiki page that already
   exists.
+- Added navigation to `/jump` (`ctrl-j`) page.
 
 ## 0.1.26
 
