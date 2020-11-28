@@ -118,7 +118,7 @@ impl DB {
         }
 
         let out = match shell!(
-            "grep --exclude-dir {:?} -E -h -o -r '#(\\w+)' {} | sort | uniq",
+            "grep --exclude-dir {:?} -I -E -h -o -r '#(\\w+)' {} | sort | uniq",
             self.git_dir(),
             self.root
         ) {
