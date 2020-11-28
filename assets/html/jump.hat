@@ -1,6 +1,6 @@
 <p>
   <a href="/">home</> " | "
-  <a href="/new">new
+  <a#jump-new href="/new">new
 
 <div#jump-page>
   <form GET="/jump" autocomplete="off">

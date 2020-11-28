@@ -4,6 +4,8 @@
   exists.
 - Added navigation to `/jump` (`ctrl-j`) page.
 - Fixed a bug with the 'jump' page displaying errors.
+- The "new" link on the "jump" page now uses the input box's content
+  as the title of the new page.
 - Clicking "new" on a page in a directory will now pre-fill the "New
   Page" form with the current directory.
 

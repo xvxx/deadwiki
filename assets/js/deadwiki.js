@@ -116,6 +116,20 @@ $("#toggle-ui-mode").addEventListener("click", (e) => {
   return false;
 });
 
+/* "new" link on jump page */
+var jumpLink = $("#jump-new");
+if (jumpLink) {
+  jumpLink.addEventListener("click", (e) => {
+    let input = $("#jump-pattern").value;
+    if (input) {
+      window.location = "/new?name=" + input;
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  });
+}
+
 /* jump to page (ctrl-j) */
 window.WIKI_PAGES = [];
 var first = true;
