@@ -3,6 +3,9 @@
 - Nice error now shown when trying to create wiki page that already
   exists.
 - Added navigation to `/jump` (`ctrl-j`) page.
+- Fixed a bug with the 'jump' page displaying errors.
+- Clicking "new" on a page in a directory will now pre-fill the "New
+  Page" form with the current directory.
 
 ## 0.1.26
 
