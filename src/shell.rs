@@ -18,8 +18,8 @@ pub fn shell(path: &str, args: &[&str]) -> Result<String, std::io::Error> {
     } else {
         output.stderr
     };
-    match std::str::from_utf8(&out) {
-        Ok(s) => Ok(s.to_string()),
+    match String::from_utf8(out) {
+        Ok(s) => Ok(s),
         Err(e) => Err(std::io::Error::new(
             std::io::ErrorKind::Other,
             e.to_string(),
