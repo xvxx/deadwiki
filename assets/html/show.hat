@@ -1,6 +1,6 @@
 <p>
   <a href="/">home</> " | "
-  <a href="/new">new</> " | "
+  <a#new-link href=new-link>new</> " | "
   <a#edit-link href="/edit/{page.name}"> edit
 
 <article>

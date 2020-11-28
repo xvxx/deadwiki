@@ -182,8 +182,26 @@ fn show_page(req: &Request, name: &str) -> io::Result<Response> {
     if page.has_conflict() {
         return redirect_to(format!("/edit{}?conflicts=true", page.url()));
     }
+
+    let path = req.path().trim_start_matches('/');
+    env.set(
+        "new-link",
+        if path.contains('/') {
+            format!(
+                "/new?name={}/",
+                path.split('/')
+                    .take(path.matches('/').count())
+                    .collect::<Vec<_>>()
+                    .join("/")
+            )
+        } else {
+            "/new".into()
+        },
+    );
+
     let title = page.title().clone();
     let names = req.db().names()?;
+
     env.set("page", page);
     env.set("markdown", move |args: hatter::Args| {
         let src = args.need_string(0).unwrap();
