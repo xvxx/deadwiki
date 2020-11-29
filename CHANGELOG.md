@@ -1,4 +1,4 @@
-## 0.1.27-dev
+## 0.1.27
 
 - Nice error now shown when trying to create wiki page that already
   exists.
