@@ -1,3 +1,5 @@
+use walkdir::WalkDir;
+
 use {
     crate::Page,
     std::{
@@ -44,11 +46,11 @@ impl DB {
     /// How many wiki pages have been created?
     #[must_use]
     pub fn len(&self) -> usize {
-        if let Ok(res) = shell!("ls -R -1 {} | grep '\\.md' | wc -l", self.root) {
-            res.trim().parse::<usize>().unwrap_or(0)
-        } else {
-            0
-        }
+        WalkDir::new(self.root.clone())
+            .into_iter()
+            .flatten()
+            .filter(|x| x.file_name().to_str().unwrap_or("").ends_with(".md"))
+            .count()
     }
 
     /// Find a single wiki page by name.
@@ -69,12 +71,24 @@ impl DB {
 
     /// All the wiki pages, in alphabetical order.
     pub fn pages(&self) -> Result<Vec<Page>> {
-        Ok(shell!("find {} -type f -name '*.md' | sort", self.root)?
-            .trim()
-            .split('\n')
-            .filter(|line| !line.trim().is_empty())
-            .map(|line| Page::new(&self.root, line.trim().replace("//", "/")))
-            .collect())
+        let mut filtered = WalkDir::new(self.root.clone())
+            .into_iter()
+            .flatten()
+            .filter(|x| x.file_name().to_string_lossy().to_string().ends_with(".md"))
+            .collect::<Vec<walkdir::DirEntry>>();
+        filtered.sort_by(|a, b| {
+            // this could be .file_name() theoretically
+            a.path()
+                .to_string_lossy()
+                .to_string()
+                .to_lowercase()
+                .cmp(&b.path().to_string_lossy().to_string().to_lowercase())
+        });
+
+        Ok(filtered
+            .into_iter()
+            .map(|dirent| Page::new(&self.root, dirent.path().to_string_lossy()))
+            .collect::<Vec<Page>>())
     }
 
     /// All the wiki page names, in alphabetical order.
@@ -284,13 +298,13 @@ mod test {
         assert_eq!("TODO", pages[0].title());
         assert_eq!("keyboard_shortcuts", pages[1].name());
         assert_eq!("Keyboard Shortcuts", pages[1].title());
-
-        shell!("mkdir -p ./wiki/empty").unwrap();
+        std::fs::create_dir("./wiki").unwrap();
+        std::fs::create_dir("./wiki/empty").unwrap();
         let db = DB::new("./wiki/empty");
         let pages = db.pages().unwrap();
         println!("{:?}", pages);
         assert_eq!(0, pages.len());
-        shell!("rm -rf ./wiki/empty").unwrap();
+        std::fs::remove_dir_all("./wiki/empty").unwrap();
     }
 
     #[test]
