@@ -34,7 +34,6 @@
 #![allow(missing_docs)]
 #![allow(clippy::missing_errors_doc)]
 
-
 #[macro_use]
 pub mod shell;
 pub mod app;

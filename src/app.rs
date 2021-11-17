@@ -148,7 +148,13 @@ fn edit(req: Request) -> io::Result<impl Responder> {
 
 fn show(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
-    if name.rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("md")) == Some(true) || !name.contains('.') {
+    if name
+        .rsplit('.')
+        .next()
+        .map(|ext| ext.eq_ignore_ascii_case("md"))
+        == Some(true)
+        || !name.contains('.')
+    {
         show_page(&req, name)
     } else {
         Ok(Response::from_file(&req.db().absolute_path(name)))

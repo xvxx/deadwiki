@@ -49,7 +49,15 @@ impl DB {
         WalkDir::new(self.root.clone())
             .into_iter()
             .flatten()
-            .filter(|x| x.file_name().to_string_lossy().to_string().rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("md")) == Some(true))
+            .filter(|x| {
+                x.file_name()
+                    .to_string_lossy()
+                    .to_string()
+                    .rsplit('.')
+                    .next()
+                    .map(|ext| ext.eq_ignore_ascii_case("md"))
+                    == Some(true)
+            })
             .count()
     }
 
@@ -71,21 +79,27 @@ impl DB {
 
     /// All the wiki pages, in alphabetical order.
     pub fn pages(&self) -> Result<Vec<Page>> {
-        let mut filtered = WalkDir::new(self.root.clone())
+        Ok(WalkDir::new(self.root.clone())
             .into_iter()
             .flatten()
-            .filter(|x| x.file_name().to_string_lossy().to_string().rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("md")) == Some(true))
-            .collect::<Vec<walkdir::DirEntry>>();
-        filtered.sort_by(|a, b| {
-            // this could be .file_name() theoretically
-            a.path()
-                .to_string_lossy()
-                .to_string()
-                .to_lowercase()
-                .cmp(&b.path().to_string_lossy().to_string().to_lowercase())
-        });
-
-        Ok(filtered
+            .filter(|x| {
+                x.file_name()
+                    .to_string_lossy()
+                    .to_string()
+                    .rsplit('.')
+                    .next()
+                    .map(|ext| ext.eq_ignore_ascii_case("md"))
+                    == Some(true)
+            })
+            .collect::<Vec<walkdir::DirEntry>>()
+            .sort_by(|a, b| {
+                // this could be .file_name() theoretically
+                a.path()
+                    .to_string_lossy()
+                    .to_string()
+                    .to_lowercase()
+                    .cmp(&b.path().to_string_lossy().to_string().to_lowercase())
+            })
             .into_iter()
             .map(|dirent| Page::new(&self.root, dirent.path().to_string_lossy()))
             .collect::<Vec<Page>>())
@@ -229,7 +243,13 @@ impl DB {
     /// Get an FS path to a file, without changing case or characters.
     #[must_use]
     pub fn absolute_path(&self, path: &str) -> String {
-        let path = if path.rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("html")) == Some(true) && !path.starts_with("html/") {
+        let path = if path
+            .rsplit('.')
+            .next()
+            .map(|ext| ext.eq_ignore_ascii_case("html"))
+            == Some(true)
+            && !path.starts_with("html/")
+        {
             format!("html/{}", path)
         } else {
             path.to_string()
@@ -256,7 +276,12 @@ impl DB {
     /// path to its location on disk.
     /// Ex: "Test Results" -> "./`wiki_root/test_results.md`"
     fn pathify(&self, path: &str) -> String {
-        if path.rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("md")) == Some(true) {
+        if path
+            .rsplit('.')
+            .next()
+            .map(|ext| ext.eq_ignore_ascii_case("md"))
+            == Some(true)
+        {
             path.into()
         } else {
             self.absolute_path(&format!("{}.md", Self::title_to_name(path)))
