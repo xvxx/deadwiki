@@ -49,7 +49,7 @@ impl DB {
         WalkDir::new(self.root.clone())
             .into_iter()
             .flatten()
-            .filter(|x| x.file_name().to_str().unwrap_or("").ends_with(".md"))
+            .filter(|x| x.file_name().to_string_lossy().to_string().rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("md")) == Some(true))
             .count()
     }
 
@@ -74,7 +74,7 @@ impl DB {
         let mut filtered = WalkDir::new(self.root.clone())
             .into_iter()
             .flatten()
-            .filter(|x| x.file_name().to_string_lossy().to_string().ends_with(".md"))
+            .filter(|x| x.file_name().to_string_lossy().to_string().rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("md")) == Some(true))
             .collect::<Vec<walkdir::DirEntry>>();
         filtered.sort_by(|a, b| {
             // this could be .file_name() theoretically
@@ -229,7 +229,7 @@ impl DB {
     /// Get an FS path to a file, without changing case or characters.
     #[must_use]
     pub fn absolute_path(&self, path: &str) -> String {
-        let path = if path.ends_with(".html") && !path.starts_with("html/") {
+        let path = if path.rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("html")) == Some(true) && !path.starts_with("html/") {
             format!("html/{}", path)
         } else {
             path.to_string()
@@ -256,7 +256,7 @@ impl DB {
     /// path to its location on disk.
     /// Ex: "Test Results" -> "./`wiki_root/test_results.md`"
     fn pathify(&self, path: &str) -> String {
-        if path.ends_with(".md") {
+        if path.rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("md")) == Some(true) {
             path.into()
         } else {
             self.absolute_path(&format!("{}.md", Self::title_to_name(path)))

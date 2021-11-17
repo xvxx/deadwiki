@@ -1,4 +1,3 @@
-// #![warn(missing_docs)]
 #![deny(
     anonymous_parameters,
     clippy::all,
@@ -32,6 +31,9 @@
 #![allow(clippy::module_name_repetitions)] // helps with context
 #![allow(clippy::inline_always)] // let me inline hot functions
 #![allow(clippy::unused_self)] // fixes clippy errors with different features
+#![allow(missing_docs)]
+#![allow(clippy::missing_errors_doc)]
+
 
 #[macro_use]
 pub mod shell;

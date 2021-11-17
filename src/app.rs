@@ -93,7 +93,7 @@ fn create(req: Request) -> io::Result<impl Responder> {
         req.render("New Page", env.render("html/new.hat")?)
     } else {
         let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
-        redirect_to(page.url())
+        Ok(redirect_to(page.url()))
     }
 }
 
@@ -134,7 +134,7 @@ fn jump(req: Request) -> io::Result<impl Responder> {
 fn update(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
     let page = req.db().update(name, &markdown_post_data(&req))?;
-    redirect_to(page.url())
+    Ok(redirect_to(page.url()))
 }
 
 fn edit(req: Request) -> io::Result<impl Responder> {
@@ -148,7 +148,7 @@ fn edit(req: Request) -> io::Result<impl Responder> {
 
 fn show(req: Request) -> io::Result<impl Responder> {
     let name = unwrap_or_404!(req.arg("name"));
-    if name.ends_with(".md") || !name.contains('.') {
+    if name.rsplit('.').next().map(|ext| ext.eq_ignore_ascii_case("md")) == Some(true) || !name.contains('.') {
         show_page(&req, name)
     } else {
         Ok(Response::from_file(&req.db().absolute_path(name)))
@@ -180,7 +180,7 @@ fn show_page(req: &Request, name: &str) -> io::Result<Response> {
     let mut env = Hatter::new();
     let page = unwrap_or_404!(req.db().find(name.trim_end_matches(".md")));
     if page.has_conflict() {
-        return redirect_to(format!("/edit{}?conflicts=true", page.url()));
+        return Ok(redirect_to(format!("/edit{}?conflicts=true", page.url())));
     }
 
     let path = req.path().trim_start_matches('/');
@@ -219,8 +219,8 @@ fn markdown_post_data(req: &Request) -> String {
     req.form("markdown").unwrap_or("").replace('\r', "")
 }
 
-fn redirect_to<S: AsRef<str>>(path: S) -> io::Result<Response> {
-    Ok(Response::redirect_to(path.as_ref()))
+fn redirect_to<S: AsRef<str>>(path: S) -> Response {
+    Response::redirect_to(path.as_ref())
 }
 
 trait Render {
