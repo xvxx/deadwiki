@@ -6,7 +6,7 @@ macro_rules! shell {
         crate::shell::shell("sh", &["-c", $cmd.as_ref()])
     }};
     ($cmd:expr, $($arg:tt)+) => {
-        shell!(format!($cmd, $($arg)+));
+        shell!(format!($cmd, $($arg)+))
     };
 }
 

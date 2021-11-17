@@ -87,7 +87,7 @@ impl Page {
                         capitalize(last)
                     )
                 } else {
-                    capitalize(&part)
+                    capitalize(part)
                 }
             })
             .collect::<Vec<_>>()

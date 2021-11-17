@@ -99,7 +99,7 @@ impl DB {
         )?;
         let mut pages = vec![];
         let mut seen = HashMap::new();
-        for path in out.split("\n") {
+        for path in out.split('\n') {
             if seen.get(path).is_some() || path == ".md" || path.is_empty() {
                 // TODO: .md hack
                 continue;
@@ -157,7 +157,7 @@ impl DB {
             self.root
         )?;
         Ok(out
-            .split("\n")
+            .split('\n')
             .filter_map(|line| {
                 if !line.is_empty() {
                     Some(Page::new(&self.root, line.split(':').next().unwrap_or("?")))

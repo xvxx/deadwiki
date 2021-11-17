@@ -2,7 +2,6 @@
 
 use {
     crate::utils::html_encode,
-    hatter,
     std::{io, ops},
     vial::asset,
 };
@@ -23,7 +22,11 @@ impl ops::DerefMut for Hatter {
         &mut self.env
     }
 }
-
+impl Default for Hatter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl Hatter {
     pub fn new() -> Hatter {
         Hatter {
@@ -37,7 +40,7 @@ impl Hatter {
 
         let src = asset::to_string(path)?;
         match self.env.render(&src) {
-            Ok(out) => Ok(out.into()),
+            Ok(out) => Ok(out),
             Err(err) => match err.kind {
                 ParseError | SyntaxError | RuntimeError => {
                     let (errline, errcol) = hatter::line_and_col(&src, err.pos);

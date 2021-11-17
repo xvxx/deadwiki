@@ -199,13 +199,13 @@ fn show_page(req: &Request, name: &str) -> io::Result<Response> {
         },
     );
 
-    let title = page.title().clone();
+    let title = page.title();
     let names = req.db().names()?;
 
     env.set("page", page);
     env.set("markdown", move |args: hatter::Args| {
         let src = args.need_string(0).unwrap();
-        Ok(markdown::to_html(&src, &names).into())
+        Ok(markdown::to_html(src, &names).into())
     });
     req.render(&title, env.render("html/show.hat")?)
 }

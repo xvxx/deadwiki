@@ -22,7 +22,7 @@ pub fn to_html(md: &str, names: &[String]) -> String {
     // if we are, store the text between [ and ]
     let mut wiki_link_text = String::new();
 
-    let parser = markdown::Parser::new_ext(&md, options).map(|event| match event {
+    let parser = markdown::Parser::new_ext(md, options).map(|event| match event {
         markdown::Event::Text(text) => {
             if *text == *"[" && !wiki_link {
                 wiki_link = true;
@@ -50,32 +50,30 @@ pub fn to_html(md: &str, names: &[String]) -> String {
             } else if wiki_link {
                 wiki_link_text.push_str(&text);
                 markdown::Event::Text("".into())
-            } else {
-                if text.contains("http://") || text.contains("https://") {
-                    let linked = autolink(&text);
-                    if linked.len() == text.len() {
-                        markdown::Event::Text(text.into())
-                    } else {
-                        markdown::Event::Html(linked.to_string().into())
-                    }
-                } else if let Some(idx) = text.find('#') {
-                    // look for and link #hashtags
-                    let linked = text[idx..]
-                        .split(' ')
-                        .map(|word| {
-                            if word.starts_with('#') && word.len() > 1 {
-                                let word = word.trim_start_matches('#');
-                                format!("<a href='/search?tag={}'>#{}</a>", word, word)
-                            } else {
-                                word.into()
-                            }
-                        })
-                        .collect::<Vec<_>>()
-                        .join(" ");
-                    markdown::Event::Html(format!("{}{}", &text[..idx], linked).into())
+            } else if text.contains("http://") || text.contains("https://") {
+                let linked = autolink(&text);
+                if linked.len() == text.len() {
+                    markdown::Event::Text(text)
                 } else {
-                    markdown::Event::Text(text.into())
+                    markdown::Event::Html(linked.to_string().into())
                 }
+            } else if let Some(idx) = text.find('#') {
+                // look for and link #hashtags
+                let linked = text[idx..]
+                    .split(' ')
+                    .map(|word| {
+                        if word.starts_with('#') && word.len() > 1 {
+                            let word = word.trim_start_matches('#');
+                            format!("<a href='/search?tag={}'>#{}</a>", word, word)
+                        } else {
+                            word.into()
+                        }
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" ");
+                markdown::Event::Html(format!("{}{}", &text[..idx], linked).into())
+            } else {
+                markdown::Event::Text(text)
             }
         }
         _ => event,
