@@ -15,7 +15,7 @@ pub struct Page {
 /// thing.into()
 impl From<Page> for Value {
     fn from(p: Page) -> Self {
-        Value::Object(Rc::new(p))
+        Self::Object(Rc::new(p))
     }
 }
 
@@ -38,8 +38,8 @@ impl Object for Page {
 }
 
 impl Page {
-    pub fn new<S: AsRef<str>, T: AsRef<str>>(root: S, path: T) -> Page {
-        Page {
+    pub fn new<S: AsRef<str>, T: AsRef<str>>(root: S, path: T) -> Self {
+        Self {
             root: root.as_ref().into(),
             path: path.as_ref().into(),
             body: RefCell::new(String::new()),

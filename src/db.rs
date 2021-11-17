@@ -29,19 +29,19 @@ unsafe impl Send for DB {}
 
 impl DB {
     /// Create a new DB object. Should only have one per run.
-    pub fn new<S: AsRef<str>>(root: S) -> DB {
-        DB {
+    pub fn new<S: AsRef<str>>(root: S) -> Self {
+        Self {
             root: root.as_ref().to_string(),
         }
     }
 
     /// Is this DB empty?
-    pub fn is_empty(&self) -> bool {
+    #[must_use] pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
     /// How many wiki pages have been created?
-    pub fn len(&self) -> usize {
+    #[must_use] pub fn len(&self) -> usize {
         if let Ok(res) = shell!("ls -R -1 {} | grep '\\.md' | wc -l", self.root) {
             res.trim().parse::<usize>().unwrap_or(0)
         } else {
@@ -50,7 +50,7 @@ impl DB {
     }
 
     /// Find a single wiki page by name.
-    pub fn find(&self, name: &str) -> Option<Page> {
+    #[must_use] pub fn find(&self, name: &str) -> Option<Page> {
         let path = self.pathify(name);
         self.pages()
             .unwrap_or_else(|_| vec![])
@@ -59,7 +59,7 @@ impl DB {
     }
 
     /// Check if a wiki page exists by name.
-    pub fn exists(&self, name: &str) -> bool {
+    #[must_use] pub fn exists(&self, name: &str) -> bool {
         self.find(name).is_some()
     }
 
@@ -82,7 +82,7 @@ impl DB {
 
     /// All the wiki page titles, in alphabetical order.
     pub fn titles(&self) -> Result<Vec<String>> {
-        let mut names: Vec<_> = self.pages()?.iter().map(|p| p.title()).collect();
+        let mut names: Vec<_> = self.pages()?.iter().map(crate::page::Page::title).collect();
         names.sort();
         Ok(names)
     }
@@ -103,7 +103,8 @@ impl DB {
             if seen.get(path).is_some() || path == ".md" || path.is_empty() {
                 // TODO: .md hack
                 continue;
-            } else {
+            } 
+            {
                 pages.push(Page::new(&self.root, path));
                 seen.insert(path, true);
             }
@@ -159,17 +160,17 @@ impl DB {
         Ok(out
             .split('\n')
             .filter_map(|line| {
-                if !line.is_empty() {
-                    Some(Page::new(&self.root, line.split(':').next().unwrap_or("?")))
-                } else {
+                if line.is_empty() {
                     None
+                } else {
+                    Some(Page::new(&self.root, line.split(':').next().unwrap_or("?")))
                 }
             })
             .collect::<Vec<_>>())
     }
 
     /// Create a new wiki page on disk. Name should be the title, such
-    /// as "Linux Laptops" - it'll get converted to linux_laptops.md.
+    /// as "Linux Laptops" - it'll get converted to `linux_laptops.md`.
     pub fn create(&self, name: &str, body: &str) -> Result<Page> {
         let path = self.pathify(name);
         if self.exists(&path) {
@@ -208,7 +209,7 @@ impl DB {
     }
 
     /// Get an FS path to a file, without changing case or characters.
-    pub fn absolute_path(&self, path: &str) -> String {
+    #[must_use] pub fn absolute_path(&self, path: &str) -> String {
         let path = if path.ends_with(".html") && !path.starts_with("html/") {
             format!("html/{}", path)
         } else {
@@ -222,7 +223,7 @@ impl DB {
     }
 
     /// Is this DB tracked with git?
-    pub fn is_git(&self) -> bool {
+    #[must_use] pub fn is_git(&self) -> bool {
         self.git_dir().exists()
     }
 
@@ -233,7 +234,7 @@ impl DB {
 
     /// Convert a wiki page name or file path to cleaned up, absolute
     /// path to its location on disk.
-    /// Ex: "Test Results" -> "./wiki_root/test_results.md"
+    /// Ex: "Test Results" -> "./`wiki_root/test_results.md`"
     fn pathify(&self, path: &str) -> String {
         if path.ends_with(".md") {
             path.into()
@@ -242,8 +243,8 @@ impl DB {
         }
     }
 
-    /// "Keyboard Shortcut" -> "Keyboard_Shortcut"
-    pub fn title_to_name(title: &str) -> String {
+    /// "Keyboard Shortcut" -> "`Keyboard_Shortcut`"
+    #[must_use] pub fn title_to_name(title: &str) -> String {
         title
             .trim()
             .replace(" ", "_")

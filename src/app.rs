@@ -72,28 +72,28 @@ fn all_pages(req: Request) -> io::Result<impl Responder> {
 
 /// GET /toggle-ui-mode
 fn toggle_ui_mode(req: Request) -> impl Responder {
-    let mut res = Response::redirect_to("/");
+    let mut response = Response::redirect_to("/");
     if matches!(req.cookie("ui-mode"), Some("dark")) {
-        res.set_cookie("ui-mode", "light");
+        response.set_cookie("ui-mode", "light");
     } else {
-        res.set_cookie("ui-mode", "dark");
+        response.set_cookie("ui-mode", "dark");
     }
-    res
+    response
 }
 
 // POST new page
 fn create(req: Request) -> io::Result<impl Responder> {
     let name = req.form("name").unwrap_or("note.md");
-    if !req.db().exists(name) {
-        let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
-        redirect_to(page.url())
-    } else {
+    if req.db().exists(name) {
         let mut env = Hatter::new();
         env.set("name", name);
         env.set("error?", true);
         env.set("error", "Wiki page with that name already exists.");
         env.set("page-body", req.form("markdown").unwrap_or(""));
         req.render("New Page", env.render("html/new.hat")?)
+    } else {
+        let page = req.db().create(name, req.form("markdown").unwrap_or(""))?;
+        redirect_to(page.url())
     }
 }
 
@@ -158,10 +158,10 @@ fn show(req: Request) -> io::Result<impl Responder> {
 fn show_index(req: &Request) -> io::Result<Response> {
     let mut env = Hatter::new();
     env.set("pages", req.db().pages()?);
-    env.set("nested_header", |args: hatter::Args| {
+    env.set("nested_header", |args: hatter::Args<'_>| {
         Ok(args.need_string(0)?.split('/').next().unwrap_or("").into())
     });
-    env.set("nested_title", |args: hatter::Args| {
+    env.set("nested_title", |args: hatter::Args<'_>| {
         Ok(args
             .need_string(0)?
             .split('/')
@@ -170,7 +170,7 @@ fn show_index(req: &Request) -> io::Result<Response> {
             .join("/")
             .into())
     });
-    env.set("nested?", |args: hatter::Args| {
+    env.set("nested?", |args: hatter::Args<'_>| {
         Ok(args.need_string(0)?.contains('/').into())
     });
     req.render("deadwiki", env.render("html/index.hat")?)
@@ -203,7 +203,7 @@ fn show_page(req: &Request, name: &str) -> io::Result<Response> {
     let names = req.db().names()?;
 
     env.set("page", page);
-    env.set("markdown", move |args: hatter::Args| {
+    env.set("markdown", move |args: hatter::Args<'_>| {
         let src = args.need_string(0).unwrap();
         Ok(markdown::to_html(src, &names).into())
     });
@@ -235,9 +235,9 @@ impl Render for Request {
         env.set("dark-mode?", matches!(self.cookie("ui-mode"), Some("dark")));
         let start = Instant::now();
         let html = env.render("html/layout.hat")?;
-        let end = start.elapsed();
+        let elapsed_time = start.elapsed();
         Ok(Response::from(
-            html.replace("$render-time", &format!(r#""{:?}""#, end)),
+            html.replace("$render-time", &format!(r#""{:?}""#, elapsed_time)),
         ))
     }
 }

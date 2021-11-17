@@ -28,15 +28,15 @@ impl Default for Hatter {
     }
 }
 impl Hatter {
-    pub fn new() -> Hatter {
-        Hatter {
+    #[must_use] pub fn new() -> Self {
+        Self {
             env: hatter::Env::new(),
         }
     }
 
     /// Render template and fallback to a nice HTML error.
     pub fn render(&mut self, path: &str) -> Result<String, io::Error> {
-        use hatter::ErrorKind::*;
+        use hatter::ErrorKind::{ArgNotFound, ParseError, RuntimeError, SyntaxError, WrongArgType};
 
         let src = asset::to_string(path)?;
         match self.env.render(&src) {
