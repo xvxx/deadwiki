@@ -10,7 +10,8 @@ use {crate::db::DB, linkify::LinkFinder, pulldown_cmark as markdown, std::borrow
 
 /// Convert raw wiki Markdown into HTML.
 /// Takes a list of all wiki pages in the system, for [Link]s.
-#[must_use] pub fn to_html(md: &str, names: &[String]) -> String {
+#[must_use]
+pub fn to_html(md: &str, names: &[String]) -> String {
     let mut options = markdown::Options::empty();
     options.insert(markdown::Options::ENABLE_TABLES);
     options.insert(markdown::Options::ENABLE_FOOTNOTES);
@@ -32,14 +33,13 @@ use {crate::db::DB, linkify::LinkFinder, pulldown_cmark as markdown, std::borrow
                 let page_name = DB::title_to_name(&wiki_link_text);
                 let link_text = wiki_link_text.clone();
                 wiki_link_text.clear();
-                let (link_class, link_href) = if let Some(idx) = names
+                let (link_class, link_href) = names
                     .iter()
                     .position(|n| n.to_ascii_lowercase() == page_name.to_ascii_lowercase())
-                {
-                    ("", format!("/{}", names[idx]))
-                } else {
-                    ("new", format!("/new?name={}", page_name))
-                };
+                    .map_or_else(
+                        || ("new", format!("/new?name={}", page_name)),
+                        |idx| ("", format!("/{}", names[idx])),
+                    );
                 markdown::Event::Html(
                     format!(
                         r#"<a href="{}" class="{}">{}</a>"#,

@@ -28,7 +28,8 @@ impl Default for Hatter {
     }
 }
 impl Hatter {
-    #[must_use] pub fn new() -> Self {
+    #[must_use]
+    pub fn new() -> Self {
         Self {
             env: hatter::Env::new(),
         }

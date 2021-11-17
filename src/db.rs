@@ -36,12 +36,14 @@ impl DB {
     }
 
     /// Is this DB empty?
-    #[must_use] pub fn is_empty(&self) -> bool {
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
     /// How many wiki pages have been created?
-    #[must_use] pub fn len(&self) -> usize {
+    #[must_use]
+    pub fn len(&self) -> usize {
         if let Ok(res) = shell!("ls -R -1 {} | grep '\\.md' | wc -l", self.root) {
             res.trim().parse::<usize>().unwrap_or(0)
         } else {
@@ -50,7 +52,8 @@ impl DB {
     }
 
     /// Find a single wiki page by name.
-    #[must_use] pub fn find(&self, name: &str) -> Option<Page> {
+    #[must_use]
+    pub fn find(&self, name: &str) -> Option<Page> {
         let path = self.pathify(name);
         self.pages()
             .unwrap_or_else(|_| vec![])
@@ -59,7 +62,8 @@ impl DB {
     }
 
     /// Check if a wiki page exists by name.
-    #[must_use] pub fn exists(&self, name: &str) -> bool {
+    #[must_use]
+    pub fn exists(&self, name: &str) -> bool {
         self.find(name).is_some()
     }
 
@@ -103,7 +107,7 @@ impl DB {
             if seen.get(path).is_some() || path == ".md" || path.is_empty() {
                 // TODO: .md hack
                 continue;
-            } 
+            }
             {
                 pages.push(Page::new(&self.root, path));
                 seen.insert(path, true);
@@ -209,7 +213,8 @@ impl DB {
     }
 
     /// Get an FS path to a file, without changing case or characters.
-    #[must_use] pub fn absolute_path(&self, path: &str) -> String {
+    #[must_use]
+    pub fn absolute_path(&self, path: &str) -> String {
         let path = if path.ends_with(".html") && !path.starts_with("html/") {
             format!("html/{}", path)
         } else {
@@ -223,7 +228,8 @@ impl DB {
     }
 
     /// Is this DB tracked with git?
-    #[must_use] pub fn is_git(&self) -> bool {
+    #[must_use]
+    pub fn is_git(&self) -> bool {
         self.git_dir().exists()
     }
 
@@ -244,7 +250,8 @@ impl DB {
     }
 
     /// "Keyboard Shortcut" -> "`Keyboard_Shortcut`"
-    #[must_use] pub fn title_to_name(title: &str) -> String {
+    #[must_use]
+    pub fn title_to_name(title: &str) -> String {
         title
             .trim()
             .replace(" ", "_")
@@ -266,7 +273,7 @@ mod test {
 
         let db = DB::new("./src/");
         assert_eq!(0, db.len());
-        assert_eq!(true, db.is_empty());
+        assert!(db.is_empty());
     }
 
     #[test]

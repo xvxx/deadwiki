@@ -236,8 +236,9 @@ impl Render for Request {
         let start = Instant::now();
         let html = env.render("html/layout.hat")?;
         let elapsed_time = start.elapsed();
-        Ok(Response::from(
-            html.replace("$render-time", &format!(r#""{:?}""#, elapsed_time)),
-        ))
+        Ok(Response::from(html.replace(
+            "$render-time",
+            &format!(r#""{:?}""#, elapsed_time),
+        )))
     }
 }

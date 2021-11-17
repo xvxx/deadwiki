@@ -24,7 +24,6 @@
     unused_qualifications,
     variant_size_differences
 )]
-
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::needless_doctest_main)] // main is useful for docs
 #![allow(clippy::missing_const_for_fn)]
@@ -33,7 +32,6 @@
 #![allow(clippy::module_name_repetitions)] // helps with context
 #![allow(clippy::inline_always)] // let me inline hot functions
 #![allow(clippy::unused_self)] // fixes clippy errors with different features
-
 
 #[macro_use]
 pub mod shell;
