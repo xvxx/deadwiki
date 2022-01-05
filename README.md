@@ -1,5 +1,16 @@
 <img src="/assets/img/rip.gif" alt="R.I.P." height="200" align="left">
 
+# RIP deadwiki
+
+A fun project that I used almost constantly in 2020, deadwiki was an 
+experiment in organizing information,
+[developing a web library](https://github.com/xvxx/vial),
+and creating a [weird web language](https://github.com/xvxx/hatter).
+
+It is now abandoned and archived. Thanks for all the PRs!
+
+---
+
 # deadwiki
 
 **deadwiki** is a Markdown-powered wiki that uses your filesystem as
